@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* ─── Color Palette ────────────────────────────────────────────────────── */
+  --color-base:            #FFFFFF;
+  --color-surface:         #F5F5F5;
+  --color-surface-2:       #EBEBEB;
+  --color-gray-mid:        #CCCCCC;
+  --color-gray-dark:       #666666;
+  --color-text:            #0A0A0A;
+  --color-text-secondary:  #444444;
+  --color-accent:          #000000;
+  --color-accent-hover:    #222222;
+  --color-danger:          #1A1A1A;  /* monochrome — no color-coded states */
+  --color-muted:           #888888;
+  --color-card-hover:      #F0F0F0;
+  --color-border:          #E0E0E0;
+
+  /* ─── Typography ───────────────────────────────────────────────────────── */
+  --font-display:  "Space Grotesk", sans-serif;
+  --font-heading:  "Space Grotesk", sans-serif;
+  --font-body:     "Inter", sans-serif;
+
+  /* ─── Radii ────────────────────────────────────────────────────────────── */
+  --radius-brand: 0px;
+  --radius-card:  4px;
+  --radius-chip:  2px;
+
+  /* ─── Spacing ──────────────────────────────────────────────────────────── */
+  --spacing-section-desk:  80px;
+  --spacing-section-mob:   40px;
+  --spacing-card-pad:      16px;
+  --spacing-gutter:        24px;
+
+  /* ─── Motion Tokens (Brutalist/Linear — Rev 2) ─────────────────────────── */
+  /* No spring physics. No overshoot. No parallax. */
+  --duration-fast:    150ms;
+  --duration-base:    200ms;
+  --duration-slow:    300ms;
+  --ease-brand:       linear;           /* sharp, editorial */
+  --ease-ui:          cubic-bezier(0.4, 0, 0.2, 1); /* standard material-like ease */
+}
+
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--color-base);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-text);
+    line-height: 1.1;
+  }
+
+  /* Reduced motion — always respected */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ─── Components ────────────────────────────────────────────────────────────── */
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply bg-accent text-white font-heading font-bold text-center
+           flex items-center justify-center
+           transition-colors duration-[150ms] ease-linear
+           rounded-none uppercase tracking-wider text-sm;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-accent-hover);
+  }
+  .btn-primary:disabled {
+    @apply opacity-40 cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply border border-accent text-accent font-heading font-bold text-center
+           flex items-center justify-center bg-transparent
+           transition-colors duration-[150ms] ease-linear
+           rounded-none uppercase tracking-wider text-sm;
+  }
+  .btn-outline:hover {
+    @apply bg-surface;
+  }
+
+  .btn-ghost {
+    @apply text-accent font-heading font-bold
+           transition-colors duration-[150ms] ease-linear
+           rounded-none uppercase tracking-wider text-sm
+           hover:text-muted;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full bg-surface border border-transparent
+           focus:border-accent outline-none
+           px-4 py-3 font-body text-text text-sm
+           transition-colors duration-[150ms] ease-linear
+           rounded-none placeholder:text-muted;
+  }
+
+  /* Page fade transition */
+  .page-enter {
+    opacity: 0;
+  }
+  .page-enter-active {
+    opacity: 1;
+    transition: opacity var(--duration-base) var(--ease-brand);
+  }
+
+  /* Cart drawer */
+  .cart-drawer {
+    transform: translateX(100%);
+    transition: transform var(--duration-base) linear;
+  }
+  .cart-drawer.open {
+    transform: translateX(0);
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    @apply bg-surface-2 relative overflow-hidden rounded-none;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+    animation: shimmer 1.5s infinite linear;
+  }
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
+
+  /* Stock badge */
+  .stock-badge-warn {
+    @apply border border-accent text-accent text-[10px] font-heading font-bold
+           uppercase tracking-wider px-2 py-0.5;
+  }
+
+  /* Admin status pills */
+  .status-pill {
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-heading font-bold uppercase tracking-wider border;
+  }
+  .status-pill-pending  { @apply border-gray-mid text-muted; }
+  .status-pill-placed   { @apply border-accent text-accent; }
+  .status-pill-shipped  { @apply border-accent bg-accent text-white; }
+  .status-pill-delivered { @apply border-accent bg-accent text-white; }
+  .status-pill-cancelled { @apply border-gray-mid text-muted line-through; }
+
+  /* Utility: visually hide but keep accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
