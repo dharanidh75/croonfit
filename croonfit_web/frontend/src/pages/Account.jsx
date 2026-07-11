@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Layout } from '../components/layout/Layout'
+import { Navbar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 import { useStore } from '../store'
 import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
@@ -32,7 +33,9 @@ export function Account() {
   if (!isAuthenticated) return null
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-white font-sans text-[#0A0A0A] flex flex-col">
+      <Navbar />
+      <main className="flex-1 pt-32 pb-32">
       <div className="max-w-[1280px] mx-auto px-6 py-section-mob md:py-section-desk">
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-border pb-6">
@@ -106,6 +109,8 @@ export function Account() {
         </div>
 
       </div>
-    </Layout>
+      </main>
+      <Footer />
+    </div>
   )
 }

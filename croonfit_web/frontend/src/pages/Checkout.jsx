@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Layout } from '../components/layout/Layout'
+import { Navbar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 import { CheckoutForm } from '../components/checkout/CheckoutForm'
 import { PaymentForm } from '../components/checkout/PaymentForm'
 import { OrderSummary } from '../components/checkout/OrderSummary'
@@ -20,7 +21,7 @@ export function Checkout() {
   // Redirect if cart is empty
   useEffect(() => {
     if (cart.length === 0 && !isProcessing) {
-      navigate('/shop?gender=MENS')
+      navigate('/retail')
     }
   }, [cart, navigate, isProcessing])
 
@@ -37,10 +38,8 @@ export function Checkout() {
       
       if (res.data.valid) {
         setStep(2)
-        window.scrollTo(0, 0)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       } else {
-        // Theoretically shouldn't hit here if 200 OK and valid=false in my backend setup,
-        // but just in case
         setStockIssues(res.data.issues)
         toast.error("Some items are no longer available.")
       }
@@ -84,7 +83,7 @@ export function Checkout() {
         setLastOrder({
           order_number: confirmRes.data.order_number,
           total: order.total,
-          email: address.full_name // close enough for dummy display
+          email: address.full_name
         })
         clearCart()
         navigate('/order-success')
@@ -106,36 +105,59 @@ export function Checkout() {
   if (cart.length === 0 && !isProcessing) return null
 
   return (
-    <Layout noFooter>
-      <div className="max-w-[1280px] mx-auto flex flex-col lg:flex-row min-h-screen">
-        
-        {/* Left: Forms */}
-        <div className="w-full lg:w-3/5 p-6 lg:p-16 xl:p-24 lg:border-r border-border bg-base order-2 lg:order-1">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-xs mb-12">
-            <button 
-              onClick={() => { if (!isProcessing) setStep(1) }} 
-              className={step === 1 ? 'text-text' : 'text-muted hover:text-text transition-colors duration-[150ms] linear'}
-            >
-              Shipping
-            </button>
-            <span className="text-muted">/</span>
-            <span className={step === 2 ? 'text-text' : 'text-muted'}>Payment</span>
+    <div className="min-h-screen bg-white font-sans text-[#0A0A0A] flex flex-col">
+      <Navbar />
+
+      <main className="flex-1 pt-32 pb-32">
+        <div className="max-w-[1440px] mx-auto px-6 mb-12">
+          <h1 className="text-4xl md:text-5xl font-light uppercase tracking-tight mb-2">
+            Checkout
+          </h1>
+          <p className="text-sm font-medium uppercase tracking-widest text-[#888888]">
+            Secure Payment
+          </p>
+        </div>
+
+        <div className="max-w-[1440px] mx-auto px-6">
+          <div className="flex flex-col lg:flex-row gap-12 xl:gap-24">
+            
+            {/* Left: Forms */}
+            <div className="w-full lg:w-[60%] xl:w-[65%]">
+              
+              {/* Wizard Nav */}
+              <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest mb-12 pb-6 border-b border-[#F5F5F5]">
+                <button 
+                  onClick={() => { if (!isProcessing) setStep(1) }} 
+                  className={`transition-colors duration-300 ${step === 1 ? 'text-[#0A0A0A]' : 'text-[#888888] hover:text-[#0A0A0A]'}`}
+                >
+                  <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full mr-2 ${step === 1 ? 'bg-black text-white' : 'bg-[#F5F5F5] text-[#888888]'}`}>1</span>
+                  Shipping
+                </button>
+                <div className="w-8 h-px bg-[#E5E5E5]"></div>
+                <span className={`transition-colors duration-300 ${step === 2 ? 'text-[#0A0A0A]' : 'text-[#888888]'}`}>
+                  <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full mr-2 ${step === 2 ? 'bg-black text-white' : 'bg-[#F5F5F5] text-[#888888]'}`}>2</span>
+                  Payment
+                </span>
+              </div>
+
+              {step === 1 ? (
+                <CheckoutForm address={address} setAddress={setAddress} onSubmit={handleAddressSubmit} />
+              ) : (
+                <PaymentForm onConfirm={handlePaymentConfirm} isProcessing={isProcessing} />
+              )}
+
+            </div>
+
+            {/* Right: Summary */}
+            <div className="w-full lg:w-[40%] xl:w-[35%]">
+              <OrderSummary cart={cart} outOfStockIssues={stockIssues} />
+            </div>
+            
           </div>
-
-          {step === 1 ? (
-            <CheckoutForm address={address} setAddress={setAddress} onSubmit={handleAddressSubmit} />
-          ) : (
-            <PaymentForm onConfirm={handlePaymentConfirm} isProcessing={isProcessing} />
-          )}
         </div>
+      </main>
 
-        {/* Right: Summary */}
-        <div className="w-full lg:w-2/5 p-6 lg:p-16 xl:p-24 bg-surface-2 order-1 lg:order-2 lg:min-h-screen">
-          <OrderSummary cart={cart} outOfStockIssues={stockIssues} />
-        </div>
-
-      </div>
-    </Layout>
+      <Footer />
+    </div>
   )
 }

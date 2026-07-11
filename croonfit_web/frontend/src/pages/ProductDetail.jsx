@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Layout } from '../components/layout/Layout'
+import { Navbar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 import { ProductGallery } from '../components/product/ProductGallery'
 import { SizeSelector } from '../components/product/SizeSelector'
 import { SizeGuideModal } from '../components/product/SizeGuideModal'
 import { Skeleton } from '../components/ui/Skeleton'
-import { Heart, Ruler, ChevronDown, ChevronUp } from 'lucide-react'
+import { Heart, Ruler, ChevronDown, ChevronUp, ShoppingBag, Truck } from 'lucide-react'
 import { useStore } from '../store'
 import api from '../lib/api'
 
@@ -14,6 +15,7 @@ export function ProductDetail() {
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState(null)
+  const [selectedColor, setSelectedColor] = useState(null)
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false)
   const [adding, setAdding] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -27,7 +29,16 @@ export function ProductDetail() {
       .then(res => {
         setProduct(res.data)
         const firstAvail = res.data.variants?.find(v => v.stock_qty > 0)
-        if (firstAvail) setSelectedSize(firstAvail.size)
+        if (firstAvail) {
+          setSelectedSize(firstAvail.size)
+        }
+        
+        // Mock colors if not present in API
+        if (res.data.colors && res.data.colors.length > 0) {
+          setSelectedColor(res.data.colors[0])
+        } else {
+          setSelectedColor({ name: 'Black', hex: '#000000' })
+        }
       })
       .catch(err => console.error(err))
       .finally(() => setLoading(false))
@@ -35,21 +46,31 @@ export function ProductDetail() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="max-w-[1280px] mx-auto px-6 py-12 flex flex-col md:flex-row gap-10">
-          <div className="w-full md:w-[55%]"><Skeleton className="w-full aspect-[3/4]" /></div>
-          <div className="flex-1 space-y-4">
-            <Skeleton className="h-10 w-3/4" />
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-24 w-full mt-8" />
+      <div className="min-h-screen bg-white flex flex-col">
+        <Navbar />
+        <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-24 flex flex-col md:flex-row gap-12">
+          <div className="w-full md:w-[60%]"><Skeleton className="w-full aspect-[3/4] rounded-2xl" /></div>
+          <div className="w-full md:w-[40%] space-y-6 pt-10">
+            <Skeleton className="h-12 w-3/4" />
+            <Skeleton className="h-8 w-1/4" />
+            <Skeleton className="h-32 w-full mt-12" />
           </div>
-        </div>
-      </Layout>
+        </main>
+        <Footer />
+      </div>
     )
   }
 
   if (!product) {
-    return <Layout><div className="py-32 text-center font-body text-[#888888]">Product not found.</div></Layout>
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center py-32 text-center text-[#888888]">
+          <h2 className="text-2xl font-light">Product not found.</h2>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   const wishlisted = isWishlisted(product.id)
@@ -73,140 +94,178 @@ export function ProductDetail() {
     ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
     : null
 
+  // Mock colors for the UI since backend may not have them yet
+  const colors = product.colors || [
+    { name: 'Black', hex: '#000000' },
+    { name: 'White', hex: '#FFFFFF' },
+    { name: 'Navy', hex: '#1E293B' },
+  ]
+
   return (
-    <Layout>
-      {/* Breadcrumb */}
-      <div className="px-6 max-w-[1280px] mx-auto pt-6 pb-0">
-        <nav className="text-xs font-body text-[#888888]" aria-label="Breadcrumb">
-          <span>Home</span>
-          <span className="mx-2">/</span>
-          <span>{product.category?.name}</span>
-          <span className="mx-2">/</span>
-          <span className="text-[#0A0A0A]">{product.name}</span>
-        </nav>
-      </div>
+    <div className="min-h-screen bg-white text-[#0A0A0A] font-sans flex flex-col">
+      <Navbar />
 
-      <div className="max-w-[1280px] mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
+      <main className="flex-1 pt-24 pb-32">
+        {/* Breadcrumb */}
+        <div className="max-w-[1440px] mx-auto px-6 mb-8">
+          <nav className="text-xs font-medium uppercase tracking-widest text-[#888888] flex items-center gap-2">
+            <span>Home</span>
+            <span>/</span>
+            <span>{product.category?.name || 'Shop'}</span>
+            <span>/</span>
+            <span className="text-[#0A0A0A] truncate max-w-[200px]">{product.name}</span>
+          </nav>
+        </div>
 
-          {/* Gallery */}
-          <div className="w-full md:w-[55%] lg:w-[60%]">
-            <ProductGallery images={product.images} />
-          </div>
+        <div className="max-w-[1440px] mx-auto px-6">
+          <div className="flex flex-col lg:flex-row gap-12 xl:gap-20">
 
-          {/* Info panel — sticky */}
-          <div className="flex-1 flex flex-col md:sticky md:top-[120px] md:self-start">
-
-            {/* Brand + Name */}
-            <p className="text-[12px] font-body font-bold uppercase tracking-wider text-[#888888] mb-1">Croonfit</p>
-            <h1 className="font-heading font-bold text-3xl uppercase tracking-tight leading-tight mb-4">
-              {product.name}
-            </h1>
-
-            {/* Price */}
-            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[#EEEEEE]">
-              <span className="font-heading font-bold text-2xl text-[#0A0A0A]">₹{product.price}</span>
-              {product.compare_price && (
-                <>
-                  <span className="font-body text-base text-[#888888] line-through">₹{product.compare_price}</span>
-                  <span className="font-heading font-bold text-sm text-[#E53E3E]">{discount}% OFF</span>
-                </>
-              )}
+            {/* Left: Gallery */}
+            <div className="w-full lg:w-[60%] xl:w-[65%]">
+              <ProductGallery images={product.images} />
             </div>
 
-            {/* Description */}
-            <p className="font-body text-sm text-[#444444] leading-relaxed mb-6">
-              {product.description}
-            </p>
+            {/* Right: Info panel (Sticky) */}
+            <div className="w-full lg:w-[40%] xl:w-[35%] flex flex-col">
+              <div className="lg:sticky lg:top-28">
+                
+                {/* Brand + Name */}
+                <p className="text-xs font-bold uppercase tracking-widest text-[#888888] mb-3">Croonfit</p>
+                <h1 className="text-4xl md:text-5xl font-light uppercase tracking-tight leading-none mb-6">
+                  {product.name}
+                </h1>
 
-            {/* Size Selector */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <span className="font-heading font-bold text-xs uppercase tracking-wider">Select Size</span>
-                <button
-                  onClick={() => setIsSizeGuideOpen(true)}
-                  className="flex items-center gap-1 text-xs font-body font-bold text-[#888888] hover:text-[#0A0A0A] transition-colors duration-150 underline underline-offset-2"
-                >
-                  <Ruler className="w-3 h-3" /> Size Guide
-                </button>
+                {/* Price */}
+                <div className="flex items-end gap-4 mb-8 pb-8 border-b border-[#F5F5F5]">
+                  <span className="text-3xl font-medium text-[#0A0A0A]">₹{product.price}</span>
+                  {product.compare_price && (
+                    <div className="flex flex-col">
+                      <span className="text-sm font-light text-[#888888] line-through mb-1">₹{product.compare_price}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#E53E3E]">{discount}% OFF</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description */}
+                <p className="font-light text-base text-[#555555] leading-relaxed mb-10">
+                  {product.description || "Engineered for optimal comfort and minimal distraction. A versatile addition to your modern wardrobe."}
+                </p>
+
+                {/* Colors */}
+                <div className="mb-10">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-xs font-bold uppercase tracking-widest">Color: {selectedColor?.name}</span>
+                  </div>
+                  <div className="flex gap-4">
+                    {colors.map(color => (
+                      <button
+                        key={color.name}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-10 h-10 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
+                          selectedColor?.name === color.name ? 'border-black' : 'border-transparent hover:border-gray-300'
+                        }`}
+                      >
+                        <span 
+                          className="w-8 h-8 rounded-full border border-gray-200" 
+                          style={{ backgroundColor: color.hex }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Size Selector */}
+                <div className="mb-10">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-xs font-bold uppercase tracking-widest">Select Size</span>
+                    <button
+                      onClick={() => setIsSizeGuideOpen(true)}
+                      className="flex items-center gap-2 text-xs font-medium text-[#888888] hover:text-[#0A0A0A] transition-colors duration-300"
+                    >
+                      <Ruler className="w-3.5 h-3.5" /> Size Guide
+                    </button>
+                  </div>
+                  <SizeSelector
+                    variants={product.variants || []}
+                    selectedSize={selectedSize}
+                    onSelect={setSelectedSize}
+                    sizeChart={product.category?.size_chart}
+                  />
+                </div>
+
+                {/* CTA Row */}
+                <div className="flex gap-4 mb-12">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!selectedSize || adding}
+                    className="flex-1 h-14 bg-black text-white text-sm font-bold uppercase tracking-widest rounded-xl hover:bg-gray-900 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    {adding ? 'Adding...' : 'Add to Cart'}
+                  </button>
+                  <button
+                    onClick={() => isAuthenticated && toggleWishlist(product)}
+                    aria-label="Wishlist"
+                    className={`w-14 h-14 rounded-xl border flex items-center justify-center transition-all duration-300 ${
+                      wishlisted ? 'border-[#E53E3E] bg-red-50' : 'border-[#E5E5E5] hover:border-black'
+                    }`}
+                  >
+                    <Heart
+                      className="w-6 h-6"
+                      style={{ fill: wishlisted ? '#E53E3E' : 'none', color: wishlisted ? '#E53E3E' : '#0A0A0A' }}
+                    />
+                  </button>
+                </div>
+
+                {/* Accordions */}
+                <div className="border-t border-[#F5F5F5]">
+                  <button
+                    onClick={() => setDetailsOpen(v => !v)}
+                    className="flex justify-between items-center w-full py-6 text-xs font-bold uppercase tracking-widest hover:text-gray-500 transition-colors"
+                  >
+                    Details &amp; Care
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${detailsOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {detailsOpen && (
+                    <div className="pb-6 font-light text-sm text-[#555555] leading-relaxed space-y-3 animate-fade-in-up">
+                      <p>• 100% premium heavyweight cotton.</p>
+                      <p>• Machine wash cold. Tumble dry low. Do not bleach.</p>
+                      <p>• Model is 6'1" wearing size M.</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-[#F5F5F5]">
+                  <button
+                    onClick={() => setShippingOpen(v => !v)}
+                    className="flex justify-between items-center w-full py-6 text-xs font-bold uppercase tracking-widest hover:text-gray-500 transition-colors"
+                  >
+                    <span className="flex items-center gap-2"><Truck className="w-4 h-4" /> Shipping &amp; Returns</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${shippingOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {shippingOpen && (
+                    <div className="pb-6 font-light text-sm text-[#555555] leading-relaxed space-y-3 animate-fade-in-up">
+                      <p>• Free express shipping on orders above ₹999.</p>
+                      <p>• Standard delivery: 3–5 business days.</p>
+                      <p>• Easy 7-day returns on unworn items with tags attached.</p>
+                    </div>
+                  )}
+                </div>
+                <div className="border-t border-[#F5F5F5]" />
+
               </div>
-              <SizeSelector
-                variants={product.variants || []}
-                selectedSize={selectedSize}
-                onSelect={setSelectedSize}
-                sizeChart={product.category?.size_chart}
-              />
             </div>
-
-            {/* CTA row */}
-            <div className="flex gap-3 mb-8">
-              <button
-                onClick={handleAddToCart}
-                disabled={!selectedSize || adding}
-                className="flex-1 h-12 bg-[#000000] text-white font-heading font-bold text-sm uppercase tracking-wider hover:bg-[#222222] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {adding ? 'Adding...' : 'Add to Cart'}
-              </button>
-              <button
-                onClick={() => isAuthenticated && toggleWishlist(product)}
-                aria-label="Wishlist"
-                className={`w-12 h-12 border flex items-center justify-center transition-colors duration-150 ${
-                  wishlisted ? 'border-[#E53E3E] bg-red-50' : 'border-[#CCCCCC] hover:border-[#0A0A0A]'
-                }`}
-              >
-                <Heart
-                  className="w-5 h-5"
-                  style={{ fill: wishlisted ? '#E53E3E' : 'none', color: wishlisted ? '#E53E3E' : '#0A0A0A' }}
-                />
-              </button>
-            </div>
-
-            {/* Accordion: Details & Care */}
-            <div className="border-t border-[#EEEEEE]">
-              <button
-                onClick={() => setDetailsOpen(v => !v)}
-                className="flex justify-between items-center w-full py-4 font-heading font-bold text-xs uppercase tracking-wider text-[#0A0A0A]"
-              >
-                Details &amp; Care
-                {detailsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {detailsOpen && (
-                <div className="pb-4 font-body text-sm text-[#444444] leading-relaxed space-y-2">
-                  <p>100% premium performance fabric.</p>
-                  <p>Machine wash cold. Tumble dry low. Do not bleach.</p>
-                  <p>Model is 6'1" wearing size M.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Accordion: Shipping */}
-            <div className="border-t border-[#EEEEEE]">
-              <button
-                onClick={() => setShippingOpen(v => !v)}
-                className="flex justify-between items-center w-full py-4 font-heading font-bold text-xs uppercase tracking-wider text-[#0A0A0A]"
-              >
-                Shipping &amp; Returns
-                {shippingOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-              {shippingOpen && (
-                <div className="pb-4 font-body text-sm text-[#444444] leading-relaxed space-y-2">
-                  <p>Free shipping on orders above ₹999.</p>
-                  <p>Standard delivery: 3–5 business days.</p>
-                  <p>Easy 7-day returns on unworn items with tags attached.</p>
-                </div>
-              )}
-            </div>
-            <div className="border-t border-[#EEEEEE]" />
 
           </div>
         </div>
-      </div>
+      </main>
 
       <SizeGuideModal
         isOpen={isSizeGuideOpen}
         onClose={() => setIsSizeGuideOpen(false)}
         sizeChart={product.category?.size_chart}
       />
-    </Layout>
+      <Footer />
+    </div>
   )
 }

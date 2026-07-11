@@ -1,5 +1,4 @@
 import React from 'react'
-import { StockBadge } from '../ui/StockBadge'
 
 export function OrderSummary({ cart, outOfStockIssues = [] }) {
   const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
@@ -7,44 +6,42 @@ export function OrderSummary({ cart, outOfStockIssues = [] }) {
   const total = subtotal + shipping
 
   return (
-    <div className="bg-surface p-6 sticky top-24">
-      <h3 className="font-heading font-bold text-lg uppercase tracking-wider mb-6">Order Summary</h3>
+    <div className="bg-[#F9F9F9] rounded-2xl p-8 lg:sticky lg:top-28">
+      <h3 className="text-lg font-medium uppercase tracking-widest mb-6">Order Summary</h3>
       
-      <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
+      <div className="space-y-6 mb-8 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
         {cart.map(item => {
-          // Check if this item has a stock issue
           const issue = outOfStockIssues.find(i => i.variant_id === item.variant.id)
           
           return (
             <div key={item.variant.id} className="flex gap-4">
-              <div className="w-16 h-20 bg-base flex-shrink-0 relative">
+              <div className="w-16 md:w-20 aspect-[3/4] bg-[#F5F5F5] rounded-xl relative overflow-hidden flex-shrink-0">
                 <img 
                   src={item.product.primary_image || item.product.images?.[0]?.url} 
                   alt={item.product.name} 
                   className={`w-full h-full object-cover mix-blend-multiply ${issue ? 'grayscale opacity-50' : ''}`}
                 />
-                <span className="absolute -top-2 -right-2 bg-text text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
                   {item.quantity}
                 </span>
               </div>
               
-              <div className="flex-1 flex flex-col justify-center">
-                <div className="flex justify-between">
-                  <span className={`font-heading font-bold uppercase text-sm ${issue ? 'text-muted line-through' : ''}`}>
+              <div className="flex-1 flex flex-col py-1">
+                <div className="flex justify-between items-start gap-4">
+                  <span className={`text-sm font-medium ${issue ? 'text-[#888888] line-through' : 'text-[#0A0A0A]'}`}>
                     {item.product.name}
                   </span>
-                  <span className={`font-body text-sm font-bold ${issue ? 'text-muted' : ''}`}>
+                  <span className={`text-sm font-medium ${issue ? 'text-[#888888]' : 'text-[#0A0A0A]'}`}>
                     ₹{item.product.price * item.quantity}
                   </span>
                 </div>
-                <div className="text-xs font-body text-muted mt-1">
-                  {item.variant.size} / {item.variant.color}
+                <div className="text-xs font-light text-[#555555] mt-1">
+                  Size: {item.variant.size}
                 </div>
                 
-                {/* Stock Issue Badge */}
                 {issue && (
-                  <div className="mt-2">
-                    <StockBadge message="NO LONGER AVAILABLE" />
+                  <div className="mt-2 text-[10px] font-bold uppercase tracking-widest text-[#E53E3E]">
+                    No Longer Available
                   </div>
                 )}
               </div>
@@ -53,20 +50,20 @@ export function OrderSummary({ cart, outOfStockIssues = [] }) {
         })}
       </div>
       
-      <div className="border-t border-border pt-4 space-y-2 text-sm font-body">
-        <div className="flex justify-between text-muted">
+      <div className="border-t border-[#E5E5E5] pt-6 space-y-4 text-sm mb-6">
+        <div className="flex justify-between text-[#555555]">
           <span>Subtotal</span>
-          <span>₹{subtotal.toFixed(2)}</span>
+          <span className="font-medium text-[#0A0A0A]">₹{subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-muted">
+        <div className="flex justify-between text-[#555555]">
           <span>Shipping</span>
-          <span>{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
+          <span className="font-medium text-[#0A0A0A]">{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
         </div>
       </div>
       
-      <div className="border-t border-accent mt-4 pt-4 flex justify-between font-heading font-bold text-lg uppercase">
-        <span>Total</span>
-        <span>₹{total.toFixed(2)}</span>
+      <div className="border-t border-[#E5E5E5] pt-6 flex justify-between items-end">
+        <span className="text-sm font-bold uppercase tracking-widest">Total</span>
+        <span className="text-2xl font-medium">₹{total.toFixed(2)}</span>
       </div>
     </div>
   )

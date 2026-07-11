@@ -1,10 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Layout } from '../components/layout/Layout'
+import { Navbar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 
 export function NotFound() {
   return (
-    <Layout>
+    <div className="min-h-screen bg-white font-sans text-[#0A0A0A] flex flex-col">
+      <Navbar />
+      <main className="flex-1 pt-32 pb-32">
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 py-16 text-center">
         {/* Oversized 404 — breaks grid intentionally */}
         <div
@@ -29,6 +32,8 @@ export function NotFound() {
           </Link>
         </div>
       </div>
-    </Layout>
+      </main>
+      <Footer />
+    </div>
   )
 }

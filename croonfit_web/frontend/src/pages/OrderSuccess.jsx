@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Check } from 'lucide-react'
-import { Layout } from '../components/layout/Layout'
+import { Navbar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 import { useStore } from '../store'
 
 export function OrderSuccess() {
@@ -18,7 +19,9 @@ export function OrderSuccess() {
   if (!lastOrder) return null
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-white font-sans text-[#0A0A0A] flex flex-col">
+      <Navbar />
+      <main className="flex-1 pt-32 pb-32">
       <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto">
         <div className="w-20 h-20 bg-accent text-white rounded-full flex items-center justify-center mb-8 animate-in zoom-in duration-[300ms] ease-ui">
           <Check className="w-10 h-10" />
@@ -47,6 +50,8 @@ export function OrderSuccess() {
           CONTINUE SHOPPING
         </Link>
       </div>
-    </Layout>
+      </main>
+      <Footer />
+    </div>
   )
 }

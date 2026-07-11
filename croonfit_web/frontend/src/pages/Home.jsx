@@ -1,201 +1,149 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ArrowRight, ShoppingBag, Building2 } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
-import { CartDrawer } from '../components/cart/CartDrawer'
-import { SearchOverlay } from '../components/ui/SearchOverlay'
-import { ProductCard } from '../components/product/ProductCard'
-import { ProductSkeleton } from '../components/ui/Skeleton'
-import { useStore } from '../store'
-import api from '../lib/api'
+import { AboutSection } from '../components/AboutSection'
+import backgroundVideo from '../video/0711.mp4'
+import retailImg from '../images/retail.jpg'
+import wholesaleImg from '../images/shirt.jpg'
+
+
 
 export function Home() {
-  const [featured, setFeatured] = useState([])
-  const [loading, setLoading] = useState(true)
-  const { isCartOpen, isSearchOpen } = useStore()
+  const videoRef = useRef(null)
 
   useEffect(() => {
-    api.get('/products/featured?limit=4')
-      .then(res => setFeatured(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 1
+    }
   }, [])
 
-  useEffect(() => {
-    document.body.style.overflow = isCartOpen || isSearchOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [isCartOpen, isSearchOpen])
-
   return (
-    <div className="min-h-screen bg-white text-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-white text-[#0A0A0A] font-sans selection:bg-black selection:text-white flex flex-col">
       <Navbar />
-      <CartDrawer />
-      <SearchOverlay />
 
-      <main className="flex-1" style={{ paddingTop: '104px' }}>
-
-        {/* ── Video Hero ─────────────────────────────────────────────────────── */}
-        <section className="relative w-full overflow-hidden bg-[#0A0A0A]" style={{ height: 'calc(100vh - 104px)' }}>
+      <main className="flex-1">
+        {/* ── Hero Section ─────────────────────────────────────────────────────── */}
+        <section className="relative w-full h-screen overflow-hidden bg-black">
+          {/* Background Video */}
           <video
-            autoPlay loop muted playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
-            src="https://videos.pexels.com/video-files/8538356/8538356-hd_1920_1080_25fps.mp4"
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-50"
+            src={backgroundVideo}
           />
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
 
-          {/* Negative space in upper half — scroll invite */}
-          <div className="absolute inset-0 flex flex-col justify-end pb-20 px-8 md:px-16">
-            <p className="text-[11px] font-heading font-bold uppercase tracking-[0.15em] text-white/60 mb-4">
-              FW26 Collection
-            </p>
-            <h1
-              className="text-white font-heading font-black uppercase leading-none tracking-tighter mb-8"
-              style={{ fontSize: 'clamp(3.5rem, 10vw, 9rem)' }}
+          {/* Hero Content */}
+          <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 pt-20">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-4xl"
             >
-              WEAR THE<br />GRIND.
-            </h1>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                to="/shop?gender=MENS"
-                className="h-12 px-10 bg-white text-[#0A0A0A] flex items-center font-heading font-bold text-sm uppercase tracking-wider hover:bg-[#F5F5F5] transition-colors duration-150"
-              >
-                SHOP MEN
-              </Link>
-              <Link
-                to="/shop?gender=WOMENS"
-                className="h-12 px-10 border border-white text-white flex items-center font-heading font-bold text-sm uppercase tracking-wider hover:bg-white hover:text-[#0A0A0A] transition-colors duration-150"
-              >
-                SHOP WOMEN
-              </Link>
-            </div>
+              <h1 className="text-white font-light uppercase tracking-tight mb-8" style={{ fontSize: 'clamp(2.5rem, 6vw, 5.5rem)', lineHeight: 1.1 }}>
+                Crafted For <br />
+                <span className="font-semibold">Every Lifestyle.</span>
+              </h1>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  to="/retail"
+                  className="w-full sm:w-auto h-14 px-10 bg-white text-black flex items-center justify-center text-sm font-medium uppercase tracking-wider rounded-2xl hover:bg-gray-100 transition-colors duration-300"
+                >
+                  Explore Collection
+                </Link>
+                <Link
+                  to="/wholesale"
+                  className="w-full sm:w-auto h-14 px-10 bg-transparent border border-white text-white flex items-center justify-center text-sm font-medium uppercase tracking-wider rounded-2xl hover:bg-white/10 transition-colors duration-300"
+                >
+                  Become a Partner
+                </Link>
+              </div>
+            </motion.div>
           </div>
+
+          {/* Scroll Indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 1 }}
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          >
+            <span className="text-white/60 text-xs uppercase tracking-widest font-medium">Scroll to Discover</span>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              className="w-[1px] h-12 bg-gradient-to-b from-white/60 to-transparent"
+            />
+          </motion.div>
         </section>
 
-        {/* ── New Arrivals ───────────────────────────────────────────────────── */}
-        <section className="px-6 max-w-[1280px] mx-auto py-20 md:py-[80px]">
-          <div className="flex justify-between items-end mb-10">
-            <h2 className="font-heading font-bold text-4xl md:text-5xl uppercase tracking-tight leading-none">
-              New<br />Arrivals
-            </h2>
-            <Link
-              to="/shop?tags=new"
-              className="font-heading font-bold text-sm uppercase tracking-wider text-[#888888] hover:text-[#0A0A0A] transition-colors duration-150 flex items-center gap-1"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+        {/* ── Hub Cards Section ────────────────────────────────────────────────── */}
+        <section className="py-24 px-6 md:px-12 max-w-[1440px] mx-auto bg-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8">
-            {loading
-              ? Array.from({ length: 4 }).map((_, i) => <ProductSkeleton key={i} />)
-              : featured.map(p => <ProductCard key={p.id} product={p} />)
-            }
-          </div>
-        </section>
-
-        {/* ── Category Split — full bleed, breaks grid ───────────────────────── */}
-        <section className="grid grid-cols-1 md:grid-cols-2" style={{ height: 'clamp(400px, 70vh, 700px)' }}>
-          {[
-            {
-              to: '/shop?gender=MENS',
-              img: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1400&auto=format&fit=crop',
-              label: "Men's",
-            },
-            {
-              to: '/shop?gender=WOMENS',
-              img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1400&auto=format&fit=crop',
-              label: "Women's",
-            },
-          ].map(cat => (
-            <Link
-              key={cat.to}
-              to={cat.to}
-              className="group relative block overflow-hidden bg-[#0A0A0A] h-full"
-            >
-              <img
-                src={cat.img}
-                alt={cat.label}
-                className="absolute inset-0 w-full h-full object-cover opacity-80 transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+            {/* Retailer Card */}
+            <Link to="/retail" className="group block w-full relative overflow-hidden rounded-2xl md:rounded-[2rem] aspect-[4/5] md:aspect-square bg-gray-100">
+              <motion.img
+                initial={{ scale: 1.1 }}
+                whileInView={{ scale: 1 }}
+                transition={{ duration: 1.2 }}
+                viewport={{ once: true }}
+                src={retailImg}
+                alt="Retail Collection"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
-              <div className="absolute bottom-10 left-10">
-                <h3 className="text-white font-heading font-black text-5xl md:text-6xl uppercase tracking-tighter leading-none mb-3">
-                  {cat.label}
-                </h3>
-                <div className="flex items-center gap-2 text-sm font-heading font-bold text-white uppercase tracking-wider">
-                  <span className="border-b border-white/60 pb-0.5 group-hover:border-white transition-colors duration-150">Shop Collection</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
+
+              <div className="absolute inset-0 p-10 flex flex-col justify-end text-white">
+                <ShoppingBag className="w-8 h-8 mb-6 opacity-80" />
+                <h2 className="text-4xl md:text-5xl font-semibold uppercase tracking-tight mb-4">Retailer</h2>
+                <p className="text-lg text-white/80 font-light mb-8 max-w-sm">
+                  Shop premium products individually. Discover our latest seasonal collections crafted for the modern individual.
+                </p>
+                <div className="inline-flex items-center gap-3 font-medium uppercase tracking-widest text-sm w-fit border-b border-white pb-1 group-hover:gap-5 transition-all duration-300">
+                  Explore Retail <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
             </Link>
-          ))}
-        </section>
 
-        {/* ── Lookbook Teaser ────────────────────────────────────────────────── */}
-        <section className="px-6 max-w-[1280px] mx-auto py-20 md:py-[80px]">
-          <div className="mb-12">
-            <p className="text-[11px] font-heading font-bold uppercase tracking-[0.15em] text-[#888888] mb-3">
-              LOOKBOOK — FW26
-            </p>
-            <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-              <h2 className="font-heading font-bold text-4xl md:text-5xl uppercase tracking-tight leading-none">
-                Born to move.
-              </h2>
-              <p className="font-body text-[#888888] text-base max-w-sm leading-relaxed self-end">
-                Stripped-down essentials built for maximum performance and uncompromising style.
-              </p>
-            </div>
-          </div>
+            {/* Wholesaler Card */}
+            <Link to="/wholesale" className="group block w-full relative overflow-hidden rounded-2xl md:rounded-[2rem] aspect-[4/5] md:aspect-square bg-gray-100">
+              <motion.img
+                initial={{ scale: 1.1 }}
+                whileInView={{ scale: 1 }}
+                transition={{ duration: 1.2 }}
+                viewport={{ once: true }}
+                src={wholesaleImg}
+                alt="Wholesale Partners"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
 
-          {/* 3-col staggered grid — one breaks vertical */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            <img
-              src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop"
-              alt="Look 1"
-              className="w-full aspect-[4/5] object-cover bg-[#F5F5F5]"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop"
-              alt="Look 2"
-              className="w-full aspect-[4/5] object-cover bg-[#F5F5F5] md:-mt-10"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?q=80&w=800&auto=format&fit=crop"
-              alt="Look 3"
-              className="w-full aspect-[4/5] object-cover bg-[#F5F5F5]"
-            />
-          </div>
-
-          <Link
-            to="/lookbook"
-            className="inline-flex h-12 px-12 border border-[#0A0A0A] items-center font-heading font-bold text-sm uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-white transition-colors duration-150"
-          >
-            VIEW LOOKBOOK
-          </Link>
-        </section>
-
-        {/* ── Kids CTA Banner ────────────────────────────────────────────────── */}
-        <section className="relative h-[40vh] overflow-hidden bg-[#0A0A0A]">
-          <img
-            src="https://images.unsplash.com/photo-1622290291165-80a8daf8bfd2?q=80&w=1400&auto=format&fit=crop"
-            alt="Kids' Collection"
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-          <div className="absolute inset-0 flex flex-col justify-center px-10 md:px-16">
-            <p className="text-[11px] font-heading font-bold uppercase tracking-[0.15em] text-white/60 mb-2">Kids' Collection</p>
-            <h2 className="text-white font-heading font-black text-4xl md:text-5xl uppercase tracking-tighter leading-none mb-6">
-              For the<br />Next Gen.
-            </h2>
-            <Link
-              to="/shop?gender=KIDS"
-              className="inline-flex h-11 px-8 bg-white text-[#0A0A0A] items-center font-heading font-bold text-sm uppercase tracking-wider hover:bg-[#F5F5F5] transition-colors duration-150 w-fit"
-            >
-              SHOP KIDS <ArrowRight className="w-4 h-4 ml-2" />
+              <div className="absolute inset-0 p-10 flex flex-col justify-end text-white">
+                <Building2 className="w-8 h-8 mb-6 opacity-80" />
+                <h2 className="text-4xl md:text-5xl font-semibold uppercase tracking-tight mb-4">Wholesaler</h2>
+                <p className="text-lg text-white/80 font-light mb-8 max-w-sm">
+                  Bulk orders for businesses. Partner with us to bring premium quality apparel to your customer base.
+                </p>
+                <div className="inline-flex items-center gap-3 font-medium uppercase tracking-widest text-sm w-fit border-b border-white pb-1 group-hover:gap-5 transition-all duration-300">
+                  Explore Wholesale <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
             </Link>
+
           </div>
         </section>
+
+        {/* ── About Section ────────────────────────────────────────────────────── */}
+        <AboutSection />
 
       </main>
 

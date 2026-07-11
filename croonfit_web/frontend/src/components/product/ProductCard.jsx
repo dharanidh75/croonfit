@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Heart } from 'lucide-react'
+import { Heart, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../../store'
 
@@ -11,7 +11,7 @@ import { useStore } from '../../store'
  * - Wishlist heart top-right overlay
  * - Hover: box-shadow + image scale(1.04) + heart fades in
  */
-export function ProductCard({ product }) {
+export function ProductCard({ product, mode = 'default' }) {
   const [hovered, setHovered] = useState(false)
   const { isWishlisted, toggleWishlist, isAuthenticated } = useStore()
   const wishlisted = isWishlisted(product.id)
@@ -65,21 +65,25 @@ export function ProductCard({ product }) {
           </span>
         )}
 
-        {/* Wishlist heart — top right, fades in on hover */}
+        {/* Action Icon — top right, fades in on hover */}
         <button
           onClick={handleWishlist}
           aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-          className="absolute top-3 right-3 transition-opacity duration-150"
+          className="absolute top-3 right-3 transition-opacity duration-300 bg-white/80 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center hover:bg-white"
           style={{ opacity: hovered || wishlisted ? 1 : 0 }}
         >
-          <Heart
-            className="w-5 h-5 drop-shadow-sm transition-all duration-150"
-            style={{
-              fill: wishlisted ? '#E53E3E' : 'white',
-              color: wishlisted ? '#E53E3E' : 'white',
-              transform: wishlisted ? 'scale(1.2)' : 'scale(1)',
-            }}
-          />
+          {mode === 'wishlist' ? (
+            <Trash2 className="w-4 h-4 text-[#E53E3E] transition-transform hover:scale-110" />
+          ) : (
+            <Heart
+              className="w-4 h-4 transition-all duration-300"
+              style={{
+                fill: wishlisted ? '#E53E3E' : 'none',
+                color: wishlisted ? '#E53E3E' : '#0A0A0A',
+                transform: wishlisted ? 'scale(1.1)' : 'scale(1)',
+              }}
+            />
+          )}
         </button>
       </div>
 

@@ -10,17 +10,23 @@ export function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const searchRef = useRef(null)
+  
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { cart, wishlist, isAuthenticated, openCart } = useStore()
+  const { cart, wishlist, isAuthenticated } = useStore()
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0)
   const wishlistCount = wishlist.length
 
+  const isHome = location.pathname === '/'
+  const isTransparent = isHome && !scrolled
+
   useEffect(() => {
-    const handle = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', handle, { passive: true })
-    return () => window.removeEventListener('scroll', handle)
+    const handleScroll = () => setScrolled(window.scrollY > 50)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    // Initialize state on mount
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   useEffect(() => setMobileOpen(false), [location.pathname])
@@ -28,167 +34,180 @@ export function Navbar() {
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`)
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery('')
       setSearchFocused(false)
     }
   }
 
   const navLinks = [
-    { to: '/shop?gender=MENS', label: "Men's" },
-    { to: '/shop?gender=WOMENS', label: "Women's" },
-    { to: '/shop?gender=KIDS', label: "Kids'" },
-    { to: '/lookbook', label: 'Lookbook' },
+    { to: '/retail', label: 'Retail' },
+    { to: '/wholesale', label: 'Wholesale' },
+    { to: '/about', label: 'About' },
   ]
+
+  // Text colors based on scroll state and transparent state
+  const isDarkGlass = false // Set to true if you want a dark pill instead
+  const textColor = isTransparent ? 'text-white' : 'text-[#0A0A0A]'
+  const hoverColor = isTransparent ? 'hover:text-gray-300' : 'hover:text-gray-500'
+
+  // The full-width glassmorphism effect
+  const navClasses = scrolled
+    ? 'fixed top-0 left-0 w-full z-50 transition-all duration-500 bg-white/40 backdrop-blur-2xl border-b border-[#E5E5E5]/50 shadow-sm'
+    : 'fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b border-transparent bg-transparent'
 
   return (
     <>
-      <header
-        className={`fixed top-0 w-full z-50 transition-all duration-200 ${
-          scrolled ? 'bg-surface border-b border-[#cccccc]' : 'bg-surface border-b border-[#e5e5e5]'
-        }`}
-        style={{ height: '64px' }}
-      >
-        <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center gap-6">
+      <header className={navClasses}>
+        <div className="mx-auto px-6 max-w-[1440px] h-20 flex items-center justify-between">
+          
+          {/* LEFT — Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-8 flex-1">
+            {navLinks.map(({ to, label }) => {
+              const isActive = location.pathname.startsWith(to)
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`relative group text-sm font-medium uppercase tracking-widest transition-colors duration-200 ${textColor} ${hoverColor} ${
+                    isActive ? 'opacity-100' : 'opacity-80'
+                  }`}
+                >
+                  {label}
+                  {/* Animated underline */}
+                  <span 
+                    className={`absolute -bottom-1 left-0 h-[2px] transition-all duration-300 ${
+                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                    } ${isTransparent ? 'bg-white' : 'bg-[#0A0A0A]'}`}
+                  />
+                </Link>
+              )
+            })}
+          </nav>
 
-          {/* LEFT — Logo */}
-          <div className="flex-shrink-0">
+          {/* CENTER — Logo */}
+          <div className="flex-shrink-0 flex-1 md:flex-none flex justify-start md:justify-center">
             <Link to="/" aria-label="Croonfit Home">
-              <Logo className="h-8 text-[#0A0A0A]" />
+              <Logo className={`h-8 transition-colors duration-300 ${textColor}`} />
             </Link>
           </div>
 
-          {/* CENTER — Search bar (desktop) */}
-          <form
-            onSubmit={handleSearch}
-            className={`hidden md:flex flex-1 max-w-[420px] mx-auto items-center border transition-all duration-150 ${
-              searchFocused ? 'border-[#0A0A0A]' : 'border-[#CCCCCC]'
-            } bg-white`}
-          >
-            <button type="submit" className="pl-4 pr-2 text-[#888888] flex-shrink-0">
-              <Search className="w-4 h-4" />
-            </button>
-            <input
-              ref={searchRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
-              placeholder="What are you looking for?"
-              className="w-full py-2.5 pr-4 bg-transparent outline-none font-body text-sm text-[#0A0A0A] placeholder:text-[#888888]"
-            />
-          </form>
-
           {/* RIGHT — Actions */}
-          <div className="flex items-center gap-5 ml-auto">
-            {/* Mobile Search icon */}
+          <div className="flex items-center justify-end gap-6 flex-1">
+            {/* Search */}
+            <form
+              onSubmit={handleSearch}
+              className={`hidden md:flex items-center transition-all duration-300 border-b ${
+                searchFocused ? 'w-48 border-current' : 'w-32 border-transparent'
+              } ${isTransparent ? 'border-white/30' : 'border-[#CCCCCC]'}`}
+            >
+              <button type="submit" className={`${textColor} opacity-80 hover:opacity-100 transition-opacity`}>
+                <Search className="w-4 h-4" />
+              </button>
+              <input
+                ref={searchRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                placeholder="Search"
+                className={`w-full py-1 px-2 bg-transparent outline-none text-sm placeholder:opacity-100 font-medium ${textColor} ${
+                  isTransparent ? 'placeholder-white/70' : 'placeholder-[#222222]'
+                }`}
+              />
+            </form>
+
             <button
-              className="md:hidden text-[#0A0A0A] hover:text-[#888888] transition-colors duration-150"
-              onClick={() => navigate('/shop')}
+              className={`md:hidden ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+              onClick={() => navigate('/products')}
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
             </button>
 
+            {/* Profile */}
+            <Link
+              to={isAuthenticated ? '/account' : '/login'}
+              className={`hidden sm:block ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+              aria-label="Profile"
+            >
+              <User className="w-5 h-5" />
+            </Link>
+
             {/* Wishlist */}
             <Link
               to={isAuthenticated ? '/wishlist' : '/login'}
-              className="relative text-[#0A0A0A] hover:text-[#888888] transition-colors duration-150 hidden sm:block"
+              className={`relative hidden sm:block ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
               aria-label="Wishlist"
             >
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#0A0A0A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className={`absolute -top-2 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${
+                  isTransparent ? 'bg-white text-black' : 'bg-black text-white'
+                }`}>
                   {wishlistCount}
                 </span>
               )}
             </Link>
 
-            {/* Cart */}
-            <button
-              id="navbar-cart"
-              onClick={openCart}
-              className="relative text-[#0A0A0A] hover:text-[#888888] transition-colors duration-150"
+            {/* Cart - Navigates to /cart instead of opening drawer */}
+            <Link
+              to="/cart"
+              className={`relative ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#0A0A0A] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className={`absolute -top-2 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${
+                  isTransparent ? 'bg-white text-black' : 'bg-black text-white'
+                }`}>
                   {cartCount}
                 </span>
               )}
-            </button>
-
-            {/* Account */}
-            <Link
-              to={isAuthenticated ? '/account' : '/login'}
-              className="text-[#0A0A0A] hover:text-[#888888] transition-colors duration-150 hidden sm:block"
-              aria-label="Account"
-            >
-              <User className="w-5 h-5" />
             </Link>
 
             {/* Mobile hamburger */}
             <button
-              className="sm:hidden text-[#0A0A0A]"
+              className={`md:hidden ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
               onClick={() => setMobileOpen(v => !v)}
               aria-label="Menu"
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-          </div>
-        </div>
-
-        {/* Desktop Category Sub-nav */}
-        <div className="hidden md:block border-t border-[#E5E5E5] bg-surface">
-          <div className="max-w-[1280px] mx-auto px-6 flex items-center gap-8 h-10">
-            {navLinks.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`font-body text-xs font-bold uppercase tracking-widest transition-colors duration-150 pb-0.5 border-b-2 ${
-                  location.pathname + location.search === to
-                    ? 'text-[#0A0A0A] border-[#0A0A0A]'
-                    : 'text-[#888888] border-transparent hover:text-[#0A0A0A] hover:border-[#0A0A0A]'
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
           </div>
         </div>
       </header>
 
       {/* Mobile overlay menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-white pt-16" role="dialog">
+        <div className="fixed inset-0 z-40 bg-white/80 backdrop-blur-2xl pt-24" role="dialog">
           {/* Mobile search */}
-          <form onSubmit={handleSearch} className="flex items-center border-b border-[#CCCCCC] px-6 py-3">
-            <Search className="w-4 h-4 text-[#888888] mr-3 flex-shrink-0" />
+          <form onSubmit={handleSearch} className="flex items-center border-b border-[#CCCCCC] px-6 py-4 mx-6 mb-4">
+            <Search className="w-5 h-5 text-[#888888] mr-3 flex-shrink-0" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="What are you looking for?"
-              className="w-full outline-none font-body text-sm placeholder:text-[#888888]"
+              placeholder="Search products..."
+              className="w-full outline-none text-base placeholder:text-[#888888]"
             />
           </form>
 
-          <nav className="flex flex-col divide-y divide-[#F5F5F5]">
+          <nav className="flex flex-col px-6">
             {navLinks.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
-                className="px-6 py-4 font-heading font-bold text-lg uppercase tracking-tight text-[#0A0A0A]"
+                className="py-4 text-2xl font-light uppercase tracking-wide border-b border-[#F5F5F5] text-[#0A0A0A]"
               >
                 {label}
               </Link>
             ))}
-            <Link to={isAuthenticated ? '/account' : '/login'} className="px-6 py-4 font-heading font-bold text-lg uppercase tracking-tight text-[#0A0A0A]">
-              {isAuthenticated ? 'My Account' : 'Login / Sign Up'}
+            <Link to={isAuthenticated ? '/account' : '/login'} className="py-4 text-2xl font-light uppercase tracking-wide border-b border-[#F5F5F5] text-[#0A0A0A]">
+              {isAuthenticated ? 'Profile' : 'Login / Sign Up'}
             </Link>
-            <Link to={isAuthenticated ? '/wishlist' : '/login'} className="px-6 py-4 font-heading font-bold text-lg uppercase tracking-tight text-[#0A0A0A]">
+            <Link to={isAuthenticated ? '/wishlist' : '/login'} className="py-4 text-2xl font-light uppercase tracking-wide border-b border-[#F5F5F5] text-[#0A0A0A]">
               Wishlist
             </Link>
           </nav>
