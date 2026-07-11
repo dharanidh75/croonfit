@@ -10,29 +10,29 @@ import api from '../lib/api'
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 const SORT_OPTIONS = [
-  { value: 'newest',    label: 'Newest First' },
-  { value: 'popular',   label: 'Popularity' },
+  { value: 'newest', label: 'Newest First' },
+  { value: 'popular', label: 'Popularity' },
   { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc',label: 'Price: High to Low' },
+  { value: 'price_desc', label: 'Price: High to Low' },
 ]
 
 export function ProductListing() {
   const { category, subcategory } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
-  
+
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(false)
   const [total, setTotal] = useState(0)
-  
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [sortOpen, setSortOpen] = useState(false)
 
-  const size   = searchParams.get('size') || ''
-  const sort   = searchParams.get('sort') || 'newest'
+  const size = searchParams.get('size') || ''
+  const sort = searchParams.get('sort') || 'newest'
   const search = searchParams.get('search') || ''
-  const page   = parseInt(searchParams.get('page') || '1', 10)
+  const page = parseInt(searchParams.get('page') || '1', 10)
 
   // Map URL category to backend gender format if needed
   const getBackendGender = (cat) => {
@@ -48,15 +48,15 @@ export function ProductListing() {
     isMore ? setLoadingMore(true) : setLoading(true)
     try {
       const params = new URLSearchParams()
-      
+
       const backendGender = getBackendGender(category)
       if (backendGender) params.append('gender', backendGender)
       if (subcategory) params.append('sub', subcategory)
-      
-      if (size)   params.append('size', size)
-      if (sort)   params.append('sort', sort)
+
+      if (size) params.append('size', size)
+      if (sort) params.append('sort', sort)
       if (search) params.append('search', search)
-      
+
       params.append('page', isMore ? page + 1 : 1)
       params.append('per_page', 12)
 
@@ -77,8 +77,8 @@ export function ProductListing() {
     }
   }
 
-  useEffect(() => { 
-    fetchProducts() 
+  useEffect(() => {
+    fetchProducts()
   }, [category, subcategory, size, sort, search])
 
   const setFilter = (key, value) => {
@@ -100,7 +100,7 @@ export function ProductListing() {
       <Navbar />
 
       <main className="flex-1 pt-24 pb-32">
-        
+
         {/* Header & Breadcrumbs */}
         <div className="max-w-[1440px] mx-auto px-6 mb-12">
           <nav className="text-xs font-medium uppercase tracking-widest text-[#888888] mb-6 flex items-center gap-2">
@@ -128,22 +128,21 @@ export function ProductListing() {
         {/* Filter + Sort Bar */}
         <div className="sticky top-20 z-30 bg-white/90 backdrop-blur-md border-y border-[#F5F5F5] py-4 px-6 mb-8">
           <div className="max-w-[1440px] mx-auto flex items-center justify-between">
-            
+
             {/* Left: Desktop Filters */}
             <div className="hidden md:flex items-center gap-6">
               <span className="text-sm font-light text-[#888888] mr-4">{total} Products</span>
-              
+
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-widest mr-2">Size</span>
                 {SIZES.map(s => (
                   <button
                     key={s}
                     onClick={() => setFilter('size', size === s ? '' : s)}
-                    className={`w-10 h-10 rounded-full text-xs font-medium transition-all duration-300 ${
-                      size === s 
-                        ? 'bg-black text-white' 
+                    className={`w-10 h-10 rounded-full text-xs font-medium transition-all duration-300 ${size === s
+                        ? 'bg-black text-white'
                         : 'bg-[#F5F5F5] text-[#555555] hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {s}
                   </button>
@@ -168,16 +167,15 @@ export function ProductListing() {
                 Sort: <span className="font-light">{currentSortLabel}</span>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${sortOpen ? 'rotate-180' : ''}`} />
               </button>
-              
+
               {sortOpen && (
                 <div className="absolute right-0 top-full mt-4 w-56 bg-white border border-[#F5F5F5] shadow-lg rounded-xl overflow-hidden z-50">
                   {SORT_OPTIONS.map(opt => (
                     <button
                       key={opt.value}
                       onClick={() => { setFilter('sort', opt.value); setSortOpen(false) }}
-                      className={`w-full text-left px-5 py-3 text-sm transition-colors duration-200 ${
-                        sort === opt.value ? 'bg-gray-50 font-medium' : 'text-[#555555] hover:bg-gray-50 hover:text-black'
-                      }`}
+                      className={`w-full text-left px-5 py-3 text-sm transition-colors duration-200 ${sort === opt.value ? 'bg-gray-50 font-medium' : 'text-[#555555] hover:bg-gray-50 hover:text-black'
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -242,9 +240,8 @@ export function ProductListing() {
                   <button
                     key={s}
                     onClick={() => setFilter('size', size === s ? '' : s)}
-                    className={`h-12 min-w-[3rem] px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      size === s ? 'bg-black text-white' : 'bg-[#F5F5F5] text-[#555555]'
-                    }`}
+                    className={`h-12 min-w-[3rem] px-4 rounded-xl text-sm font-medium transition-all duration-200 ${size === s ? 'bg-black text-white' : 'bg-[#F5F5F5] text-[#555555]'
+                      }`}
                   >
                     {s}
                   </button>
