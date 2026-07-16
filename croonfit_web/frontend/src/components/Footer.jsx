@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Logo } from './Logo'
+import { Logo, CroonIcon } from './Logo'
 
 export function Footer() {
   const year = new Date().getFullYear()
@@ -12,7 +12,13 @@ export function Footer() {
 
         {/* Brand column */}
         <div>
-          <Logo className="h-7 text-white mb-5" />
+          <div className="flex items-center gap-3 mb-3">
+            <CroonIcon className="h-8 text-white" />
+            <div>
+              <Logo className="h-5 text-white" />
+              <p className="text-[9px] font-bold tracking-[0.25em] uppercase text-[#888888] mt-0.5">APPAREL STUDIO</p>
+            </div>
+          </div>
           <p className="font-body text-sm text-[#888888] leading-relaxed max-w-[220px]">
             Gen Z-coded sportswear for Indian streets. Wear the Grind.
           </p>
@@ -38,11 +44,11 @@ export function Footer() {
           <h4 className="font-heading font-bold text-xs uppercase tracking-[0.12em] mb-5 text-white">Shop</h4>
           <ul className="space-y-3 font-body text-sm text-[#888888]">
             {[
-              { to: '/shop?gender=MENS',   label: "Men's" },
-              { to: '/shop?gender=WOMENS', label: "Women's" },
-              { to: '/shop?gender=KIDS',   label: "Kids'" },
-              { to: '/shop?tags=new',      label: 'New Arrivals' },
-              { to: '/lookbook',           label: 'Lookbook' },
+              { to: '/category/mens',   label: "Men's" },
+              { to: '/category/womens', label: "Women's" },
+              { to: '/category/kids',   label: "Kids'" },
+              { to: '/retail',          label: 'Shop All' },
+              { to: '/about',           label: 'About Us' },
             ].map(l => (
               <li key={l.to}>
                 <Link to={l.to} className="hover:text-white transition-colors duration-150">{l.label}</Link>
@@ -55,7 +61,7 @@ export function Footer() {
         <div>
           <h4 className="font-heading font-bold text-xs uppercase tracking-[0.12em] mb-5 text-white">Support</h4>
           <ul className="space-y-3 font-body text-sm text-[#888888]">
-            {['Size Guide', 'Track Order', 'Returns & Exchanges', 'Contact Us', 'FAQ'].map(l => (
+            {['Contact Us', 'FAQ'].map(l => (
               <li key={l}><a href="#" className="hover:text-white transition-colors duration-150">{l}</a></li>
             ))}
           </ul>

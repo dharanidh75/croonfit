@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ImageWithFallback } from '../ui/ImageWithFallback'
 
 export function ProductGallery({ images }) {
   const [activeIndex, setActiveIndex] = useState(0)
@@ -36,7 +37,7 @@ export function ProductGallery({ images }) {
                   : 'border-transparent opacity-50 hover:opacity-100'
               }`}
             >
-              <img src={img.url} alt={img.alt || 'Thumbnail'} className="w-full h-full object-cover bg-[#F5F5F5]" />
+              <ImageWithFallback src={img.url} alt={img.alt || 'Thumbnail'} className="w-full h-full object-cover bg-[#F5F5F5]" />
             </button>
           ))}
         </div>
@@ -46,7 +47,7 @@ export function ProductGallery({ images }) {
           className="relative flex-1 aspect-[3/4] md:aspect-auto bg-[#F5F5F5] rounded-2xl cursor-zoom-in order-1 md:order-2 overflow-hidden group"
           onClick={() => setLightboxOpen(true)}
         >
-          <img 
+          <ImageWithFallback 
             src={activeImage.url} 
             alt={activeImage.alt || 'Product view'} 
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
@@ -77,7 +78,7 @@ export function ProductGallery({ images }) {
               <ChevronLeft className="w-8 h-8 md:w-12 md:h-12" />
             </button>
 
-            <img 
+            <ImageWithFallback 
               src={activeImage.url} 
               alt={activeImage.alt || 'Product view'} 
               className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm"

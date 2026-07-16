@@ -1,30 +1,50 @@
 import React, { useState, useEffect } from 'react'
+import { ImageWithFallback } from '../../components/ui/ImageWithFallback'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { DataTable } from '../../components/admin/ui/DataTable'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Filter } from 'lucide-react'
 import { adminApi } from '../../lib/api'
+import { Plus, Search, Filter } from 'lucide-react'
 
 export function AdminProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Reusing existing API
-    adminApi.get('/admin/products')
-      .then(res => setProducts(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false))
+    fetchProducts()
   }, [])
 
+  const fetchProducts = () => {
+    adminApi.get('/admin/products')
+      .then(res => {
+        setProducts(res.data.items)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return
+    try {
+      await adminApi.delete(`/admin/products/${id}`)
+      fetchProducts() // Refresh table
+    } catch (err) {
+      console.error('Failed to delete product', err)
+      alert('Failed to delete product')
+    }
+  }
+
   const columns = [
-    { 
-      header: 'Product', 
-      accessorKey: 'name', 
+    {
+      header: 'Product',
+      accessorKey: 'name',
       cell: row => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded bg-[#F5F5F5] overflow-hidden flex-shrink-0">
-            {row.images?.[0] ? <img src={row.images[0]} className="w-full h-full object-cover" alt="" /> : null}
+            {row.primary_image ? <ImageWithFallback src={row.primary_image} className="w-full h-full object-cover" alt="" /> : null}
           </div>
           <div>
             <p className="font-bold text-[#111111]">{row.name}</p>
@@ -34,31 +54,42 @@ export function AdminProducts() {
       )
     },
     { header: 'Category', accessorKey: 'category_name' },
-    { 
-      header: 'Price', 
-      accessorKey: 'price', 
+    {
+      header: 'Price',
+      accessorKey: 'price',
       align: 'right',
-      cell: row => <span className="font-medium">₹{row.price}</span> 
+      cell: row => <span className="font-medium">₹{row.price}</span>
     },
-    { 
-      header: 'Stock', 
-      accessorKey: 'stock', 
+    {
+      header: 'Stock',
+      accessorKey: 'stock',
       align: 'right',
       cell: row => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-          row.stock > 10 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-        }`}>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${row.stock > 10 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          }`}>
           {row.stock} in stock
         </span>
-      ) 
+      )
     },
-    { 
-      header: 'Status', 
-      accessorKey: 'status', 
-      cell: () => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest bg-blue-50 text-blue-700">
-          Active
+    {
+      header: 'Status',
+      accessorKey: 'is_active',
+      cell: (row) => (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest ${row.is_active ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
+          {row.is_active ? 'Active' : 'Inactive'}
         </span>
+      )
+    },
+    {
+      header: 'Actions',
+      accessorKey: 'actions',
+      cell: (row) => (
+        <button
+          onClick={() => handleDelete(row.id)}
+          className="text-red-600 hover:text-red-800 text-xs font-bold uppercase tracking-widest"
+        >
+          Delete
+        </button>
       )
     }
   ]
@@ -83,9 +114,9 @@ export function AdminProducts() {
       <div className="bg-white border border-[#E5E5E5] rounded-xl mb-6 p-2 flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
-          <input 
-            type="text" 
-            placeholder="Search products by name, SKU..." 
+          <input
+            type="text"
+            placeholder="Search products by name, SKU..."
             className="w-full h-9 pl-9 pr-4 bg-transparent outline-none text-sm placeholder:text-[#888888] text-[#111111]"
           />
         </div>

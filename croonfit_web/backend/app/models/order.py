@@ -50,6 +50,7 @@ class OrderItem(Base):
     variant_id = Column(Integer, ForeignKey("product_variants.id"), nullable=False)
     product_name = Column(String(255), nullable=False)  # snapshot at time of order
     variant_label = Column(String(100), nullable=False) # e.g. "M / Black"
+    product_image = Column(String(500), nullable=True)
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Float, nullable=False)
 

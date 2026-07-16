@@ -6,13 +6,14 @@ import { CheckoutForm } from '../components/checkout/CheckoutForm'
 import { PaymentForm } from '../components/checkout/PaymentForm'
 import { OrderSummary } from '../components/checkout/OrderSummary'
 import { useStore } from '../store'
-import toast from 'react-hot-toast'
 import api from '../lib/api'
+import toast from 'react-hot-toast'
+
 
 export function Checkout() {
   const { cart, clearCart, setLastOrder } = useStore()
   const navigate = useNavigate()
-  
+
   const [step, setStep] = useState(1) // 1 = Address, 2 = Payment
   const [address, setAddress] = useState({})
   const [isProcessing, setIsProcessing] = useState(false)
@@ -27,15 +28,15 @@ export function Checkout() {
 
   const handleAddressSubmit = async (e) => {
     e.preventDefault()
-    
+
     // Rev 2: Validate stock before proceeding to payment
     setIsProcessing(true)
     setStockIssues([])
-    
+
     try {
       const items = cart.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
       const res = await api.post('/orders/validate-stock', { items })
-      
+
       if (res.data.valid) {
         setStep(2)
         window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -58,18 +59,18 @@ export function Checkout() {
   const handlePaymentConfirm = async (cardDetails) => {
     setIsProcessing(true)
     setStockIssues([])
-    
+
     try {
       const items = cart.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
-      
+
       // 1. Create Order
       const orderRes = await api.post('/orders', { items, shipping_address: address })
       const order = orderRes.data
-      
+
       // 2. Create Payment Intent
       const intentRes = await api.post('/payments/intent', { order_id: order.id })
       const paymentId = intentRes.data.payment_id
-      
+
       // 3. Confirm Payment (simulate network delay)
       await new Promise(resolve => setTimeout(resolve, 2000))
       const confirmRes = await api.post('/payments/confirm', {
@@ -78,7 +79,7 @@ export function Checkout() {
         card_expiry: cardDetails.expiry,
         card_cvv: cardDetails.cvv
       })
-      
+
       if (confirmRes.data.success) {
         setLastOrder({
           order_number: confirmRes.data.order_number,
@@ -86,9 +87,10 @@ export function Checkout() {
           email: address.full_name
         })
         clearCart()
-        navigate('/order-success')
+        toast.success("Payment successful! Your order has been placed.")
+        navigate('/orders')
       }
-      
+
     } catch (err) {
       if (err.response?.status === 409) {
         // Race condition caught at checkout confirm!
@@ -120,14 +122,14 @@ export function Checkout() {
 
         <div className="max-w-[1440px] mx-auto px-6">
           <div className="flex flex-col lg:flex-row gap-12 xl:gap-24">
-            
+
             {/* Left: Forms */}
             <div className="w-full lg:w-[60%] xl:w-[65%]">
-              
+
               {/* Wizard Nav */}
               <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest mb-12 pb-6 border-b border-[#F5F5F5]">
-                <button 
-                  onClick={() => { if (!isProcessing) setStep(1) }} 
+                <button
+                  onClick={() => { if (!isProcessing) setStep(1) }}
                   className={`transition-colors duration-300 ${step === 1 ? 'text-[#0A0A0A]' : 'text-[#888888] hover:text-[#0A0A0A]'}`}
                 >
                   <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full mr-2 ${step === 1 ? 'bg-black text-white' : 'bg-[#F5F5F5] text-[#888888]'}`}>1</span>
@@ -152,7 +154,7 @@ export function Checkout() {
             <div className="w-full lg:w-[40%] xl:w-[35%]">
               <OrderSummary cart={cart} outOfStockIssues={stockIssues} />
             </div>
-            
+
           </div>
         </div>
       </main>

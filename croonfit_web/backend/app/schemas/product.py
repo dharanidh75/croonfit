@@ -105,6 +105,12 @@ class ProductListItem(BaseModel):
         from_attributes = True
 
 
+class ProductImageCreate(BaseModel):
+    url: str
+    alt: Optional[str] = None
+    is_primary: bool = False
+    sort_order: int = 0
+
 class ProductCreate(BaseModel):
     name: str
     slug: str
@@ -116,6 +122,7 @@ class ProductCreate(BaseModel):
     is_featured: bool = False
     tags: Optional[List[str]] = None
     variants: List[ProductVariantCreate] = []
+    images: List[ProductImageCreate] = []
 
 
 class ProductUpdate(BaseModel):
@@ -135,3 +142,20 @@ class ProductListResponse(BaseModel):
     page: int
     per_page: int
     has_more: bool
+
+# ─── Category CRUD ───────────────────────────────────────────────────────────
+
+class CategoryCreate(BaseModel):
+    name: str
+    slug: str
+    gender: GenderCategory
+    description: str | None = None
+    cover_image_url: str | None = None
+
+
+class CategoryUpdate(BaseModel):
+    name: str | None = None
+    slug: str | None = None
+    gender: GenderCategory | None = None
+    description: str | None = None
+    cover_image_url: str | None = None

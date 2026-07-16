@@ -21,39 +21,39 @@ export function AdminOrders() {
   }, [])
 
   const columns = [
-    { 
-      header: 'Order', 
-      accessorKey: 'id', 
-      cell: row => <span className="font-bold text-[#111111]">#{row.id}</span> 
+    {
+      header: 'Order',
+      accessorKey: 'id',
+      cell: row => <span className="font-bold text-[#111111]">#{row.id}</span>
     },
-    { 
-      header: 'Date', 
-      accessorKey: 'created_at', 
-      cell: row => <span className="text-[#666666]">{new Date(row.created_at).toLocaleDateString()}</span> 
+    {
+      header: 'Date',
+      accessorKey: 'created_at',
+      cell: row => <span className="text-[#666666]">{new Date(row.created_at).toLocaleDateString()}</span>
     },
-    { 
-      header: 'Customer', 
-      accessorKey: 'user_id', 
-      cell: row => <span className="text-[#111111]">User #{row.user_id}</span> 
+    {
+      header: 'Customer',
+      accessorKey: 'user_id',
+      cell: row => <span className="text-[#111111]">User #{row.user_id}</span>
     },
-    { 
-      header: 'Total', 
-      accessorKey: 'total', 
+    {
+      header: 'Total',
+      accessorKey: 'total',
       align: 'right',
-      cell: row => <span className="font-medium">₹{row.total.toFixed(2)}</span> 
+      cell: row => <span className="font-medium">₹{row.total.toFixed(2)}</span>
     },
-    { 
-      header: 'Payment Status', 
-      accessorKey: 'payment_status', 
+    {
+      header: 'Payment Status',
+      accessorKey: 'payment_status',
       cell: () => (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest bg-green-50 text-green-700">
           Paid
         </span>
       )
     },
-    { 
-      header: 'Fulfillment', 
-      accessorKey: 'status', 
+    {
+      header: 'Fulfillment',
+      accessorKey: 'status',
       cell: row => {
         const colors = {
           PENDING: 'bg-yellow-50 text-yellow-700',
@@ -95,9 +95,9 @@ export function AdminOrders() {
         </div>
         <div className="relative flex-1 min-w-[200px] mx-2">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
-          <input 
-            type="text" 
-            placeholder="Search orders..." 
+          <input
+            type="text"
+            placeholder="Search orders..."
             className="w-full h-9 pl-9 pr-4 bg-transparent outline-none text-sm placeholder:text-[#888888] text-[#111111]"
           />
         </div>

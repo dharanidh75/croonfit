@@ -59,12 +59,6 @@ export function Home() {
                 >
                   Explore Collection
                 </Link>
-                <Link
-                  to="/wholesale"
-                  className="w-full sm:w-auto h-14 px-10 bg-transparent border border-white text-white flex items-center justify-center text-sm font-medium uppercase tracking-wider rounded-2xl hover:bg-white/10 transition-colors duration-300"
-                >
-                  Become a Partner
-                </Link>
               </div>
             </motion.div>
           </div>
@@ -85,8 +79,41 @@ export function Home() {
           </motion.div>
         </section>
 
-        {/* ── Hub Cards Section ────────────────────────────────────────────────── */}
+        {/* ── Premium New Arrivals Banner ────────────────────────────────────────── */}
         <section className="py-24 px-6 md:px-12 max-w-[1440px] mx-auto bg-white">
+          <Link to="/retail" className="group block w-full relative overflow-hidden rounded-3xl h-[600px] bg-black">
+            <motion.img
+              initial={{ scale: 1.1 }}
+              whileInView={{ scale: 1 }}
+              transition={{ duration: 1.2 }}
+              viewport={{ once: true }}
+              src={wholesaleImg}
+              alt="New Arrivals"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-80 group-hover:opacity-60"
+            />
+            {/* Elegant Advertisement Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent" />
+
+            <div className="absolute inset-0 p-12 md:p-24 flex flex-col justify-center text-white max-w-3xl">
+              <span className="text-[#E53E3E] text-sm md:text-base font-bold uppercase tracking-[0.2em] mb-4">
+                The Latest Drop
+              </span>
+              <h2 className="text-5xl md:text-7xl font-light uppercase tracking-tight mb-6 leading-none">
+                New <br /> <span className="font-semibold">Arrivals</span>
+              </h2>
+              <p className="text-lg md:text-xl text-white/80 font-light mb-10 max-w-lg leading-relaxed">
+                Discover our latest seasonal drops. Fresh styles engineered for optimal comfort and relentless durability.
+              </p>
+              
+              <div className="inline-flex items-center justify-center gap-3 bg-white text-black h-14 px-10 text-sm font-bold uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all duration-300 w-fit">
+                Shop The Collection <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </Link>
+        </section>
+
+        {/* ── Hub Cards — Retailer & Wholesaler ───────────────────────────────── */}
+        <section className="pb-24 px-6 md:px-12 max-w-[1440px] mx-auto bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
 
             {/* Retailer Card */}
@@ -115,14 +142,14 @@ export function Home() {
             </Link>
 
             {/* Wholesaler Card */}
-            <Link to="/wholesale" className="group block w-full relative overflow-hidden rounded-2xl md:rounded-[2rem] aspect-[4/5] md:aspect-square bg-gray-100">
+            <Link to="/retail" className="group block w-full relative overflow-hidden rounded-2xl md:rounded-[2rem] aspect-[4/5] md:aspect-square bg-gray-100">
               <motion.img
                 initial={{ scale: 1.1 }}
                 whileInView={{ scale: 1 }}
                 transition={{ duration: 1.2 }}
                 viewport={{ once: true }}
                 src={wholesaleImg}
-                alt="Wholesale Partners"
+                alt="Wholesale Collection"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
@@ -131,7 +158,7 @@ export function Home() {
                 <Building2 className="w-8 h-8 mb-6 opacity-80" />
                 <h2 className="text-4xl md:text-5xl font-semibold uppercase tracking-tight mb-4">Wholesaler</h2>
                 <p className="text-lg text-white/80 font-light mb-8 max-w-sm">
-                  Bulk orders for businesses. Partner with us to bring premium quality apparel to your customer base.
+                  Bulk orders for businesses. Premium quality at wholesale prices with dedicated support.
                 </p>
                 <div className="inline-flex items-center gap-3 font-medium uppercase tracking-widest text-sm w-fit border-b border-white pb-1 group-hover:gap-5 transition-all duration-300">
                   Explore Wholesale <ArrowRight className="w-4 h-4" />

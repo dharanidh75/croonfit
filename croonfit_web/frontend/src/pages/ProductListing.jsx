@@ -4,7 +4,7 @@ import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { ProductCard } from '../components/product/ProductCard'
 import { ProductSkeleton } from '../components/ui/Skeleton'
-import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
+import { ChevronDown, SlidersHorizontal, X, Search } from 'lucide-react'
 import api from '../lib/api'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
@@ -28,6 +28,7 @@ export function ProductListing() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [sortOpen, setSortOpen] = useState(false)
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
 
   const size = searchParams.get('size') || ''
   const sort = searchParams.get('sort') || 'newest'
@@ -38,8 +39,8 @@ export function ProductListing() {
   const getBackendGender = (cat) => {
     if (!cat) return ''
     const lower = cat.toLowerCase()
-    if (lower === 'men') return 'MENS'
-    if (lower === 'women') return 'WOMENS'
+    if (lower === 'mens' || lower === 'men') return 'MENS'
+    if (lower === 'womens' || lower === 'women') return 'WOMENS'
     if (lower === 'kids') return 'KIDS'
     return cat.toUpperCase()
   }
@@ -59,10 +60,6 @@ export function ProductListing() {
 
       params.append('page', isMore ? page + 1 : 1)
       params.append('per_page', 12)
-
-      // Fallback mapping if backend expects exact ?category=men&subcategory=oversized as mentioned in prompt
-      params.append('category', category || '')
-      params.append('subcategory', subcategory || '')
 
       const res = await api.get(`/products?${params.toString()}`)
       isMore ? setProducts(p => [...p, ...res.data.items]) : setProducts(res.data.items)
@@ -129,19 +126,40 @@ export function ProductListing() {
         <div className="sticky top-20 z-30 bg-white/90 backdrop-blur-md border-y border-[#F5F5F5] py-4 px-6 mb-8">
           <div className="max-w-[1440px] mx-auto flex items-center justify-between">
 
-            {/* Left: Desktop Filters */}
-            <div className="hidden md:flex items-center gap-6">
-              <span className="text-sm font-light text-[#888888] mr-4">{total} Products</span>
+            {/* Left: Search & Desktop Filters */}
+            <div className="flex flex-1 items-center gap-6">
+              
+              {/* Search Bar */}
+              <form 
+                onSubmit={(e) => { e.preventDefault(); setFilter('search', searchInput) }}
+                className="hidden md:flex items-center bg-[#F5F5F5] rounded-full px-4 h-10 flex-1 max-w-sm"
+              >
+                <Search className="w-4 h-4 text-[#888888] mr-2" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="bg-transparent border-none outline-none text-sm w-full font-medium placeholder:text-[#888888]"
+                />
+                {searchInput && (
+                  <button type="button" onClick={() => { setSearchInput(''); setFilter('search', '') }}>
+                    <X className="w-4 h-4 text-[#888888] hover:text-black" />
+                  </button>
+                )}
+              </form>
 
-              <div className="flex items-center gap-2">
+              <span className="hidden lg:block text-sm font-light text-[#888888] mr-4 whitespace-nowrap">{total} Products</span>
+
+              <div className="hidden md:flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-widest mr-2">Size</span>
                 {SIZES.map(s => (
                   <button
                     key={s}
                     onClick={() => setFilter('size', size === s ? '' : s)}
                     className={`w-10 h-10 rounded-full text-xs font-medium transition-all duration-300 ${size === s
-                        ? 'bg-black text-white'
-                        : 'bg-[#F5F5F5] text-[#555555] hover:bg-gray-200'
+                      ? 'bg-black text-white'
+                      : 'bg-[#F5F5F5] text-[#555555] hover:bg-gray-200'
                       }`}
                   >
                     {s}
@@ -150,16 +168,18 @@ export function ProductListing() {
               </div>
             </div>
 
-            {/* Mobile Filter Trigger */}
-            <button
-              onClick={() => setMobileFiltersOpen(true)}
-              className="md:hidden flex items-center gap-2 text-sm uppercase tracking-widest font-medium"
-            >
-              <SlidersHorizontal className="w-4 h-4" /> Filter ({total})
-            </button>
+            {/* Mobile Filter & Search Trigger */}
+            <div className="md:hidden flex items-center gap-4">
+              <button
+                onClick={() => setMobileFiltersOpen(true)}
+                className="flex items-center gap-2 text-sm uppercase tracking-widest font-medium"
+              >
+                <SlidersHorizontal className="w-4 h-4" /> Filter ({total})
+              </button>
+            </div>
 
             {/* Right: Sort */}
-            <div className="relative">
+            <div className="relative ml-auto md:ml-0">
               <button
                 onClick={() => setSortOpen(v => !v)}
                 className="flex items-center gap-2 text-sm uppercase tracking-widest font-medium hover:text-gray-500 transition-colors"
@@ -229,8 +249,25 @@ export function ProductListing() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMobileFiltersOpen(false)} />
           <div className="relative bg-white w-full p-6 rounded-t-3xl transform transition-transform duration-300">
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-xl font-light uppercase tracking-wide">Filters</h3>
+              <h3 className="text-xl font-light uppercase tracking-wide">Filters & Search</h3>
               <button onClick={() => setMobileFiltersOpen(false)} className="p-2 bg-gray-100 rounded-full"><X className="w-5 h-5" /></button>
+            </div>
+
+            {/* Mobile Search */}
+            <div className="mb-8">
+              <form 
+                onSubmit={(e) => { e.preventDefault(); setFilter('search', searchInput); setMobileFiltersOpen(false); }}
+                className="flex items-center bg-[#F5F5F5] rounded-xl px-4 h-12 w-full"
+              >
+                <Search className="w-5 h-5 text-[#888888] mr-3" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="bg-transparent border-none outline-none text-base w-full font-medium placeholder:text-[#888888]"
+                />
+              </form>
             </div>
 
             <div className="mb-8">

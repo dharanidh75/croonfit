@@ -5,6 +5,7 @@ import { Footer } from '../components/Footer'
 import { ProductCard } from '../components/product/ProductCard'
 import { useStore } from '../store'
 import { Minus, Plus, X, ArrowRight } from 'lucide-react'
+import { ImageWithFallback } from '../components/ui/ImageWithFallback'
 import api from '../lib/api'
 
 export function Cart() {
@@ -49,8 +50,8 @@ export function Cart() {
           {cart.length === 0 ? (
             <div className="py-24 text-center border-y border-[#F5F5F5]">
               <h2 className="text-2xl font-light mb-6">Your cart is empty.</h2>
-              <Link 
-                to="/retail" 
+              <Link
+                to="/retail"
                 className="inline-flex h-14 px-10 items-center justify-center bg-black text-white text-sm font-bold uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-colors"
               >
                 Return to Shop
@@ -58,7 +59,7 @@ export function Cart() {
             </div>
           ) : (
             <div className="flex flex-col lg:flex-row gap-12 xl:gap-24">
-              
+
               {/* Left: Cart Items */}
               <div className="w-full lg:w-[60%] xl:w-[65%]">
                 <div className="hidden md:grid grid-cols-12 gap-4 pb-4 border-b border-[#F5F5F5] text-xs font-bold uppercase tracking-widest text-[#888888]">
@@ -70,11 +71,11 @@ export function Cart() {
                 <div className="flex flex-col">
                   {cart.map((item, index) => (
                     <div key={`${item.product.id}-${item.variant.id}`} className="grid grid-cols-1 md:grid-cols-12 gap-6 py-8 border-b border-[#F5F5F5] animate-fade-in-up" style={{ animationDelay: `${index * 50}ms` }}>
-                      
+
                       {/* Product Info */}
                       <div className="col-span-1 md:col-span-6 flex gap-6">
                         <Link to={`/product/${item.product.slug}`} className="w-24 md:w-32 flex-shrink-0 bg-[#F5F5F5] rounded-xl overflow-hidden aspect-[3/4]">
-                          <img src={item.product.primary_image} alt={item.product.name} className="w-full h-full object-cover mix-blend-multiply" />
+                          <ImageWithFallback src={item.product.primary_image} alt={item.product.name} className="w-full h-full object-cover mix-blend-multiply" />
                         </Link>
                         <div className="flex flex-col py-2">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-[#888888] mb-1">Croonfit</p>
@@ -83,8 +84,8 @@ export function Cart() {
                           </Link>
                           <p className="text-xs font-light text-[#555555] mt-2">Size: {item.variant.size}</p>
                           <p className="text-xs font-medium mt-2 md:hidden">₹{item.product.price}</p>
-                          
-                          <button 
+
+                          <button
                             onClick={() => removeFromCart(item.product.id, item.variant.id)}
                             className="mt-auto text-xs font-bold uppercase tracking-widest text-[#888888] hover:text-[#E53E3E] transition-colors flex items-center gap-1 w-fit"
                           >
@@ -96,7 +97,7 @@ export function Cart() {
                       {/* Quantity Selector */}
                       <div className="col-span-1 md:col-span-3 flex items-center md:justify-center">
                         <div className="flex items-center border border-[#E5E5E5] rounded-lg overflow-hidden h-10 w-28">
-                          <button 
+                          <button
                             onClick={() => updateCartQty(item.product.id, item.variant.id, Math.max(1, item.quantity - 1))}
                             className="w-8 h-full flex items-center justify-center text-[#888888] hover:bg-[#F5F5F5] transition-colors"
                           >
@@ -105,7 +106,7 @@ export function Cart() {
                           <div className="flex-1 h-full flex items-center justify-center text-sm font-medium">
                             {item.quantity}
                           </div>
-                          <button 
+                          <button
                             onClick={() => updateCartQty(item.product.id, item.variant.id, item.quantity + 1)}
                             className="w-8 h-full flex items-center justify-center text-[#888888] hover:bg-[#F5F5F5] transition-colors"
                           >
@@ -127,7 +128,7 @@ export function Cart() {
               <div className="w-full lg:w-[40%] xl:w-[35%]">
                 <div className="bg-[#F9F9F9] rounded-2xl p-8 lg:sticky lg:top-28">
                   <h2 className="text-lg font-medium uppercase tracking-widest mb-6">Order Summary</h2>
-                  
+
                   <div className="space-y-4 mb-6 text-sm">
                     <div className="flex justify-between text-[#555555]">
                       <span>Subtotal</span>
@@ -145,13 +146,13 @@ export function Cart() {
                       </p>
                     )}
                   </div>
-                  
+
                   <div className="border-t border-[#E5E5E5] pt-6 flex justify-between items-end mb-8">
                     <span className="text-sm font-bold uppercase tracking-widest">Total</span>
                     <span className="text-2xl font-medium">₹{total}</span>
                   </div>
 
-                  <button 
+                  <button
                     onClick={handleCheckout}
                     className="w-full h-14 bg-black text-white text-sm font-bold uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                   >
@@ -159,7 +160,7 @@ export function Cart() {
                   </button>
                 </div>
               </div>
-              
+
             </div>
           )}
         </div>

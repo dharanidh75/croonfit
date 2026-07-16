@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Heart, ShoppingBag, User, Menu, X, Search } from 'lucide-react'
-import { Logo } from './Logo'
+import { Logo, CroonIcon } from './Logo'
 import { useStore } from '../store'
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [searchFocused, setSearchFocused] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const searchRef = useRef(null)
-  
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -31,19 +27,12 @@ export function Navbar() {
 
   useEffect(() => setMobileOpen(false), [location.pathname])
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery('')
-      setSearchFocused(false)
-    }
-  }
+
 
   const navLinks = [
-    { to: '/retail', label: 'Retail' },
-    { to: '/wholesale', label: 'Wholesale' },
-    { to: '/about', label: 'About' },
+    { to: '/category/mens', label: 'Mens' },
+    { to: '/category/womens', label: 'Womens' },
+    { to: '/category/kids', label: 'Kids' },
   ]
 
   // Text colors based on scroll state and transparent state
@@ -87,44 +76,14 @@ export function Navbar() {
 
           {/* CENTER — Logo */}
           <div className="flex-shrink-0 flex-1 md:flex-none flex justify-start md:justify-center">
-            <Link to="/" aria-label="Croonfit Home">
-              <Logo className={`h-8 transition-colors duration-300 ${textColor}`} />
+            <Link to="/" aria-label="Croon Home" className="flex flex-col items-center">
+              <Logo className={`h-7 transition-colors duration-300 ${textColor}`} />
+              {!isTransparent && <span className="text-[8px] font-bold tracking-[0.3em] uppercase mt-0.5 opacity-60" style={{color: 'currentColor'}}>APPAREL STUDIO</span>}
             </Link>
           </div>
 
           {/* RIGHT — Actions */}
           <div className="flex items-center justify-end gap-6 flex-1">
-            {/* Search */}
-            <form
-              onSubmit={handleSearch}
-              className={`hidden md:flex items-center transition-all duration-300 border-b ${
-                searchFocused ? 'w-48 border-current' : 'w-32 border-transparent'
-              } ${isTransparent ? 'border-white/30' : 'border-[#CCCCCC]'}`}
-            >
-              <button type="submit" className={`${textColor} opacity-80 hover:opacity-100 transition-opacity`}>
-                <Search className="w-4 h-4" />
-              </button>
-              <input
-                ref={searchRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                placeholder="Search"
-                className={`w-full py-1 px-2 bg-transparent outline-none text-sm placeholder:opacity-100 font-medium ${textColor} ${
-                  isTransparent ? 'placeholder-white/70' : 'placeholder-[#222222]'
-                }`}
-              />
-            </form>
-
-            <button
-              className={`md:hidden ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
-              onClick={() => navigate('/products')}
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
-            </button>
 
             {/* Profile */}
             <Link
@@ -182,17 +141,7 @@ export function Navbar() {
       {/* Mobile overlay menu */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 bg-white/80 backdrop-blur-2xl pt-24" role="dialog">
-          {/* Mobile search */}
-          <form onSubmit={handleSearch} className="flex items-center border-b border-[#CCCCCC] px-6 py-4 mx-6 mb-4">
-            <Search className="w-5 h-5 text-[#888888] mr-3 flex-shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products..."
-              className="w-full outline-none text-base placeholder:text-[#888888]"
-            />
-          </form>
+          {/* Mobile search removed */}
 
           <nav className="flex flex-col px-6">
             {navLinks.map(({ to, label }) => (

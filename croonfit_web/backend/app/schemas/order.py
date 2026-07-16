@@ -17,6 +17,7 @@ class OrderItemOut(BaseModel):
     variant_id: int
     product_name: str
     variant_label: str
+    product_image: Optional[str] = None
     quantity: int
     unit_price: float
 

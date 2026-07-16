@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Heart, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../../store'
+import { ImageWithFallback } from '../ui/ImageWithFallback'
 
 /**
  * Ajio-style Product Card
@@ -30,7 +31,7 @@ export function ProductCard({ product, mode = 'default' }) {
 
   return (
     <Link
-      to={`/products/${product.slug}`}
+      to={`/product/${product.slug}`}
       className="group block"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -45,8 +46,7 @@ export function ProductCard({ product, mode = 'default' }) {
           transition: 'box-shadow 200ms ease, transform 200ms ease',
         }}
       >
-        {/* Primary image */}
-        <img
+        <ImageWithFallback
           src={product.primary_image}
           alt={product.name}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out"

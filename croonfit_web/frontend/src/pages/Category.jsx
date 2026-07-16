@@ -53,9 +53,10 @@ export function Category() {
   ]
 
   let subcategories = menSubcategories
-  if (category?.toLowerCase() === 'women') {
+  const catLower = category?.toLowerCase()
+  if (catLower === 'womens' || catLower === 'women') {
     subcategories = womenSubcategories
-  } else if (category?.toLowerCase() === 'kids') {
+  } else if (catLower === 'kids') {
     subcategories = kidsSubcategories
   }
 
@@ -109,7 +110,7 @@ export function Category() {
             {subcategories.map((sub) => (
               <motion.div key={sub.id} variants={itemVariants}>
                 <Link
-                  to={`/${category}/${sub.id}`}
+                  to={`/category/${category}/${sub.id}`}
                   className="group block relative overflow-hidden rounded-2xl aspect-[4/5] bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
                 >
                   <img

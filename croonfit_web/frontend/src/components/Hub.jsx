@@ -16,19 +16,19 @@ export function Hub({ type }) {
       id: 'men',
       title: 'Men',
       image: mensImg,
-      link: '/men'
+      link: '/category/men'
     },
     {
       id: 'women',
       title: 'Women',
       image: womenImg,
-      link: '/women'
+      link: '/category/women'
     },
     {
       id: 'kids',
       title: 'Kids',
       image: kidsImg,
-      link: '/kids'
+      link: '/category/kids'
     }
   ]
 

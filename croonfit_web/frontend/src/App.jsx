@@ -16,8 +16,10 @@ import { Cart }           from './pages/Cart'
 import { Checkout }       from './pages/Checkout'
 import { OrderSuccess }   from './pages/OrderSuccess'
 import { Account }        from './pages/Account'
+import { Orders }         from './pages/Orders'
 import { Login }          from './pages/Login'
 import { NotFound }       from './pages/NotFound'
+import { Navigate }       from 'react-router-dom'
 
 import { PageTransition } from './components/layout/PageTransition'
 
@@ -60,6 +62,7 @@ const AdminComingSoon = () => (
 
 // Wrapper for AdminLayout to use with ComingSoon
 import { AdminLayout } from './components/admin/AdminLayout'
+import { AdminProtectedRoute } from './components/admin/AdminProtectedRoute'
 const ComingSoonPage = () => <AdminLayout><AdminComingSoon /></AdminLayout>
 
 // Wrapper for AnimatePresence to work with useLocation
@@ -80,39 +83,45 @@ function AnimatedRoutes() {
         <Route path="/checkout"                    element={<PageTransition><Checkout /></PageTransition>} />
         <Route path="/order-success"               element={<PageTransition><OrderSuccess /></PageTransition>} />
         <Route path="/account"                     element={<PageTransition><Account /></PageTransition>} />
+        <Route path="/orders"                      element={<PageTransition><Orders /></PageTransition>} />
         <Route path="/login"                       element={<PageTransition><Login /></PageTransition>} />
         
-        {/* Global Products / Search Route */}
+        {/* Products listing (all / search) */}
         <Route path="/products"                    element={<PageTransition><ProductListing /></PageTransition>} />
 
-        {/* Dynamic Category Routes - Put after static routes to avoid shadowing */}
-        <Route path="/:category"                   element={<PageTransition><Category /></PageTransition>} />
-        <Route path="/:category/:subcategory"      element={<PageTransition><ProductListing /></PageTransition>} />
+        {/* Legacy redirect routes */}
+        <Route path="/mens"                        element={<Navigate to="/category/mens" replace />} />
+        <Route path="/womens"                      element={<Navigate to="/category/womens" replace />} />
+        <Route path="/kids"                        element={<Navigate to="/category/kids" replace />} />
+
+        {/* Category pages: /category/mens, /category/womens, /category/kids */}
+        <Route path="/category/:category"                   element={<PageTransition><Category /></PageTransition>} />
+        <Route path="/category/:category/:subcategory"      element={<PageTransition><ProductListing /></PageTransition>} />
 
         {/* ── Admin Routes (lazy) ────────────────────────────────────── */}
         <Route path="/admin/login"    element={<Suspense fallback={AdminFallback}><AdminLogin /></Suspense>} />
-        <Route path="/admin"          element={<Suspense fallback={AdminFallback}><AdminDashboard /></Suspense>} />
+        <Route path="/admin"          element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminDashboard /></Suspense></AdminProtectedRoute>} />
         
         {/* Phase 2: Products Module */}
-        <Route path="/admin/products"            element={<Suspense fallback={AdminFallback}><AdminProducts /></Suspense>} />
-        <Route path="/admin/products/new"        element={<Suspense fallback={AdminFallback}><ProductForm /></Suspense>} />
-        <Route path="/admin/products/categories" element={<Suspense fallback={AdminFallback}><Categories /></Suspense>} />
+        <Route path="/admin/products"            element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminProducts /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/products/new"        element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><ProductForm /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/products/categories" element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><Categories /></Suspense></AdminProtectedRoute>} />
 
-        <Route path="/admin/orders"   element={<Suspense fallback={AdminFallback}><AdminOrders /></Suspense>} />
-        <Route path="/admin/billing"  element={<Suspense fallback={AdminFallback}><AdminBilling /></Suspense>} />
+        <Route path="/admin/orders"   element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminOrders /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/billing"  element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminBilling /></Suspense></AdminProtectedRoute>} />
         
         {/* Phases 4, 5, 6 */}
-        <Route path="/admin/customers"    element={<Suspense fallback={AdminFallback}><AdminCustomers /></Suspense>} />
-        <Route path="/admin/dealers"      element={<Suspense fallback={AdminFallback}><AdminDealers /></Suspense>} />
-        <Route path="/admin/inventory"    element={<Suspense fallback={AdminFallback}><AdminInventory /></Suspense>} />
+        <Route path="/admin/customers"    element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminCustomers /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/dealers"      element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminDealers /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/inventory"    element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminInventory /></Suspense></AdminProtectedRoute>} />
         
         {/* Phases 7, 8, 9 */}
-        <Route path="/admin/discounts"    element={<Suspense fallback={AdminFallback}><AdminDiscounts /></Suspense>} />
-        <Route path="/admin/cms"          element={<Suspense fallback={AdminFallback}><AdminCMS /></Suspense>} />
-        <Route path="/admin/analytics"    element={<Suspense fallback={AdminFallback}><AdminAnalytics /></Suspense>} />
+        <Route path="/admin/discounts"    element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminDiscounts /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/cms"          element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminCMS /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/analytics"    element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminAnalytics /></Suspense></AdminProtectedRoute>} />
         
         {/* Phase 10 */}
-        <Route path="/admin/settings"     element={<Suspense fallback={AdminFallback}><AdminSettings /></Suspense>} />
+        <Route path="/admin/settings"     element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminSettings /></Suspense></AdminProtectedRoute>} />
 
         {/* ── 404 ──────────────────────────────────────────────────────── */}
         <Route path="*" element={<NotFound />} />
@@ -121,9 +130,18 @@ function AnimatedRoutes() {
   )
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  React.useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Toaster
         position="top-center"
         toastOptions={{

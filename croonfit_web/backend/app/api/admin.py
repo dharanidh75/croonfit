@@ -63,18 +63,25 @@ def admin_create_product(
     db: Session = Depends(get_db),
     admin=Depends(require_admin),
 ):
-    product = Product(
-        name=data.name, slug=data.slug, description=data.description,
-        price=data.price, compare_price=data.compare_price,
-        category_id=data.category_id, is_active=data.is_active,
-        is_featured=data.is_featured, tags=data.tags,
-    )
-    for v in data.variants:
-        product.variants.append(ProductVariant(**v.model_dump()))
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-    return product
+    try:
+        product = Product(
+            name=data.name, slug=data.slug, description=data.description,
+            price=data.price, compare_price=data.compare_price,
+            category_id=data.category_id, is_active=data.is_active,
+            is_featured=data.is_featured, tags=data.tags,
+        )
+        for v in data.variants:
+            product.variants.append(ProductVariant(**v.model_dump()))
+        for i in data.images:
+            product.images.append(ProductImage(**i.model_dump()))
+        db.add(product)
+        db.commit()
+        db.refresh(product)
+        return product
+    except Exception as e:
+        db.rollback()
+        import traceback
+        raise HTTPException(status_code=400, detail=str(e) + "\n" + traceback.format_exc())
 
 
 @router.put("/products/{product_id}", response_model=ProductOut)
@@ -103,9 +110,9 @@ def admin_delete_product(
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    product.is_active = False   # soft delete
+    db.delete(product)
     db.commit()
-    return {"message": "Product deactivated"}
+    return {"message": "Product deleted"}
 
 
 # ─── Admin: Orders ────────────────────────────────────────────────────────────
@@ -213,3 +220,64 @@ def admin_stats(
             for v in low_stock
         ],
     }
+
+
+# ─── Admin: Categories CRUD ───────────────────────────────────────────────────
+
+from app.schemas.product import CategoryCreate, CategoryUpdate, CategoryOut
+
+@router.get("/categories", response_model=List[CategoryOut])
+def admin_list_categories(
+    db: Session = Depends(get_db),
+    admin=Depends(require_admin),
+):
+    return db.query(Category).options(joinedload(Category.products)).all()
+
+
+@router.post("/categories", response_model=CategoryOut, status_code=201)
+def admin_create_category(
+    data: CategoryCreate,
+    db: Session = Depends(get_db),
+    admin=Depends(require_admin),
+):
+    existing = db.query(Category).filter(Category.slug == data.slug).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Category with this slug already exists")
+    cat = Category(**data.model_dump())
+    db.add(cat)
+    db.commit()
+    db.refresh(cat)
+    return cat
+
+
+@router.put("/categories/{category_id}", response_model=CategoryOut)
+def admin_update_category(
+    category_id: int,
+    data: CategoryUpdate,
+    db: Session = Depends(get_db),
+    admin=Depends(require_admin),
+):
+    cat = db.query(Category).filter(Category.id == category_id).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found")
+    for field, value in data.model_dump(exclude_none=True).items():
+        setattr(cat, field, value)
+    db.commit()
+    db.refresh(cat)
+    return cat
+
+
+@router.delete("/categories/{category_id}")
+def admin_delete_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    admin=Depends(require_admin),
+):
+    cat = db.query(Category).filter(Category.id == category_id).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found")
+    if cat.products:
+        raise HTTPException(status_code=409, detail="Cannot delete category with existing products. Move products first.")
+    db.delete(cat)
+    db.commit()
+    return {"message": "Category deleted"}

@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { adminApi } from '../../lib/api'
 import toast from 'react-hot-toast'
-
+import { adminApi } from '../../lib/api'
 export function AdminLogin() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -14,7 +13,7 @@ export function AdminLogin() {
     setLoading(true)
     try {
       const res = await adminApi.post('/admin/login', { username, password })
-      localStorage.setItem('croonfit-admin-token', res.data.access_token)
+      sessionStorage.setItem('croonfit-admin-token', res.data.access_token)
       toast.success('Login successful')
       navigate('/admin')
     } catch (err) {
@@ -34,16 +33,16 @@ export function AdminLogin() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="input-field border-border border"
             required
           />
-          <input 
-            type="password" 
+          <input
+            type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

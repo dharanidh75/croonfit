@@ -3,7 +3,6 @@ import { AdminLayout } from '../../components/admin/AdminLayout'
 import { DataTable } from '../../components/admin/DataTable'
 import { StatusPill } from '../../components/admin/StatusPill'
 import { adminApi } from '../../lib/api'
-
 export function AdminBilling() {
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,10 +37,10 @@ export function AdminBilling() {
     <AdminLayout>
       <div className="p-8">
         <h1 className="font-heading font-black text-2xl uppercase tracking-wider mb-8">Billing Ledger</h1>
-        
-        <DataTable 
-          columns={columns} 
-          data={payments} 
+
+        <DataTable
+          columns={columns}
+          data={payments}
           loading={loading}
           pagination={{
             page,

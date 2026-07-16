@@ -134,9 +134,6 @@ export function AboutSection() {
             <Link to="/retail" className="h-14 px-10 bg-[#0A0A0A] text-white flex items-center justify-center text-sm font-medium uppercase tracking-wider rounded-2xl hover:bg-gray-800 transition-colors duration-300">
               Explore Collection
             </Link>
-            <Link to="/wholesale" className="h-14 px-10 bg-transparent border border-[#0A0A0A] text-[#0A0A0A] flex items-center justify-center text-sm font-medium uppercase tracking-wider rounded-2xl hover:bg-gray-100 transition-colors duration-300">
-              Become a Partner
-            </Link>
           </div>
         </motion.div>
 

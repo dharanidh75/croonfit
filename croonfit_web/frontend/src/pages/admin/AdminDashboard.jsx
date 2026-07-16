@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { adminApi } from '../../lib/api'
 import { useNavigate, Link } from 'react-router-dom'
+import { adminApi } from '../../lib/api'
 import { Package, ShoppingBag, IndianRupee, AlertCircle, ArrowRight, Users } from 'lucide-react'
 import { KPICard } from '../../components/admin/ui/KPICard'
 import { SimpleChart } from '../../components/admin/ui/SimpleChart'
@@ -51,12 +51,14 @@ export function AdminDashboard() {
     { header: 'Product', accessorKey: 'product', cell: (row) => <span className="font-medium">{row.product}</span> },
     { header: 'SKU', accessorKey: 'sku', cell: (row) => <span className="text-[#666666]">{row.sku}</span> },
     { header: 'Variant', accessorKey: 'variant', cell: (row) => `${row.size} / ${row.color}` },
-    { header: 'Qty', accessorKey: 'qty', align: 'right', cell: (row) => (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
-        <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-        {row.qty}
-      </span>
-    )}
+    {
+      header: 'Qty', accessorKey: 'qty', align: 'right', cell: (row) => (
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+          {row.qty}
+        </span>
+      )
+    }
   ]
 
   return (
@@ -75,42 +77,42 @@ export function AdminDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <KPICard 
-          title="Total Revenue" 
-          value={`₹${stats.revenue.toFixed(2)}`} 
-          trend="up" 
-          trendValue="12.5%" 
-          icon={IndianRupee} 
+        <KPICard
+          title="Total Revenue"
+          value={`₹${stats.revenue.toFixed(2)}`}
+          trend="up"
+          trendValue="12.5%"
+          icon={IndianRupee}
         />
-        <KPICard 
-          title="Total Orders" 
-          value={stats.orders.total} 
-          trend="up" 
-          trendValue="8.2%" 
-          icon={ShoppingBag} 
+        <KPICard
+          title="Total Orders"
+          value={stats.orders.total}
+          trend="up"
+          trendValue="8.2%"
+          icon={ShoppingBag}
         />
-        <KPICard 
-          title="Pending Orders" 
-          value={stats.orders.pending} 
-          trend="neutral" 
-          trendValue="0%" 
-          icon={Package} 
+        <KPICard
+          title="Pending Orders"
+          value={stats.orders.pending}
+          trend="neutral"
+          trendValue="0%"
+          icon={Package}
         />
-        <KPICard 
-          title="Active Customers" 
+        <KPICard
+          title="Active Customers"
           value="1,249" // Mock metric to fill out the 4-grid
-          trend="up" 
-          trendValue="4.1%" 
-          icon={Users} 
+          trend="up"
+          trendValue="4.1%"
+          icon={Users}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         {/* Main Chart */}
         <div className="lg:col-span-2">
-          <SimpleChart 
-            title="Revenue Overview" 
-            data={chartData} 
+          <SimpleChart
+            title="Revenue Overview"
+            data={chartData}
             height="h-64"
           />
         </div>
@@ -147,17 +149,17 @@ export function AdminDashboard() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold tracking-tight text-[#111111] flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-red-500" /> 
+              <AlertCircle className="w-5 h-5 text-red-500" />
               Low Stock Alerts
             </h2>
             <Link to="/admin/inventory" className="text-sm font-medium text-[#666666] hover:text-[#111111] flex items-center gap-1">
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <DataTable 
-            columns={lowStockCols} 
-            data={stats.low_stock_variants} 
-            emptyMessage="All items are sufficiently stocked." 
+          <DataTable
+            columns={lowStockCols}
+            data={stats.low_stock_variants}
+            emptyMessage="All items are sufficiently stocked."
           />
         </div>
 
@@ -172,15 +174,17 @@ export function AdminDashboard() {
           </div>
           {/* We use low_stock_variants array length logic to display mock recent orders for now, 
               until Phase 3 where we fetch actual recent orders list */}
-          <DataTable 
+          <DataTable
             columns={[
               { header: 'Order ID', accessorKey: 'id', cell: row => <span className="font-medium">#{row.id}</span> },
               { header: 'Customer', accessorKey: 'customer' },
-              { header: 'Status', accessorKey: 'status', cell: row => (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-50 text-yellow-700">
-                  {row.status}
-                </span>
-              ) },
+              {
+                header: 'Status', accessorKey: 'status', cell: row => (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-50 text-yellow-700">
+                    {row.status}
+                  </span>
+                )
+              },
               { header: 'Total', accessorKey: 'total', align: 'right', cell: row => <span className="font-medium">₹{row.total}</span> }
             ]}
             data={[

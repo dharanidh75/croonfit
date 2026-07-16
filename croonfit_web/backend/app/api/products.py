@@ -58,10 +58,12 @@ def list_products(
         .filter(Product.is_active == True)
     )
 
-    if category:
-        q = q.join(Product.category).filter(Category.slug == category)
-    if gender:
-        q = q.join(Product.category).filter(Category.gender == gender)
+    if category or gender:
+        q = q.join(Product.category)
+        if category:
+            q = q.filter(Category.slug == category)
+        if gender:
+            q = q.filter(Category.gender == gender)
     if price_min is not None:
         q = q.filter(Product.price >= price_min)
     if price_max is not None:

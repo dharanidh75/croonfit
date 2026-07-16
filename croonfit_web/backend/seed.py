@@ -27,8 +27,8 @@ def seed():
         admin = AdminUser(
             username="admin",
             hashed_password=get_admin_password_hash("admin123"),
-        )
-        db.add(admin)
+        )   
+        db.add(admin)       
         print("✓ Admin user created (admin / admin123)")
 
     # ── Categories ────────────────────────────────────────────────────────────
