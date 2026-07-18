@@ -15,7 +15,8 @@ class Settings(BaseSettings):
     FREE_SHIPPING_THRESHOLD: float = 999.0
     APP_ENV: str = "development"
 
-    class Config:
-        env_file = ".env"
+    model_config = {
+        "env_file": ".env"
+    }
 
 settings = Settings()

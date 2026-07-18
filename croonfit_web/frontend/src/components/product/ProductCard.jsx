@@ -26,7 +26,7 @@ export function ProductCard({ product, mode = 'default' }) {
   const handleWishlist = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (isAuthenticated) toggleWishlist(product)
+    toggleWishlist(product)
   }
 
   return (
@@ -47,7 +47,7 @@ export function ProductCard({ product, mode = 'default' }) {
         }}
       >
         <ImageWithFallback
-          src={product.primary_image}
+          src={product.primary_image || product.images?.find(i => i.is_primary)?.url || product.images?.[0]?.url}
           alt={product.name}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out"
           style={{ transform: hovered ? 'scale(1.04)' : 'scale(1)' }}

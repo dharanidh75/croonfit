@@ -128,9 +128,9 @@ export function ProductListing() {
 
             {/* Left: Search & Desktop Filters */}
             <div className="flex flex-1 items-center gap-6">
-              
+
               {/* Search Bar */}
-              <form 
+              <form
                 onSubmit={(e) => { e.preventDefault(); setFilter('search', searchInput) }}
                 className="hidden md:flex items-center bg-[#F5F5F5] rounded-full px-4 h-10 flex-1 max-w-sm"
               >
@@ -255,7 +255,7 @@ export function ProductListing() {
 
             {/* Mobile Search */}
             <div className="mb-8">
-              <form 
+              <form
                 onSubmit={(e) => { e.preventDefault(); setFilter('search', searchInput); setMobileFiltersOpen(false); }}
                 className="flex items-center bg-[#F5F5F5] rounded-xl px-4 h-12 w-full"
               >

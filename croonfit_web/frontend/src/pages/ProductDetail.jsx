@@ -265,7 +265,7 @@ export function ProductDetail() {
                     </button>
                   )}
                   <button
-                    onClick={() => isAuthenticated && toggleWishlist(product)}
+                    onClick={() => toggleWishlist(product)}
                     aria-label="Wishlist"
                     className={`w-14 h-14 rounded-xl border flex items-center justify-center transition-all duration-300 ${wishlisted ? 'border-[#E53E3E] bg-red-50' : 'border-[#E5E5E5] hover:border-black'
                       }`}

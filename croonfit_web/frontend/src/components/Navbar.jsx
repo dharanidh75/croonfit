@@ -96,7 +96,7 @@ export function Navbar() {
 
             {/* Wishlist */}
             <Link
-              to={isAuthenticated ? '/wishlist' : '/login'}
+              to="/wishlist"
               className={`relative hidden sm:block ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
               aria-label="Wishlist"
             >
@@ -156,7 +156,7 @@ export function Navbar() {
             <Link to={isAuthenticated ? '/account' : '/login'} className="py-4 text-2xl font-light uppercase tracking-wide border-b border-[#F5F5F5] text-[#0A0A0A]">
               {isAuthenticated ? 'Profile' : 'Login / Sign Up'}
             </Link>
-            <Link to={isAuthenticated ? '/wishlist' : '/login'} className="py-4 text-2xl font-light uppercase tracking-wide border-b border-[#F5F5F5] text-[#0A0A0A]">
+            <Link to="/wishlist" className="py-4 text-2xl font-light uppercase tracking-wide border-b border-[#F5F5F5] text-[#0A0A0A]">
               Wishlist
             </Link>
           </nav>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ImageWithFallback } from '../ui/ImageWithFallback'
+import { AmazonZoom } from '../ui/AmazonZoom'
 
 export function ProductGallery({ images }) {
   const [activeIndex, setActiveIndex] = useState(0)
@@ -24,9 +25,9 @@ export function ProductGallery({ images }) {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row gap-6 h-full">
+      <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Thumbnails */}
-        <div className="flex md:flex-col gap-4 order-2 md:order-1 overflow-x-auto md:overflow-y-auto hide-scrollbar w-full md:w-24 flex-shrink-0">
+        <div className="flex md:flex-col gap-4 order-2 md:order-1 overflow-x-auto w-full md:w-24 flex-shrink-0 hide-scrollbar">
           {images.map((img, idx) => (
             <button
               key={img.id}
@@ -44,13 +45,13 @@ export function ProductGallery({ images }) {
 
         {/* Main Image */}
         <div 
-          className="relative flex-1 aspect-[3/4] md:aspect-auto bg-[#F5F5F5] rounded-2xl cursor-zoom-in order-1 md:order-2 overflow-hidden group"
+          className="relative flex-1 aspect-[3/4] bg-[#F5F5F5] rounded-2xl order-1 md:order-2 group w-full"
           onClick={() => setLightboxOpen(true)}
         >
-          <ImageWithFallback 
+          <AmazonZoom 
             src={activeImage.url} 
             alt={activeImage.alt || 'Product view'} 
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="w-full h-full rounded-2xl overflow-visible md:overflow-visible" 
           />
           <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm text-black text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             Click to expand

@@ -88,7 +88,7 @@ export function Checkout() {
         })
         clearCart()
         toast.success("Payment successful! Your order has been placed.")
-        navigate('/orders')
+        navigate('/order-success')
       }
 
     } catch (err) {
