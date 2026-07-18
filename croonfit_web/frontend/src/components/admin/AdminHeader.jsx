@@ -19,14 +19,7 @@ export function AdminHeader() {
   return (
     <header className="h-16 border-b border-[#E5E5E5] bg-white flex items-center justify-between px-6 sticky top-0 z-30">
       <div className="flex items-center gap-4 w-96 hidden md:flex">
-        <div className="relative w-full">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
-          <input 
-            type="text" 
-            placeholder="Search orders, products, customers..." 
-            className="w-full h-9 pl-10 pr-4 bg-[#F9F9F9] border border-transparent focus:border-[#E5E5E5] focus:bg-white rounded-lg text-sm outline-none transition-colors"
-          />
-        </div>
+        {/* Search removed as requested */}
       </div>
       
       <div className="flex items-center gap-4 ml-auto">

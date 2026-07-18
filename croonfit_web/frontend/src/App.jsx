@@ -18,6 +18,7 @@ import { OrderSuccess }   from './pages/OrderSuccess'
 import { Account }        from './pages/Account'
 import { Orders }         from './pages/Orders'
 import { Login }          from './pages/Login'
+import { Contact }        from './pages/Contact'
 import { NotFound }       from './pages/NotFound'
 import { Navigate }       from 'react-router-dom'
 
@@ -44,8 +45,6 @@ const AdminDiscounts = React.lazy(() => import('./pages/admin/AdminDiscounts').t
 const AdminCMS       = React.lazy(() => import('./pages/admin/AdminCMS').then(module => ({ default: module.AdminCMS })))
 const AdminAnalytics = React.lazy(() => import('./pages/admin/AdminAnalytics').then(module => ({ default: module.AdminAnalytics })))
 
-// Admin Phase 10
-const AdminSettings  = React.lazy(() => import('./pages/admin/AdminSettings').then(module => ({ default: module.AdminSettings })))
 
 const AdminFallback = (
   <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
@@ -85,6 +84,7 @@ function AnimatedRoutes() {
         <Route path="/account"                     element={<PageTransition><Account /></PageTransition>} />
         <Route path="/orders"                      element={<PageTransition><Orders /></PageTransition>} />
         <Route path="/login"                       element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/contact"                     element={<PageTransition><Contact /></PageTransition>} />
         
         {/* Products listing (all / search) */}
         <Route path="/products"                    element={<PageTransition><ProductListing /></PageTransition>} />
@@ -105,6 +105,7 @@ function AnimatedRoutes() {
         {/* Phase 2: Products Module */}
         <Route path="/admin/products"            element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminProducts /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/products/new"        element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><ProductForm /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/products/:id"        element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><ProductForm /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/products/categories" element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><Categories /></Suspense></AdminProtectedRoute>} />
 
         <Route path="/admin/orders"   element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminOrders /></Suspense></AdminProtectedRoute>} />
@@ -120,8 +121,6 @@ function AnimatedRoutes() {
         <Route path="/admin/cms"          element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminCMS /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/analytics"    element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminAnalytics /></Suspense></AdminProtectedRoute>} />
         
-        {/* Phase 10 */}
-        <Route path="/admin/settings"     element={<AdminProtectedRoute><Suspense fallback={AdminFallback}><AdminSettings /></Suspense></AdminProtectedRoute>} />
 
         {/* ── 404 ──────────────────────────────────────────────────────── */}
         <Route path="*" element={<NotFound />} />

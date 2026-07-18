@@ -5,7 +5,15 @@ import { Card, CardHeader, CardContent } from '../../components/admin/ui/Card'
 import { TrendingUp, Users, ShoppingBag, ArrowUpRight } from 'lucide-react'
 
 export function AdminAnalytics() {
-  const chartData = [12, 19, 15, 25, 22, 30, 28]
+  const chartData = [
+    { label: 'Mon', value: 320000 },
+    { label: 'Tue', value: 450000 },
+    { label: 'Wed', value: 380000 },
+    { label: 'Thu', value: 510000 },
+    { label: 'Fri', value: 480000 },
+    { label: 'Sat', value: 650000 },
+    { label: 'Sun', value: 590000 }
+  ]
 
   return (
     <AdminLayout>
@@ -69,14 +77,12 @@ export function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader title="Revenue Overview" description="Daily sales performance." />
-          <CardContent>
-            <div className="h-[300px] w-full pt-4">
-              <SimpleChart data={chartData} color="#111111" />
-            </div>
-          </CardContent>
-        </Card>
+        <SimpleChart 
+          title="Revenue Overview" 
+          description="Daily sales performance." 
+          data={chartData} 
+          height={300} 
+        />
 
         <Card>
           <CardHeader title="Top Products" description="Best selling items by volume." />

@@ -1,15 +1,15 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingBag, 
-  Users, 
-  Building2, 
-  Archive, 
-  Tag, 
-  LayoutTemplate, 
-  LineChart, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Users,
+  Building2,
+  Archive,
+  Tag,
+  LayoutTemplate,
+  LineChart,
   Settings
 } from 'lucide-react'
 
@@ -39,7 +39,6 @@ export function AdminSidebar() {
       items: [
         { to: '/admin/cms', icon: LayoutTemplate, label: 'Content (CMS)' },
         { to: '/admin/analytics', icon: LineChart, label: 'Analytics' },
-        { to: '/admin/settings', icon: Settings, label: 'Settings' },
       ]
     }
   ]
@@ -62,19 +61,18 @@ export function AdminSidebar() {
               {group.items.map(item => {
                 const Icon = item.icon
                 // Exact match for dashboard, partial match for others so nested routes stay active
-                const isActive = item.to === '/admin' 
+                const isActive = item.to === '/admin'
                   ? location.pathname === '/admin'
                   : location.pathname.startsWith(item.to)
-                  
+
                 return (
                   <Link
                     key={item.to}
                     to={item.to}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive 
-                        ? 'bg-[#EFEFEF] text-[#111111]' 
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+                        ? 'bg-[#EFEFEF] text-[#111111]'
                         : 'text-[#666666] hover:bg-[#F0F0F0] hover:text-[#111111]'
-                    }`}
+                      }`}
                   >
                     <Icon className={`w-4 h-4 ${isActive ? 'text-[#111111]' : 'text-[#888888]'}`} />
                     {item.label}
@@ -85,7 +83,7 @@ export function AdminSidebar() {
           </div>
         ))}
       </nav>
-      
+
       <div className="p-4 border-t border-[#E5E5E5] shrink-0">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-[#E5E5E5] flex items-center justify-center text-xs font-bold text-[#666666]">

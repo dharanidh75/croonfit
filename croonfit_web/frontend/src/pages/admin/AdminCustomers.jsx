@@ -11,6 +11,25 @@ export function AdminCustomers() {
     { id: '1004', name: 'David Lee', email: 'david.lee@example.com', orders: 8, spent: 28900, last_active: '2026-07-11T08:20:00Z', status: 'Active' },
   ])
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [advancedFilters, setAdvancedFilters] = useState({ status: 'all' })
+
+  const filteredCustomers = customers.filter(c => {
+    let matchesSearch = true
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      matchesSearch = c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
+    }
+
+    let matchesStatus = true
+    if (advancedFilters.status !== 'all') {
+      matchesStatus = c.status.toLowerCase() === advancedFilters.status.toLowerCase()
+    }
+
+    return matchesSearch && matchesStatus
+  })
+
   const columns = [
     { 
       header: 'Customer', 
@@ -72,25 +91,63 @@ export function AdminCustomers() {
       </div>
 
       <div className="bg-white border border-[#E5E5E5] rounded-xl mb-6 p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-        <div className="flex gap-1 overflow-x-auto p-1 border-b sm:border-b-0 sm:border-r border-[#E5E5E5] hide-scrollbar">
-          <button className="px-3 py-1.5 text-sm font-medium bg-[#111111] text-white rounded-md whitespace-nowrap">All Customers</button>
-          <button className="px-3 py-1.5 text-sm font-medium text-[#666666] hover:bg-[#F5F5F5] rounded-md whitespace-nowrap">New</button>
-          <button className="px-3 py-1.5 text-sm font-medium text-[#666666] hover:bg-[#F5F5F5] rounded-md whitespace-nowrap">Returning</button>
-        </div>
-        <div className="relative flex-1 min-w-[200px] mx-2">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
           <input 
             type="text" 
             placeholder="Search by name or email..." 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
             className="w-full h-9 pl-9 pr-4 bg-transparent outline-none text-sm placeholder:text-[#888888] text-[#111111]"
           />
         </div>
-        <button className="h-9 px-3 text-sm font-medium text-[#666666] hover:text-[#111111] flex items-center justify-center gap-2 border sm:border-none border-[#E5E5E5] rounded-md">
-          <Filter className="w-4 h-4" /> Filter
-        </button>
+        <div className="w-px h-6 bg-[#E5E5E5] mx-1 hidden sm:block"></div>
+        <div className="relative">
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="h-9 px-3 text-sm font-medium text-[#666666] hover:text-[#111111] flex items-center justify-center gap-2 border sm:border-none border-[#E5E5E5] rounded-md"
+          >
+            <Filter className="w-4 h-4" /> Filter
+          </button>
+          
+          {showFilters && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#E5E5E5] rounded-xl shadow-lg z-50 p-4">
+              <div className="mb-4">
+                <label className="block text-xs font-bold text-[#888888] uppercase tracking-wider mb-2">Status</label>
+                <select 
+                  value={advancedFilters.status}
+                  onChange={(e) => setAdvancedFilters({...advancedFilters, status: e.target.value})}
+                  className="w-full h-9 px-3 bg-[#F9F9F9] border border-[#E5E5E5] rounded-lg text-sm outline-none"
+                >
+                  <option value="all">All</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <button 
+                  onClick={() => {
+                    setAdvancedFilters({ status: 'all' })
+                    setSearchQuery('')
+                    setShowFilters(false)
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium text-[#666666] hover:text-[#111111]"
+                >
+                  Clear All
+                </button>
+                <button 
+                  onClick={() => setShowFilters(false)}
+                  className="px-4 py-1.5 bg-[#111111] text-white text-xs font-medium rounded-md hover:bg-black"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      <DataTable columns={columns} data={customers} />
+      <DataTable columns={columns} data={filteredCustomers} emptyMessage="No customers found." />
     </AdminLayout>
   )
 }

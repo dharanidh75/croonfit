@@ -37,14 +37,14 @@ export function AdminDashboard() {
   if (!stats) return null
 
   const chartData = [
-    { label: 'Jan', value: 4000 },
-    { label: 'Feb', value: 3000 },
-    { label: 'Mar', value: 2000 },
-    { label: 'Apr', value: 2780 },
-    { label: 'May', value: 1890 },
-    { label: 'Jun', value: 2390 },
-    { label: 'Jul', value: 3490 },
-    { label: 'Aug', value: Math.floor(stats.revenue || 4000) } // use live data for latest
+    { label: 'Jan', value: Math.floor((stats.revenue || 4250000) * 0.4) },
+    { label: 'Feb', value: Math.floor((stats.revenue || 4250000) * 0.5) },
+    { label: 'Mar', value: Math.floor((stats.revenue || 4250000) * 0.45) },
+    { label: 'Apr', value: Math.floor((stats.revenue || 4250000) * 0.6) },
+    { label: 'May', value: Math.floor((stats.revenue || 4250000) * 0.75) },
+    { label: 'Jun', value: Math.floor((stats.revenue || 4250000) * 0.8) },
+    { label: 'Jul', value: Math.floor((stats.revenue || 4250000) * 0.9) },
+    { label: 'Aug', value: Math.floor(stats.revenue || 4250000) }
   ]
 
   const lowStockCols = [
@@ -113,7 +113,7 @@ export function AdminDashboard() {
           <SimpleChart
             title="Revenue Overview"
             data={chartData}
-            height="h-64"
+            height={256}
           />
         </div>
 

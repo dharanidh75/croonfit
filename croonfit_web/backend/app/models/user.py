@@ -1,7 +1,8 @@
 from sqlalchemy import (
     Column, Integer, String, Boolean, Enum,
-    DateTime, func
+    DateTime, func, ForeignKey
 )
+from sqlalchemy.orm import relationship
 from app.database import Base
 import enum
 
@@ -25,3 +26,35 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     company_name = Column(String(255), nullable=True)  # wholesalers
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    addresses = relationship("UserAddress", back_populates="user", cascade="all, delete-orphan")
+    payment_methods = relationship("UserPaymentMethod", back_populates="user", cascade="all, delete-orphan")
+
+
+class UserAddress(Base):
+    __tablename__ = "user_addresses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(100)) # e.g. Home, Office
+    full_name = Column(String(100))
+    street = Column(String(255))
+    city = Column(String(100))
+    state = Column(String(100))
+    zip = Column(String(20))
+    is_default = Column(Boolean, default=False)
+
+    user = relationship("User", back_populates="addresses")
+
+
+class UserPaymentMethod(Base):
+    __tablename__ = "user_payment_methods"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    card_type = Column(String(50)) # e.g. Visa, Mastercard
+    last4 = Column(String(4))
+    expiry = Column(String(10))
+    name_on_card = Column(String(100))
+
+    user = relationship("User", back_populates="payment_methods")

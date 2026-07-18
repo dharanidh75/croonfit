@@ -17,7 +17,9 @@ export function DataTable({ columns, data, emptyMessage = "No data found." }) {
             {columns.map((col, i) => (
               <th 
                 key={i} 
-                className={`py-3 px-4 text-xs font-bold text-[#666666] uppercase tracking-wider ${col.align === 'right' ? 'text-right' : ''}`}
+                className={`py-3 px-4 text-xs font-bold text-[#666666] uppercase tracking-wider ${
+                  col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : ''
+                }`}
               >
                 {col.header}
               </th>
@@ -30,7 +32,9 @@ export function DataTable({ columns, data, emptyMessage = "No data found." }) {
               {columns.map((col, colIndex) => (
                 <td 
                   key={colIndex} 
-                  className={`py-3 px-4 text-sm text-[#111111] ${col.align === 'right' ? 'text-right' : ''}`}
+                  className={`py-3 px-4 text-sm text-[#111111] ${
+                    col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : ''
+                  }`}
                 >
                   {col.cell ? col.cell(row) : row[col.accessorKey]}
                 </td>

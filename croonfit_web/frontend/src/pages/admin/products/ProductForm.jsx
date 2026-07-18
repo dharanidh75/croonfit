@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AdminLayout } from '../../../components/admin/AdminLayout'
 import { Card, CardHeader, CardContent } from '../../../components/admin/ui/Card'
 import { UploadCloud, Plus, Minus } from 'lucide-react'
 import { adminApi } from '../../../lib/api'
+import { getHexFromName, getNameFromHex } from '../../../utils/colors'
 
 const GENDER_LABELS = {
   MENS: "Men's",
@@ -16,6 +17,9 @@ const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function ProductForm() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const isEditing = Boolean(id)
+
   const [allCategories, setAllCategories] = useState([])
   const [selectedGender, setSelectedGender] = useState('')
   const [formData, setFormData] = useState({
@@ -43,7 +47,46 @@ export function ProductForm() {
     adminApi.get('/products/categories')
       .then(res => setAllCategories(res.data))
       .catch(err => console.error(err))
-  }, [])
+
+    if (isEditing) {
+      adminApi.get(`/products/${id}`)
+        .then(res => {
+          const p = res.data
+          setFormData({
+            name: p.name || '',
+            slug: p.slug || '',
+            description: p.description || '',
+            price: p.price || '',
+            compare_price: p.compare_price || '',
+            category_id: p.category_id || '',
+            is_active: p.is_active,
+            is_featured: p.is_featured,
+            tags: p.tags ? p.tags.join(', ') : '',
+          })
+          if (p.category && p.category.gender) {
+            setSelectedGender(p.category.gender)
+          }
+          if (p.variants && p.variants.length > 0) {
+            setVariants(p.variants.map(v => ({
+              id: v.id,
+              size: v.size || 'M',
+              color: v.color || 'Black',
+              color_hex: v.color_hex || '#000000',
+              stock_qty: v.stock_qty || 0,
+              sku: v.sku || ''
+            })))
+          }
+          if (p.images && p.images.length > 0) {
+            setImages(p.images.map(img => ({
+              id: img.id,
+              url: img.image_url || '',
+              is_primary: img.is_primary
+            })))
+          }
+        })
+        .catch(err => console.error(err))
+    }
+  }, [id, isEditing])
 
   // Unique genders from fetched categories
   const availableGenders = [...new Set(allCategories.map(c => c.gender))].sort()
@@ -72,6 +115,16 @@ export function ProductForm() {
     setVariants(prev => {
       const updated = [...prev]
       updated[index] = { ...updated[index], [field]: value }
+      
+      // Auto-sync color hex and name
+      if (field === 'color') {
+        const hex = getHexFromName(value)
+        if (hex) updated[index].color_hex = hex
+      } else if (field === 'color_hex') {
+        const name = getNameFromHex(value)
+        if (name) updated[index].color = name
+      }
+      
       // Auto-generate SKU
       if (field === 'size' || field === 'color') {
         const slug = formData.slug || 'product'
@@ -129,7 +182,13 @@ export function ProductForm() {
           sku: v.sku || `${slug}-${v.size}-${v.color}-${i}`.toLowerCase().replace(/\s+/g, '-'),
         })),
       }
-      await adminApi.post('/admin/products', payload)
+      
+      if (isEditing) {
+        await adminApi.put(`/admin/products/${id}`, payload)
+      } else {
+        await adminApi.post('/admin/products', payload)
+      }
+      
       navigate('/admin/products')
     } catch (err) {
       console.error(err)
@@ -143,8 +202,8 @@ export function ProductForm() {
     <AdminLayout>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Add Product</h1>
-          <p className="text-sm text-[#666666] mt-1">Create a new product in your catalog.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[#111111]">{isEditing ? 'Edit Product' : 'Add Product'}</h1>
+          <p className="text-sm text-[#666666] mt-1">{isEditing ? 'Update your product details.' : 'Create a new product in your catalog.'}</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
           <button onClick={() => navigate('/admin/products')} className="h-9 px-4 bg-white border border-[#E5E5E5] text-[#111111] rounded-lg text-sm font-medium hover:bg-[#F9F9F9] transition-colors">

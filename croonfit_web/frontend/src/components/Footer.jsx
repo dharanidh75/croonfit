@@ -13,10 +13,10 @@ export function Footer() {
         {/* Brand column */}
         <div>
           <div className="flex items-center gap-3 mb-3">
-            <CroonIcon className="h-8 text-white" />
-            <div>
-              <Logo className="h-5 text-white" />
-              <p className="text-[9px] font-bold tracking-[0.25em] uppercase text-[#888888] mt-0.5">APPAREL STUDIO</p>
+            <img src="/logo.png" alt="Croon Icon" className="h-8 invert" />
+            <div className="flex flex-col">
+              <img src="/logo-word.png?v=6" alt="Croon" className="h-5 invert" />
+              <p className="text-[9px] font-bold tracking-[0.25em] uppercase text-white mt-0.5">APPAREL STUDIO</p>
             </div>
           </div>
           <p className="font-body text-sm text-[#888888] leading-relaxed max-w-[220px]">
@@ -44,11 +44,11 @@ export function Footer() {
           <h4 className="font-heading font-bold text-xs uppercase tracking-[0.12em] mb-5 text-white">Shop</h4>
           <ul className="space-y-3 font-body text-sm text-[#888888]">
             {[
-              { to: '/category/mens',   label: "Men's" },
+              { to: '/category/mens', label: "Men's" },
               { to: '/category/womens', label: "Women's" },
-              { to: '/category/kids',   label: "Kids'" },
-              { to: '/retail',          label: 'Shop All' },
-              { to: '/about',           label: 'About Us' },
+              { to: '/category/kids', label: "Kids'" },
+              { to: '/retail', label: 'Shop All' },
+              { to: '/about', label: 'About Us' },
             ].map(l => (
               <li key={l.to}>
                 <Link to={l.to} className="hover:text-white transition-colors duration-150">{l.label}</Link>
@@ -61,9 +61,12 @@ export function Footer() {
         <div>
           <h4 className="font-heading font-bold text-xs uppercase tracking-[0.12em] mb-5 text-white">Support</h4>
           <ul className="space-y-3 font-body text-sm text-[#888888]">
-            {['Contact Us', 'FAQ'].map(l => (
-              <li key={l}><a href="#" className="hover:text-white transition-colors duration-150">{l}</a></li>
-            ))}
+            <li>
+              <Link to="/contact" className="hover:text-white transition-colors duration-150">Contact Us</Link>
+            </li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors duration-150">FAQ</a>
+            </li>
           </ul>
         </div>
 

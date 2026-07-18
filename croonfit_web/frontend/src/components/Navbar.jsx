@@ -49,7 +49,7 @@ export function Navbar() {
     <>
       <header className={navClasses}>
         <div className="mx-auto px-6 max-w-[1440px] h-20 flex items-center justify-between">
-          
+
           {/* LEFT — Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8 flex-1">
             {navLinks.map(({ to, label }) => {
@@ -58,16 +58,14 @@ export function Navbar() {
                 <Link
                   key={to}
                   to={to}
-                  className={`relative group text-sm font-medium uppercase tracking-widest transition-colors duration-200 ${textColor} ${hoverColor} ${
-                    isActive ? 'opacity-100' : 'opacity-80'
-                  }`}
+                  className={`relative group text-sm font-medium uppercase tracking-widest transition-colors duration-200 ${textColor} ${hoverColor} ${isActive ? 'opacity-100' : 'opacity-80'
+                    }`}
                 >
                   {label}
                   {/* Animated underline */}
-                  <span 
-                    className={`absolute -bottom-1 left-0 h-[2px] transition-all duration-300 ${
-                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
-                    } ${isTransparent ? 'bg-white' : 'bg-[#0A0A0A]'}`}
+                  <span
+                    className={`absolute -bottom-1 left-0 h-[2px] transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                      } ${isTransparent ? 'bg-white' : 'bg-[#0A0A0A]'}`}
                   />
                 </Link>
               )
@@ -77,8 +75,16 @@ export function Navbar() {
           {/* CENTER — Logo */}
           <div className="flex-shrink-0 flex-1 md:flex-none flex justify-start md:justify-center">
             <Link to="/" aria-label="Croon Home" className="flex flex-col items-center">
-              <Logo className={`h-7 transition-colors duration-300 ${textColor}`} />
-              {!isTransparent && <span className="text-[8px] font-bold tracking-[0.3em] uppercase mt-0.5 opacity-60" style={{color: 'currentColor'}}>APPAREL STUDIO</span>}
+              <img
+                src="/logo-word.png?v=6"
+                alt="Croon"
+                className={`h-5 transition-all duration-300 ${isTransparent ? 'invert brightness-200' : 'invert-0'}`}
+              />
+              {!isTransparent && (
+                <span className={`text-[8px] font-bold tracking-[0.3em] uppercase mt-0.5 opacity-60 transition-colors duration-300 ${textColor}`}>
+                  APPAREL STUDIO
+                </span>
+              )}
             </Link>
           </div>
 
@@ -102,9 +108,8 @@ export function Navbar() {
             >
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
-                <span className={`absolute -top-2 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${
-                  isTransparent ? 'bg-white text-black' : 'bg-black text-white'
-                }`}>
+                <span className={`absolute -top-2 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${isTransparent ? 'bg-white text-black' : 'bg-black text-white'
+                  }`}>
                   {wishlistCount}
                 </span>
               )}
@@ -118,9 +123,8 @@ export function Navbar() {
             >
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className={`absolute -top-2 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${
-                  isTransparent ? 'bg-white text-black' : 'bg-black text-white'
-                }`}>
+                <span className={`absolute -top-2 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${isTransparent ? 'bg-white text-black' : 'bg-black text-white'
+                  }`}>
                   {cartCount}
                 </span>
               )}

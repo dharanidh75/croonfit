@@ -46,8 +46,12 @@ export function OrderSuccess() {
           </div>
         </div>
         
-        <Link to="/shop?gender=MENS" className="btn-primary w-full h-12">
+        <Link to="/products" className="btn-primary w-full h-12 mb-4">
           CONTINUE SHOPPING
+        </Link>
+        
+        <Link to="/orders" className="w-full h-12 flex items-center justify-center border border-black text-black font-heading font-bold uppercase tracking-wider text-sm hover:bg-[#F5F5F5] transition-colors duration-200">
+          VIEW MY ORDERS
         </Link>
       </div>
       </main>

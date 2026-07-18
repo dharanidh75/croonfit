@@ -26,14 +26,42 @@ export function AdminProducts() {
       })
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [advancedFilters, setAdvancedFilters] = useState({ status: 'all', stock: 'all' })
+  const [productToDelete, setProductToDelete] = useState(null)
+
+  const filteredProducts = products.filter(p => {
+    let matchesSearch = true
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      matchesSearch = p.name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q))
+    }
+    
+    let matchesAdvanced = true
+    if (advancedFilters.status !== 'all') {
+      const wantActive = advancedFilters.status === 'active'
+      if (p.is_active !== wantActive) matchesAdvanced = false
+    }
+    if (advancedFilters.stock !== 'all') {
+      const inStock = p.stock > 0
+      if (advancedFilters.stock === 'in_stock' && !inStock) matchesAdvanced = false
+      if (advancedFilters.stock === 'out_of_stock' && inStock) matchesAdvanced = false
+    }
+    
+    return matchesSearch && matchesAdvanced
+  })
+
+  const handleDelete = async () => {
+    if (!productToDelete) return
     try {
-      await adminApi.delete(`/admin/products/${id}`)
+      await adminApi.delete(`/admin/products/${productToDelete}`)
+      setProductToDelete(null)
       fetchProducts() // Refresh table
     } catch (err) {
       console.error('Failed to delete product', err)
       alert('Failed to delete product')
+      setProductToDelete(null)
     }
   }
 
@@ -57,13 +85,13 @@ export function AdminProducts() {
     {
       header: 'Price',
       accessorKey: 'price',
-      align: 'right',
+      align: 'center',
       cell: row => <span className="font-medium">₹{row.price}</span>
     },
     {
       header: 'Stock',
       accessorKey: 'stock',
-      align: 'right',
+      align: 'center',
       cell: row => (
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${row.stock > 10 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
           }`}>
@@ -74,6 +102,7 @@ export function AdminProducts() {
     {
       header: 'Status',
       accessorKey: 'is_active',
+      align: 'center',
       cell: (row) => (
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest ${row.is_active ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
           {row.is_active ? 'Active' : 'Inactive'}
@@ -83,13 +112,22 @@ export function AdminProducts() {
     {
       header: 'Actions',
       accessorKey: 'actions',
+      align: 'center',
       cell: (row) => (
-        <button
-          onClick={() => handleDelete(row.id)}
-          className="text-red-600 hover:text-red-800 text-xs font-bold uppercase tracking-widest"
-        >
-          Delete
-        </button>
+        <div className="flex items-center justify-center gap-2">
+          <Link
+            to={`/admin/products/${row.id}`}
+            className="px-3 py-1.5 bg-white border border-[#E5E5E5] text-[#111111] hover:bg-[#F9F9F9] rounded-md text-[10px] font-bold uppercase tracking-widest transition-colors"
+          >
+            Edit
+          </Link>
+          <button
+            onClick={() => setProductToDelete(row.id)}
+            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-[10px] font-bold uppercase tracking-widest transition-colors"
+          >
+            Delete
+          </button>
+        </div>
       )
     }
   ]
@@ -117,19 +155,99 @@ export function AdminProducts() {
           <input
             type="text"
             placeholder="Search products by name, SKU..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-9 pl-9 pr-4 bg-transparent outline-none text-sm placeholder:text-[#888888] text-[#111111]"
           />
         </div>
         <div className="w-px h-6 bg-[#E5E5E5] mx-1"></div>
-        <button className="h-9 px-3 text-sm font-medium text-[#666666] hover:text-[#111111] flex items-center gap-2">
-          <Filter className="w-4 h-4" /> Filters
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="h-9 px-3 text-sm font-medium text-[#666666] hover:text-[#111111] flex items-center gap-2"
+          >
+            <Filter className="w-4 h-4" /> Filters
+          </button>
+          
+          {showFilters && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#E5E5E5] rounded-xl shadow-lg z-50 p-4">
+              <div className="mb-4">
+                <label className="block text-xs font-bold text-[#888888] uppercase tracking-wider mb-2">Status</label>
+                <select 
+                  value={advancedFilters.status}
+                  onChange={(e) => setAdvancedFilters({...advancedFilters, status: e.target.value})}
+                  className="w-full h-9 px-3 bg-[#F9F9F9] border border-[#E5E5E5] rounded-lg text-sm outline-none"
+                >
+                  <option value="all">All</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-xs font-bold text-[#888888] uppercase tracking-wider mb-2">Stock</label>
+                <select 
+                  value={advancedFilters.stock}
+                  onChange={(e) => setAdvancedFilters({...advancedFilters, stock: e.target.value})}
+                  className="w-full h-9 px-3 bg-[#F9F9F9] border border-[#E5E5E5] rounded-lg text-sm outline-none"
+                >
+                  <option value="all">All</option>
+                  <option value="in_stock">In Stock</option>
+                  <option value="out_of_stock">Out of Stock</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <button 
+                  onClick={() => {
+                    setAdvancedFilters({ status: 'all', stock: 'all' })
+                    setSearchQuery('')
+                    setShowFilters(false)
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium text-[#666666] hover:text-[#111111]"
+                >
+                  Clear All
+                </button>
+                <button 
+                  onClick={() => setShowFilters(false)}
+                  className="px-4 py-1.5 bg-[#111111] text-white text-xs font-medium rounded-md hover:bg-black"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {loading ? (
         <div className="p-8 text-center text-[#888888] text-sm font-medium">Loading products...</div>
       ) : (
-        <DataTable columns={columns} data={products} emptyMessage="No products found. Create one!" />
+        <DataTable columns={columns} data={filteredProducts} emptyMessage="No products found. Create one!" />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {productToDelete && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-black tracking-tight text-[#111111] mb-2 uppercase">Delete Product?</h3>
+            <p className="text-sm text-[#666666] mb-6 leading-relaxed">
+              Are you completely sure you want to delete this product? This action is permanent and cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setProductToDelete(null)} 
+                className="px-4 py-2.5 text-sm font-bold text-[#666666] hover:text-[#111111] uppercase tracking-wider"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDelete} 
+                className="px-5 py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 uppercase tracking-wider shadow-sm"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </AdminLayout>
   )
