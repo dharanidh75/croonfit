@@ -77,6 +77,9 @@ class MockApi {
         recent_sales: []
       });
     }
+    if (url.includes('/auth/me/addresses') || url.includes('/auth/me/payments')) {
+      return createMockResponse([]);
+    }
     return createMockResponse({});
   }
 
