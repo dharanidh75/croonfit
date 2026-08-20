@@ -27,9 +27,8 @@ export function AdminLogin() {
     <div className="min-h-screen bg-surface flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white p-8 border border-border shadow-sm">
         <div className="text-center mb-8">
-          <h1 className="font-heading font-black text-3xl uppercase tracking-tighter">
-            CROONFIT<span className="text-muted text-sm ml-2">ADMIN</span>
-          </h1>
+          <img src="/logo-word.png?v=6" alt="Croon" className="h-5 mx-auto mb-2" />
+          <p className="text-muted text-[9px] tracking-[0.3em] uppercase font-bold opacity-60">ADMIN PORTAL</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
