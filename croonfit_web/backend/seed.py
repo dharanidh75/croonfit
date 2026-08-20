@@ -27,9 +27,12 @@ def seed():
         admin = AdminUser(
             username="admin",
             hashed_password=get_admin_password_hash("admin123"),
-        )   
-        db.add(admin)       
+        )
+        db.add(admin)
+        db.flush()
         print("✓ Admin user created (admin / admin123)")
+    else:
+        print("Admin user already exists")  
 
     # ── Categories ────────────────────────────────────────────────────────────
     categories_data = [

@@ -61,10 +61,13 @@ class MockApi {
       return createMockResponse([
         {
           id: 'mock-order-1',
+          user_id: 'user-1',
           created_at: new Date().toISOString(),
           total_amount: 3398,
+          total: 3398,
+          payment_status: 'PAID',
           status: 'DELIVERED',
-          items: [{ product_name: 'Oversized Vintage Tee', quantity: 1 }]
+          items: [{ product_name: 'Oversized Vintage Tee', quantity: 1, product_image: 'https://via.placeholder.com/150', variant_label: 'L / Black' }]
         }
       ]);
     }
