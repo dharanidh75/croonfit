@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Logo } from '../components/Logo'
 import { useStore } from '../store'
 import toast from 'react-hot-toast'
-import axios from 'axios'
+import api from '../lib/api'
 
 export function Login() {
   const [tab, setTab]               = useState('login')   // 'login' | 'signup'
@@ -23,12 +23,12 @@ export function Login() {
     setLoading(true)
     try {
       if (tab === 'login') {
-        const res = await axios.post('/api/auth/login', { email, password })
-        login({ email }, res.data.access_token)
+        const res = await api.post('/auth/login', { email, password })
+        login({ email, name: 'Guest User' }, res.data.access_token)
         toast.success('Welcome back!')
         navigate('/')
       } else {
-        await axios.post('/api/auth/register', { email, password, first_name: firstName, last_name: lastName })
+        await api.post('/auth/register', { email, password, first_name: firstName, last_name: lastName })
         toast.success('Account created! Please log in.')
         setTab('login')
       }

@@ -14,7 +14,7 @@ import { ImageWithFallback } from '../ui/ImageWithFallback'
  */
 export function ProductCard({ product, mode = 'default' }) {
   const [hovered, setHovered] = useState(false)
-  const { isWishlisted, toggleWishlist, isAuthenticated } = useStore()
+  const { isWishlisted, toggleWishlist, isAuthenticated, addToCart } = useStore()
   const wishlisted = isWishlisted(product.id)
 
   const discount = product.compare_price
@@ -106,22 +106,20 @@ export function ProductCard({ product, mode = 'default' }) {
           )}
         </div>
 
-        {/* Size chips */}
-        {sizes.length > 0 && (
-          <div className="flex gap-1.5 mt-3 flex-wrap">
-            {sizes.slice(0, 5).map(size => (
-              <span
-                key={size}
-                className="h-7 px-2 flex items-center justify-center border border-[#CCCCCC] text-[11px] font-body font-bold text-[#444444] hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all duration-150 cursor-pointer"
-              >
-                {size}
-              </span>
-            ))}
-            {sizes.length > 5 && (
-              <span className="h-7 px-2 flex items-center text-[11px] font-body text-[#888888]">+{sizes.length - 5}</span>
-            )}
-          </div>
-        )}
+        {/* Add to Cart Button */}
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (addToCart) {
+              addToCart(product, product.available_sizes?.[0] || 'M', 1);
+              // Optional: show a quick toast or feedback here
+            }
+          }}
+          className="w-full mt-4 h-10 bg-transparent border border-black text-black text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors flex items-center justify-center"
+        >
+          Add to Cart
+        </button>
       </div>
     </Link>
   )

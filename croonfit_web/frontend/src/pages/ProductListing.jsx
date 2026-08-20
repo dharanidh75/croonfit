@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { ProductCard } from '../components/product/ProductCard'
@@ -101,13 +101,25 @@ export function ProductListing() {
         {/* Header & Breadcrumbs */}
         <div className="max-w-[1440px] mx-auto px-6 mb-12">
           <nav className="text-xs font-medium uppercase tracking-widest text-[#888888] mb-6 flex items-center gap-2">
-            <span>Home</span>
-            <span>/</span>
-            <span>{formattedCategory}</span>
+            <Link to="/" className="hover:text-black transition-colors">Home</Link>
+            {formattedCategory && (
+              <>
+                <span>/</span>
+                {formattedSubcategory || search ? (
+                  <Link to={`/category/${category}`} className="hover:text-black transition-colors">{formattedCategory}</Link>
+                ) : (
+                  <span className="text-[#0A0A0A]">{formattedCategory}</span>
+                )}
+              </>
+            )}
             {formattedSubcategory && (
               <>
                 <span>/</span>
-                <span className="text-[#0A0A0A]">{formattedSubcategory}</span>
+                {search ? (
+                  <Link to={`/category/${category}/${subcategory}`} className="hover:text-black transition-colors">{formattedSubcategory}</Link>
+                ) : (
+                  <span className="text-[#0A0A0A]">{formattedSubcategory}</span>
+                )}
               </>
             )}
             {search && (
