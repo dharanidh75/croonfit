@@ -3,7 +3,7 @@ import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { useStore } from '../store'
 import { useNavigate, Link, useParams } from 'react-router-dom'
-import { LogOut, Package, ChevronRight, Mail, User as UserIcon, Phone, Shield, MapPin, CreditCard, Heart, Headphones } from 'lucide-react'
+import { LogOut, Package, ChevronRight, Mail, User as UserIcon, Phone, Shield, MapPin, CreditCard, Heart, Headphones, Settings } from 'lucide-react'
 
 // Sub-components
 import { SecuritySection } from '../components/account/SecuritySection'
@@ -167,6 +167,20 @@ export function Account() {
                   <div>
                     <h3 className="font-heading font-bold text-lg uppercase tracking-wide mb-0.5">Customer Support</h3>
                     <p className="text-sm text-[#888888]">Help center and contact us</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
+              </Link>
+
+              {/* Admin Portal */}
+              <Link to="/admin" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
+                    <Settings className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-lg uppercase tracking-wide mb-0.5">Admin Portal</h3>
+                    <p className="text-sm text-[#888888]">Manage store and products</p>
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
