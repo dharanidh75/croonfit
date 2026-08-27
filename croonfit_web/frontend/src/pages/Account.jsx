@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { useStore } from '../store'
-import { useNavigate, Link } from 'react-router-dom'
-import { LogOut, Package, ChevronRight, Mail, User as UserIcon, Phone, Shield, MapPin, CreditCard, Heart, Headphones } from 'lucide-react'
+import { useNavigate, Link, useParams } from 'react-router-dom'
+import { LogOut, Package, ChevronRight, Mail, User as UserIcon, Phone, Shield, MapPin, CreditCard, Heart, Headphones, Settings } from 'lucide-react'
 
 // Sub-components
 import { SecuritySection } from '../components/account/SecuritySection'
@@ -15,8 +15,9 @@ import { OrdersSection } from '../components/account/OrdersSection'
 export function Account() {
   const { user, logout, isAuthenticated } = useStore()
   const navigate = useNavigate()
+  const { tab } = useParams()
   
-  const [activeView, setActiveView] = useState('dashboard')
+  const activeView = tab || 'dashboard'
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -88,7 +89,7 @@ export function Account() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up">
               
               {/* My Orders */}
-              <div onClick={() => setActiveView('orders')} className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
+              <Link to="/account/orders" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
                     <Package className="w-6 h-6" />
@@ -99,10 +100,10 @@ export function Account() {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
-              </div>
+              </Link>
 
               {/* Login & Security */}
-              <div onClick={() => setActiveView('security')} className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
+              <Link to="/account/security" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
                     <Shield className="w-6 h-6" />
@@ -113,10 +114,10 @@ export function Account() {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
-              </div>
+              </Link>
 
               {/* Your Addresses */}
-              <div onClick={() => setActiveView('addresses')} className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
+              <Link to="/account/addresses" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
                     <MapPin className="w-6 h-6" />
@@ -127,10 +128,10 @@ export function Account() {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
-              </div>
+              </Link>
 
               {/* Payment Options */}
-              <div onClick={() => setActiveView('payments')} className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
+              <Link to="/account/payments" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
                     <CreditCard className="w-6 h-6" />
@@ -141,7 +142,7 @@ export function Account() {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
-              </div>
+              </Link>
 
               {/* Wishlist */}
               <Link to="/wishlist" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white">
@@ -158,7 +159,7 @@ export function Account() {
               </Link>
 
               {/* Customer Support */}
-              <div onClick={() => setActiveView('support')} className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
+              <Link to="/account/support" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
                     <Headphones className="w-6 h-6" />
@@ -169,16 +170,30 @@ export function Account() {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
-              </div>
+              </Link>
+
+              {/* Admin Portal */}
+              <Link to="/admin" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
+                    <Settings className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-lg uppercase tracking-wide mb-0.5">Admin Portal</h3>
+                    <p className="text-sm text-[#888888]">Manage store and products</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
+              </Link>
 
             </div>
           )}
 
-          {activeView === 'orders' && <OrdersSection onBack={() => setActiveView('dashboard')} />}
-          {activeView === 'security' && <SecuritySection onBack={() => setActiveView('dashboard')} />}
-          {activeView === 'addresses' && <AddressSection onBack={() => setActiveView('dashboard')} />}
-          {activeView === 'payments' && <PaymentSection onBack={() => setActiveView('dashboard')} />}
-          {activeView === 'support' && <SupportSection onBack={() => setActiveView('dashboard')} />}
+          {activeView === 'orders' && <OrdersSection onBack={() => navigate('/account')} />}
+          {activeView === 'security' && <SecuritySection onBack={() => navigate('/account')} />}
+          {activeView === 'addresses' && <AddressSection onBack={() => navigate('/account')} />}
+          {activeView === 'payments' && <PaymentSection onBack={() => navigate('/account')} />}
+          {activeView === 'support' && <SupportSection onBack={() => navigate('/account')} />}
 
         </div>
       </main>

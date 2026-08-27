@@ -135,6 +135,9 @@ class MockApi {
         ]
       });
     }
+    if (url.includes('/auth/me/addresses') || url.includes('/auth/me/payments')) {
+      return createMockResponse([]);
+    }
     return createMockResponse({});
   }
 

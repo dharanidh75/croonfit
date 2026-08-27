@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import { Logo } from '../components/Logo'
 import { useStore } from '../store'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
@@ -44,31 +43,13 @@ export function Login() {
       {/* Main: split screen */}
       <div className="flex flex-1 flex-col md:flex-row min-h-screen">
 
-        {/* ── LEFT PANEL — editorial image ────────────────────────────────── */}
-        <div className="relative w-full h-[40vh] md:h-auto md:w-1/2 overflow-hidden bg-[#0A0A0A] flex-shrink-0">
+        {/* ── LEFT PANEL — brand image ────────────────────────────────────── */}
+        <div className="relative w-full h-[40vh] md:h-auto md:w-1/2 overflow-hidden bg-[#E5E5E5] flex-shrink-0">
           <img
-            src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop"
-            alt="Fashion editorial"
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
+            src="/logo.png"
+            alt="Croon Apparel Studio"
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* Dark gradient at bottom for legibility */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-
-          {/* Watermark logotype */}
-          <div className="absolute inset-0 flex flex-col justify-between p-8 md:p-12">
-            {/* Top: Logo */}
-            <Logo className="h-8 text-white/80" />
-
-            {/* Bottom: headline */}
-            <div>
-              <p className="text-[11px] font-heading font-bold uppercase tracking-[0.15em] text-white/60 mb-2">
-                The Grind Collection
-              </p>
-              <h1 className="text-white font-heading font-black text-4xl md:text-5xl lg:text-6xl uppercase tracking-tighter leading-none">
-                Wear the<br />Grind.
-              </h1>
-            </div>
-          </div>
         </div>
 
         {/* ── RIGHT PANEL — form ─────────────────────────────────────────── */}

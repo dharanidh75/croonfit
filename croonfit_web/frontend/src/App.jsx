@@ -82,6 +82,7 @@ function AnimatedRoutes() {
         <Route path="/checkout"                    element={<PageTransition><Checkout /></PageTransition>} />
         <Route path="/order-success"               element={<PageTransition><OrderSuccess /></PageTransition>} />
         <Route path="/account"                     element={<PageTransition><Account /></PageTransition>} />
+        <Route path="/account/:tab"                element={<PageTransition><Account /></PageTransition>} />
         <Route path="/orders"                      element={<PageTransition><Orders /></PageTransition>} />
         <Route path="/login"                       element={<PageTransition><Login /></PageTransition>} />
         <Route path="/contact"                     element={<PageTransition><Contact /></PageTransition>} />
