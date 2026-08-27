@@ -22,7 +22,15 @@ class MockApi {
 
   async get(url, config) {
     await delay();
-    if (url.includes('/products/')) {
+    if (url.includes('/categories')) {
+      return createMockResponse([
+        { id: 1, name: 'T-Shirts', slug: 't-shirts', gender: 'MENS', products: [1,2,3] },
+        { id: 2, name: 'Polos', slug: 'polos', gender: 'MENS', products: [4] },
+        { id: 3, name: 'Pants', slug: 'pants', gender: 'MENS', products: [5] },
+        { id: 4, name: 'Hoodies', slug: 'hoodies', gender: 'MENS', products: [] }
+      ]);
+    }
+    if (url.includes('/products/') && !url.includes('/categories')) {
       const id = url.split('/').pop();
       const product = MOCK_PRODUCTS.find(p => p.id === id || p.slug === id) || MOCK_PRODUCTS[0];
       
@@ -60,21 +68,71 @@ class MockApi {
     if (url.includes('/orders')) {
       return createMockResponse([
         {
-          id: 'mock-order-1',
-          created_at: new Date().toISOString(),
-          total_amount: 3398,
+          id: '1042',
+          created_at: new Date(Date.now() - 10 * 60000).toISOString(),
+          total_amount: 3398.00,
+          status: 'PENDING',
+          payment_status: 'PAID',
+          customer: { name: 'Arjun M.', email: 'arjun.m@example.com', phone: '+91 9876543210' },
+          shipping_address: '123 Main St, Apartment 4B, Mumbai, Maharashtra, 400001',
+          items: [
+            { product_name: 'Oversized Vintage Tee', quantity: 2, price: 1499, color: 'White', size: 'M' }
+          ]
+        },
+        {
+          id: '1041',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          total_amount: 1899.00,
+          status: 'SHIPPED',
+          payment_status: 'PAID',
+          customer: { name: 'Priya S.', email: 'priya.s@example.com', phone: '+91 9123456789' },
+          shipping_address: '45 Park Avenue, Bangalore, Karnataka, 560001',
+          items: [
+            { product_name: 'Premium Cotton Polo', quantity: 1, price: 1899, color: 'Navy', size: 'L' }
+          ]
+        },
+        {
+          id: '1040',
+          created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+          total_amount: 2499.00,
           status: 'DELIVERED',
-          items: [{ product_name: 'Oversized Vintage Tee', quantity: 1 }]
+          payment_status: 'PAID',
+          customer: { name: 'Rahul T.', email: 'rahul.t@example.com', phone: '+91 9988776655' },
+          shipping_address: '88 Tech Park Road, Hyderabad, Telangana, 500081',
+          items: [
+            { product_name: 'Heavyweight Cargo Pant', quantity: 1, price: 2499, color: 'Olive', size: '32' }
+          ]
+        },
+        {
+          id: '1039',
+          created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+          total_amount: 999.00,
+          status: 'CANCELLED',
+          payment_status: 'UNPAID',
+          customer: { name: 'Sneha K.', email: 'sneha.k@example.com', phone: '+91 9876512345' },
+          shipping_address: '12 Sunset Blvd, Pune, Maharashtra, 411001',
+          items: [
+            { product_name: 'Essential Round Neck', quantity: 1, price: 999, color: 'Black', size: 'S' }
+          ]
         }
       ]);
     }
     if (url.includes('/admin/stats')) {
       return createMockResponse({
-        revenue: 145000,
-        orders: 124,
+        revenue: 145000.00,
+        orders: { total: 124, pending: 12 },
         customers: 89,
         products: 45,
-        recent_sales: []
+        recent_sales: [
+          { id: '1042', customer: 'Arjun M.', status: 'PENDING', total: 3398.00 },
+          { id: '1041', customer: 'Priya S.', status: 'SHIPPED', total: 1899.00 },
+          { id: '1040', customer: 'Rahul T.', status: 'DELIVERED', total: 2499.00 },
+          { id: '1039', customer: 'Sneha K.', status: 'CANCELLED', total: 999.00 }
+        ],
+        low_stock_variants: [
+          { product: 'Oversized Vintage Tee', sku: 'MOCK-1-S-BLK', size: 'S', color: 'Black', qty: 2 },
+          { product: 'Premium Cotton Polo', sku: 'MOCK-2-L-NAV', size: 'L', color: 'Navy', qty: 0 }
+        ]
       });
     }
     return createMockResponse({});

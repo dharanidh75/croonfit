@@ -137,27 +137,31 @@ function ScrollToTop() {
   return null
 }
 
+import { ErrorBoundary } from './components/layout/ErrorBoundary'
+
 function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: {
-            borderRadius: '0',
-            background: '#0A0A0A',
-            color: '#fff',
-            fontFamily: '"Inter", sans-serif',
-            textTransform: 'uppercase',
-            fontWeight: 'bold',
-            fontSize: '12px',
-            letterSpacing: '0.05em',
-          },
-        }}
-      />
-      <AnimatedRoutes />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            style: {
+              borderRadius: '0',
+              background: '#0A0A0A',
+              color: '#fff',
+              fontFamily: '"Inter", sans-serif',
+              textTransform: 'uppercase',
+              fontWeight: 'bold',
+              fontSize: '12px',
+              letterSpacing: '0.05em',
+            },
+          }}
+        />
+        <AnimatedRoutes />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

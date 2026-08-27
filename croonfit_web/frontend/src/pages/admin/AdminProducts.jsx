@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { ImageWithFallback } from '../../components/ui/ImageWithFallback'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { DataTable } from '../../components/admin/ui/DataTable'
@@ -56,11 +57,12 @@ export function AdminProducts() {
     if (!productToDelete) return
     try {
       await adminApi.delete(`/admin/products/${productToDelete}`)
+      toast.success('Product deleted')
       setProductToDelete(null)
       fetchProducts() // Refresh table
     } catch (err) {
       console.error('Failed to delete product', err)
-      alert('Failed to delete product')
+      toast.error('Failed to delete product')
       setProductToDelete(null)
     }
   }

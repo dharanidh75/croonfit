@@ -5,7 +5,7 @@ import { ArrowRight, ShoppingBag, Building2 } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { AboutSection } from '../components/AboutSection'
-import backgroundVideo from '../video/0711.mp4'
+import backgroundVideo from '../video/0711.webm'
 import retailImg from '../images/retail.jpg'
 import wholesaleImg from '../images/shirt.jpg'
 

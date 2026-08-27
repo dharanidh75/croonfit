@@ -1,125 +1,94 @@
 import React, { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
-import { DataTable } from '../../components/admin/ui/DataTable'
-import { Search, Filter, AlertCircle, ArrowUpRight } from 'lucide-react'
+import { Search, Filter, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react'
 
 export function AdminInventory() {
-  const [inventory, setInventory] = useState([
-    { id: 'SKU-TEE-01-M', product: 'Oversized Heavyweight Tee', variant: 'Black / M', stock: 145, incoming: 0, status: 'In Stock' },
-    { id: 'SKU-TEE-01-L', product: 'Oversized Heavyweight Tee', variant: 'Black / L', stock: 12, incoming: 50, status: 'Low Stock' },
-    { id: 'SKU-HOD-02-S', product: 'Essential Zip Hoodie', variant: 'Heather Grey / S', stock: 0, incoming: 100, status: 'Out of Stock' },
-    { id: 'SKU-HOD-02-M', product: 'Essential Zip Hoodie', variant: 'Heather Grey / M', stock: 45, incoming: 0, status: 'In Stock' },
-    { id: 'SKU-ACC-05-OS', product: 'Signature Dad Cap', variant: 'Navy / OS', stock: 5, incoming: 0, status: 'Low Stock' },
+  const [products] = useState([
+    {
+      id: 'p1', name: 'Grind Tech Tee', category: 'Mens', totalStock: 85, reserved: 5, available: 80, sold: 120, status: 'In Stock',
+      variants: [
+        { id: 'v11', name: 'Black / S', sku: 'GRIND-TE-S-BLA', stock: 20, reserved: 0, available: 20, sold: 45, status: 'In Stock' },
+        { id: 'v12', name: 'Black / M', sku: 'GRIND-TE-M-BLA', stock: 15, reserved: 2, available: 13, sold: 50, status: 'In Stock' },
+        { id: 'v13', name: 'Black / L', sku: 'GRIND-TE-L-BLA', stock: 5, reserved: 3, available: 2, sold: 10, status: 'Low Stock' },
+        { id: 'v14', name: 'White / M', sku: 'GRIND-TE-M-WHI', stock: 45, reserved: 0, available: 45, sold: 15, status: 'In Stock' }
+      ]
+    },
+    {
+      id: 'p2', name: 'Blackout Hoodie', category: 'Mens', totalStock: 12, reserved: 2, available: 10, sold: 250, status: 'Low Stock',
+      variants: [
+        { id: 'v21', name: 'Black / M', sku: 'BLACKOUT-M-BLA', stock: 12, reserved: 2, available: 10, sold: 150, status: 'Low Stock' },
+        { id: 'v22', name: 'Black / L', sku: 'BLACKOUT-L-BLA', stock: 0, reserved: 0, available: 0, sold: 100, status: 'Out of Stock' }
+      ]
+    },
+    {
+      id: 'p3', name: 'Session Jogger', category: 'Mens', totalStock: 140, reserved: 10, available: 130, sold: 85, status: 'In Stock',
+      variants: [
+        { id: 'v31', name: 'Graphite / S', sku: 'SESSION-S-GRA', stock: 40, reserved: 2, available: 38, sold: 20, status: 'In Stock' },
+        { id: 'v32', name: 'Graphite / M', sku: 'SESSION-M-GRA', stock: 60, reserved: 5, available: 55, sold: 40, status: 'In Stock' },
+        { id: 'v33', name: 'Graphite / L', sku: 'SESSION-L-GRA', stock: 40, reserved: 3, available: 37, sold: 25, status: 'In Stock' }
+      ]
+    },
+    {
+      id: 'p4', name: 'Form Racerback', category: 'Womens', totalStock: 0, reserved: 0, available: 0, sold: 310, status: 'Out of Stock',
+      variants: [
+        { id: 'v41', name: 'Blush / XS', sku: 'FORM-XS-BLU', stock: 0, reserved: 0, available: 0, sold: 150, status: 'Out of Stock' },
+        { id: 'v42', name: 'Blush / S', sku: 'FORM-S-BLU', stock: 0, reserved: 0, available: 0, sold: 160, status: 'Out of Stock' },
+      ]
+    }
   ])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [advancedFilters, setAdvancedFilters] = useState({ status: 'all' })
-  
-  const [showAdjustModal, setShowAdjustModal] = useState(false)
-  const [selectedItem, setSelectedItem] = useState(null)
-  const [adjustAmount, setAdjustAmount] = useState('')
+  const [expandedRows, setExpandedRows] = useState(new Set())
 
-  const filteredInventory = inventory.filter(item => {
+  const toggleRow = (id) => {
+    const newExpanded = new Set(expandedRows)
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id)
+    } else {
+      newExpanded.add(id)
+    }
+    setExpandedRows(newExpanded)
+  }
+
+  const filteredProducts = products.filter(product => {
     let matchesSearch = true
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      matchesSearch = item.product.toLowerCase().includes(q) || item.id.toLowerCase().includes(q)
+      // match product name or any variant SKU
+      matchesSearch = product.name.toLowerCase().includes(q) || 
+                      product.variants.some(v => v.sku.toLowerCase().includes(q) || v.name.toLowerCase().includes(q))
     }
 
     let matchesStatus = true
     if (advancedFilters.status !== 'all') {
-      const statusValue = item.status.toLowerCase().replace(/\s+/g, '-')
+      const statusValue = product.status.toLowerCase().replace(/\s+/g, '-')
       matchesStatus = statusValue === advancedFilters.status
     }
 
     return matchesSearch && matchesStatus
   })
 
-  const handleAdjustSubmit = () => {
-    if (!adjustAmount || isNaN(adjustAmount)) return
-    
-    setInventory(prev => prev.map(item => {
-      if (item.id === selectedItem.id) {
-        const newStock = Math.max(0, item.stock + parseInt(adjustAmount))
-        return {
-          ...item,
-          stock: newStock,
-          status: newStock === 0 ? 'Out of Stock' : newStock < 20 ? 'Low Stock' : 'In Stock'
-        }
-      }
-      return item
-    }))
-    
-    setShowAdjustModal(false)
-    setSelectedItem(null)
-    setAdjustAmount('')
-  }
-
-  const columns = [
-    { 
-      header: 'Product / Variant', 
-      accessorKey: 'product', 
-      cell: row => (
-        <div>
-          <p className="font-bold text-[#111111]">{row.product}</p>
-          <p className="text-xs text-[#666666]">{row.variant}</p>
-        </div>
-      )
-    },
-    { header: 'SKU', accessorKey: 'id', cell: row => <span className="font-mono text-xs text-[#888888]">{row.id}</span> },
-    { 
-      header: 'Status', 
-      accessorKey: 'status', 
-      cell: row => {
-        const colors = {
-          'In Stock': 'bg-green-50 text-green-700',
-          'Low Stock': 'bg-yellow-50 text-yellow-700',
-          'Out of Stock': 'bg-red-50 text-red-700',
-        }
-        return (
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest ${colors[row.status]}`}>
-            {row.status}
-          </span>
-        )
-      }
-    },
-    { 
-      header: 'Available', 
-      accessorKey: 'stock', 
-      align: 'right',
-      cell: row => <span className={`font-bold ${row.stock < 20 ? 'text-red-600' : 'text-[#111111]'}`}>{row.stock}</span> 
-    },
-    { 
-      header: 'Incoming', 
-      accessorKey: 'incoming', 
-      align: 'right',
-      cell: row => <span className="text-[#666666]">{row.incoming > 0 ? `+${row.incoming}` : '-'}</span> 
-    },
-    { 
-      header: 'Action', 
-      accessorKey: 'action', 
-      align: 'right',
-      cell: (row) => (
-        <button 
-          onClick={() => {
-            setSelectedItem(row)
-            setShowAdjustModal(true)
-          }}
-          className="text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          Adjust
-        </button>
-      )
+  const StatusBadge = ({ status }) => {
+    const colors = {
+      'In Stock': 'bg-green-50 text-green-700',
+      'Low Stock': 'bg-yellow-50 text-yellow-700',
+      'Out of Stock': 'bg-red-50 text-red-700',
     }
-  ]
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
+        {status}
+      </span>
+    )
+  }
 
   return (
     <AdminLayout>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Inventory</h1>
-          <p className="text-sm text-[#666666] mt-1">Track and adjust stock levels across variants.</p>
+          <p className="text-sm text-[#666666] mt-1">View current stock levels for all product variants.</p>
         </div>
       </div>
 
@@ -152,7 +121,7 @@ export function AdminInventory() {
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
           <input 
             type="text" 
-            placeholder="Scan or search SKU, product..." 
+            placeholder="Search products or SKUs..." 
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="w-full h-9 pl-9 pr-4 bg-transparent outline-none text-sm placeholder:text-[#888888] text-[#111111]"
@@ -205,56 +174,86 @@ export function AdminInventory() {
         </div>
       </div>
 
-      <DataTable columns={columns} data={filteredInventory} emptyMessage="No variants found." />
-
-      {/* Adjust Stock Modal */}
-      {showAdjustModal && selectedItem && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#E5E5E5]">
-              <h3 className="text-lg font-bold text-[#111111]">Adjust Stock</h3>
-            </div>
-            <div className="p-6">
-              <div className="mb-6">
-                <p className="font-bold text-[#111111] text-lg">{selectedItem.product}</p>
-                <p className="text-[#666666] text-sm mt-1">{selectedItem.variant} &middot; <span className="font-mono">{selectedItem.id}</span></p>
-              </div>
-              
-              <div className="bg-[#F9F9F9] rounded-lg p-4 mb-6 flex justify-between items-center border border-[#E5E5E5]">
-                <span className="text-sm font-medium text-[#666666]">Current Stock</span>
-                <span className="text-xl font-bold text-[#111111]">{selectedItem.stock}</span>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-[#111111] mb-2">Adjustment (use negative to decrease)</label>
-                <input 
-                  type="number" 
-                  value={adjustAmount}
-                  onChange={e => setAdjustAmount(e.target.value)}
-                  placeholder="e.g. 50 or -10"
-                  className="w-full h-10 px-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-[#111111]" 
-                />
-              </div>
-              
-              <div className="flex justify-end gap-3 mt-8">
-                <button 
-                  onClick={() => setShowAdjustModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-[#666666] hover:text-[#111111]"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleAdjustSubmit}
-                  disabled={!adjustAmount}
-                  className="px-5 py-2 bg-[#111111] text-white text-sm font-medium rounded-lg hover:bg-black disabled:opacity-50"
-                >
-                  Save Adjustment
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="bg-white border border-[#E5E5E5] rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead className="bg-[#F9F9F9] border-b border-[#E5E5E5]">
+              <tr>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider w-12"></th>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider min-w-[250px]">Product</th>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider">Variant</th>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider">SKU</th>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider text-right">Total Stock</th>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider text-right">Available</th>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider text-right">Sold</th>
+                <th className="py-3 px-4 text-xs font-bold text-[#888888] uppercase tracking-wider text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#E5E5E5]">
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="py-8 text-center text-sm text-[#888888]">
+                    No inventory items found.
+                  </td>
+                </tr>
+              ) : (
+                filteredProducts.map(product => (
+                  <React.Fragment key={product.id}>
+                    {/* Master Product Row */}
+                    <tr 
+                      className={`transition-colors group cursor-pointer ${expandedRows.has(product.id) ? 'bg-[#FAFAFA]' : 'hover:bg-[#FAFAFA]'}`}
+                      onClick={() => toggleRow(product.id)}
+                    >
+                      <td className="py-3 px-4 text-center">
+                        <button className="text-[#888888] group-hover:text-[#111111] transition-colors p-1 rounded hover:bg-[#E5E5E5]">
+                          {expandedRows.has(product.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </button>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded bg-[#F5F5F5] flex-shrink-0 flex items-center justify-center text-[10px] text-[#888888] border border-[#E5E5E5]">IMG</div>
+                          <div>
+                            <p className="font-bold text-[#111111] text-sm">{product.name}</p>
+                            <p className="text-xs text-[#666666]">{product.category}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm font-medium text-[#666666]">{product.variants.length} Variants</td>
+                      <td className="py-3 px-4 text-sm font-medium text-[#888888]">Multiple</td>
+                      <td className="py-3 px-4 text-sm font-bold text-[#111111] text-right">{product.totalStock}</td>
+                      <td className="py-3 px-4 text-sm font-bold text-[#111111] text-right">{product.available}</td>
+                      <td className="py-3 px-4 text-sm text-[#666666] text-right">{product.sold}</td>
+                      <td className="py-3 px-4 text-center">
+                        <StatusBadge status={product.status} />
+                      </td>
+                    </tr>
+                    
+                    {/* Variant Rows (Expanded) */}
+                    {expandedRows.has(product.id) && product.variants.map(variant => (
+                      <tr key={variant.id} className="bg-[#FAFAFA] border-t border-dashed border-[#E5E5E5] hover:bg-[#F5F5F5] transition-colors">
+                        <td className="py-3 px-4"></td>
+                        <td className="py-3 px-4 pl-14">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-[#EEEEEE] flex-shrink-0 flex items-center justify-center text-[8px] text-[#AAAAAA] border border-[#E5E5E5]">VAR</div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-sm font-bold text-[#111111]">{variant.name}</td>
+                        <td className="py-3 px-4 font-mono text-xs text-[#888888]">{variant.sku}</td>
+                        <td className="py-3 px-4 text-sm text-[#111111] text-right">{variant.stock}</td>
+                        <td className="py-3 px-4 text-sm font-bold text-[#111111] text-right">{variant.available}</td>
+                        <td className="py-3 px-4 text-sm text-[#666666] text-right">{variant.sold}</td>
+                        <td className="py-3 px-4 text-center">
+                          <StatusBadge status={variant.status} />
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </AdminLayout>
   )
 }

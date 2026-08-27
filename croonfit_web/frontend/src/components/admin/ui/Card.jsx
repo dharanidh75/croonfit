@@ -1,16 +1,16 @@
 import React from 'react'
 
-export function Card({ children, className = '' }) {
+export function Card({ children, className = '', ...props }) {
   return (
-    <div className={`bg-white rounded-2xl border border-[#E5E5E5] shadow-sm overflow-hidden ${className}`}>
+    <div className={`bg-white rounded-2xl border border-[#E5E5E5] shadow-sm overflow-hidden ${className}`} {...props}>
       {children}
     </div>
   )
 }
 
-export function CardHeader({ title, description, action, className = '' }) {
+export function CardHeader({ title, description, action, className = '', ...props }) {
   return (
-    <div className={`px-6 py-5 border-b border-[#E5E5E5] flex justify-between items-start ${className}`}>
+    <div className={`px-6 py-5 border-b border-[#E5E5E5] flex justify-between items-start ${className}`} {...props}>
       <div>
         <h3 className="text-sm font-semibold text-[#111111]">{title}</h3>
         {description && <p className="text-xs text-[#666666] mt-1">{description}</p>}
@@ -20,9 +20,9 @@ export function CardHeader({ title, description, action, className = '' }) {
   )
 }
 
-export function CardContent({ children, className = '' }) {
+export function CardContent({ children, className = '', ...props }) {
   return (
-    <div className={`p-6 ${className}`}>
+    <div className={`p-6 ${className}`} {...props}>
       {children}
     </div>
   )

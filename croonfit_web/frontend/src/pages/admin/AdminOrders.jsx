@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { DataTable } from '../../components/admin/ui/DataTable'
 import { adminApi } from '../../lib/api'
-import { Search, Filter, Download } from 'lucide-react'
+import { Search, Filter, Download, X } from 'lucide-react'
+import { ImageWithFallback } from '../../components/ui/ImageWithFallback'
 
 export function AdminOrders() {
   const [orders, setOrders] = useState([])
@@ -14,6 +15,8 @@ export function AdminOrders() {
     payment: 'all',
     fulfillment: 'all'
   })
+  
+  const [selectedOrder, setSelectedOrder] = useState(null)
 
   const fetchOrders = () => {
     setLoading(true)
@@ -40,7 +43,8 @@ export function AdminOrders() {
     let matchesSearch = true
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      matchesSearch = String(order.id).includes(q) || String(order.user_id).includes(q)
+      const searchStr = `${order.id} ${order.customer?.name} ${order.customer?.email} ${order.user_id}`.toLowerCase()
+      matchesSearch = searchStr.includes(q)
     }
     
     let matchesAdvanced = true
@@ -58,7 +62,7 @@ export function AdminOrders() {
 
   const columns = [
     {
-      header: 'Order',
+      header: 'Order ID',
       accessorKey: 'id',
       cell: row => <span className="font-bold text-[#111111]">#{row.id}</span>
     },
@@ -69,26 +73,33 @@ export function AdminOrders() {
     },
     {
       header: 'Customer',
-      accessorKey: 'user_id',
-      cell: row => <span className="text-[#111111]">User #{row.user_id}</span>
+      accessorKey: 'customer',
+      cell: row => (
+        <div>
+          <p className="font-bold text-[#111111]">{row.customer?.name || `User #${row.user_id}`}</p>
+          {row.customer?.email && <p className="text-xs text-[#888888]">{row.customer.email}</p>}
+        </div>
+      )
     },
     {
-      header: 'Total',
-      accessorKey: 'total',
+      header: 'Total Amount',
+      accessorKey: 'total_amount',
       align: 'right',
-      cell: row => <span className="font-medium">₹{row.total.toFixed(2)}</span>
+      cell: row => <span className="font-medium">₹{(row.total_amount || 0).toFixed(2)}</span>
     },
     {
       header: 'Payment Status',
       accessorKey: 'payment_status',
-      cell: () => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest bg-green-50 text-green-700">
-          Paid
+      cell: row => (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest ${
+          row.payment_status === 'PAID' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        }`}>
+          {row.payment_status || 'UNPAID'}
         </span>
       )
     },
     {
-      header: 'Fulfillment',
+      header: 'Status',
       accessorKey: 'status',
       cell: row => {
         const colors = {
@@ -147,7 +158,7 @@ export function AdminOrders() {
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
           <input
             type="text"
-            placeholder="Search orders by ID or User ID..."
+            placeholder="Search orders by ID, Customer Name, or Email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-9 pl-9 pr-4 bg-transparent outline-none text-sm placeholder:text-[#888888] text-[#111111]"
@@ -176,7 +187,7 @@ export function AdminOrders() {
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-xs font-bold text-[#888888] uppercase tracking-wider mb-2">Fulfillment Status</label>
+                <label className="block text-xs font-bold text-[#888888] uppercase tracking-wider mb-2">Order Status</label>
                 <select 
                   value={advancedFilters.fulfillment}
                   onChange={(e) => setAdvancedFilters({...advancedFilters, fulfillment: e.target.value})}
@@ -217,8 +228,131 @@ export function AdminOrders() {
       {loading ? (
         <div className="p-8 text-center text-[#888888] text-sm font-medium">Loading orders...</div>
       ) : (
-        <DataTable columns={columns} data={filteredOrders} emptyMessage="No orders found matching your criteria." />
+        <DataTable 
+          columns={columns} 
+          data={filteredOrders} 
+          emptyMessage="No orders found matching your criteria."
+          onRowClick={setSelectedOrder}
+        />
       )}
+
+      {/* Order Details Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-fade-in-up">
+            
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E5E5]">
+              <div>
+                <h3 className="text-lg font-bold text-[#111111]">Order #{selectedOrder.id}</h3>
+                <p className="text-xs text-[#666666]">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} className="p-2 text-[#888888] hover:text-[#111111] transition-colors rounded-full hover:bg-[#F5F5F5]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Customer Details */}
+                <div>
+                  <h4 className="text-xs font-bold text-[#888888] uppercase tracking-widest mb-3">Customer Details</h4>
+                  <div className="bg-[#F9F9F9] rounded-xl p-4 border border-[#E5E5E5] space-y-2">
+                    <p className="text-sm font-bold text-[#111111]">{selectedOrder.customer?.name || `User #${selectedOrder.user_id}`}</p>
+                    {selectedOrder.customer?.email && <p className="text-sm text-[#666666]">{selectedOrder.customer.email}</p>}
+                    {selectedOrder.customer?.phone && <p className="text-sm text-[#666666]">{selectedOrder.customer.phone}</p>}
+                  </div>
+                </div>
+
+                {/* Shipping Details */}
+                <div>
+                  <h4 className="text-xs font-bold text-[#888888] uppercase tracking-widest mb-3">Shipping Address</h4>
+                  <div className="bg-[#F9F9F9] rounded-xl p-4 border border-[#E5E5E5]">
+                    <p className="text-sm text-[#666666] leading-relaxed">
+                      {selectedOrder.shipping_address || 'No shipping address provided.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div>
+                <h4 className="text-xs font-bold text-[#888888] uppercase tracking-widest mb-3">Order Items</h4>
+                <div className="border border-[#E5E5E5] rounded-xl overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead className="bg-[#F9F9F9] border-b border-[#E5E5E5]">
+                      <tr>
+                        <th className="py-2 px-4 text-[10px] font-bold text-[#888888] uppercase tracking-widest">Product</th>
+                        <th className="py-2 px-4 text-[10px] font-bold text-[#888888] uppercase tracking-widest text-right">Qty</th>
+                        <th className="py-2 px-4 text-[10px] font-bold text-[#888888] uppercase tracking-widest text-right">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E5E5E5]">
+                      {selectedOrder.items?.map((item, idx) => (
+                        <tr key={idx}>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-md bg-[#F0F0F0] overflow-hidden flex-shrink-0 border border-[#E5E5E5]">
+                                {item.image_url ? (
+                                  <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-[#CCCCCC]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-[#111111]">{item.product_name}</p>
+                                {(item.color || item.size) && (
+                                  <p className="text-xs text-[#888888] mt-0.5">{item.color} {item.color && item.size ? '/' : ''} {item.size}</p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-sm text-right font-medium">{item.quantity}</td>
+                          <td className="py-3 px-4 text-sm text-right font-medium">₹{item.price || 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Summary */}
+              <div className="flex justify-end">
+                <div className="w-full md:w-1/2 space-y-2">
+                  <div className="flex justify-between text-sm text-[#666666]">
+                    <span>Subtotal</span>
+                    <span>₹{(selectedOrder.total_amount || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-[#666666]">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                  </div>
+                  <div className="border-t border-[#E5E5E5] pt-2 mt-2 flex justify-between font-bold text-[#111111]">
+                    <span>Total</span>
+                    <span>₹{(selectedOrder.total_amount || 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="px-6 py-4 border-t border-[#E5E5E5] flex justify-end">
+              <button 
+                onClick={() => setSelectedOrder(null)}
+                className="px-5 py-2 bg-[#111111] text-white text-sm font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors"
+              >
+                Close
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </AdminLayout>
   )
 }

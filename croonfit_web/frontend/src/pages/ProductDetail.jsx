@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { ProductGallery } from '../components/product/ProductGallery'
@@ -102,10 +103,14 @@ export function ProductDetail() {
   const wishlisted = isWishlisted(product.id)
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return
+    if (!selectedVariant) {
+      toast.error('Please select a size')
+      return
+    }
     setAdding(true)
     setTimeout(() => {
       addToCart(product, selectedVariant, 1)
+      toast.success(`${product.name} added to cart!`)
       setAdding(false)
       openCart()
     }, 350)

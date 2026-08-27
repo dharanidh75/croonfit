@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { ProductCard } from '../components/product/ProductCard'
@@ -90,7 +91,10 @@ export function Cart() {
                           <p className="text-xs font-medium mt-2 md:hidden">₹{item.product.price}</p>
 
                           <button
-                            onClick={() => removeFromCart(item.product.id, item.variant.id)}
+                            onClick={() => {
+                              removeFromCart(item.product.id, item.variant.id)
+                              toast('Item removed from cart', { icon: '🗑️' })
+                            }}
                             className="mt-auto text-xs font-bold uppercase tracking-widest text-[#888888] hover:text-[#E53E3E] transition-colors flex items-center gap-1 w-fit"
                           >
                             <X className="w-3 h-3" /> Remove

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function DataTable({ columns, data, emptyMessage = "No data found." }) {
+export function DataTable({ columns, data, emptyMessage = "No data found.", onRowClick }) {
   if (!data || data.length === 0) {
     return (
       <div className="bg-[#F9F9F9] rounded-xl border border-[#E5E5E5] p-8 text-center">
@@ -28,7 +28,11 @@ export function DataTable({ columns, data, emptyMessage = "No data found." }) {
         </thead>
         <tbody className="divide-y divide-[#E5E5E5]">
           {data.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-[#F9F9F9] transition-colors duration-150">
+            <tr 
+              key={rowIndex} 
+              onClick={() => onRowClick && onRowClick(row)}
+              className={`hover:bg-[#F9F9F9] transition-colors duration-150 ${onRowClick ? 'cursor-pointer' : ''}`}
+            >
               {columns.map((col, colIndex) => (
                 <td 
                   key={colIndex} 

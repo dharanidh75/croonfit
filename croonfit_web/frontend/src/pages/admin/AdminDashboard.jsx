@@ -68,11 +68,6 @@ export function AdminDashboard() {
           <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Dashboard</h1>
           <p className="text-sm text-[#666666] mt-1">Overview of your store's performance.</p>
         </div>
-        <div className="flex gap-3">
-          <Link to="/admin/products/new" className="h-9 px-4 bg-[#111111] text-white rounded-lg text-sm font-medium hover:bg-[#333333] transition-colors flex items-center justify-center">
-            Add Product
-          </Link>
-        </div>
       </div>
 
       {/* KPI Cards */}
@@ -179,20 +174,26 @@ export function AdminDashboard() {
               { header: 'Order ID', accessorKey: 'id', cell: row => <span className="font-medium">#{row.id}</span> },
               { header: 'Customer', accessorKey: 'customer' },
               {
-                header: 'Status', accessorKey: 'status', cell: row => (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-50 text-yellow-700">
-                    {row.status}
-                  </span>
-                )
+                header: 'Status', accessorKey: 'status', cell: row => {
+                  const colors = {
+                    PENDING: 'bg-yellow-50 text-yellow-700',
+                    PLACED: 'bg-blue-50 text-blue-700',
+                    SHIPPED: 'bg-purple-50 text-purple-700',
+                    DELIVERED: 'bg-green-50 text-green-700',
+                    CANCELLED: 'bg-red-50 text-red-700',
+                  };
+                  const color = colors[row.status] || 'bg-gray-50 text-gray-700';
+                  return (
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${color}`}>
+                      {row.status}
+                    </span>
+                  )
+                }
               },
-              { header: 'Total', accessorKey: 'total', align: 'right', cell: row => <span className="font-medium">₹{row.total}</span> }
+              { header: 'Total', accessorKey: 'total', align: 'right', cell: row => <span className="font-medium">₹{(row.total || 0).toFixed(2)}</span> }
             ]}
-            data={[
-              { id: '1042', customer: 'Arjun M.', status: 'Pending', total: '1,499.00' },
-              { id: '1041', customer: 'Priya S.', status: 'Pending', total: '2,998.00' },
-              { id: '1040', customer: 'Rahul T.', status: 'Processing', total: '899.00' },
-              { id: '1039', customer: 'Sneha K.', status: 'Processing', total: '4,500.00' },
-            ]}
+            data={stats.recent_sales}
+            emptyMessage="No recent orders."
           />
         </div>
       </div>
