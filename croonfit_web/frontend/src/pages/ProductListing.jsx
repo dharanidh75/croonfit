@@ -52,7 +52,7 @@ export function ProductListing() {
 
       const backendGender = getBackendGender(category)
       if (backendGender) params.append('gender', backendGender)
-      if (subcategory) params.append('sub', subcategory)
+      if (subcategory) params.append('category', subcategory)
 
       if (size) params.append('size', size)
       if (sort) params.append('sort', sort)

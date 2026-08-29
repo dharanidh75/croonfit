@@ -40,3 +40,6 @@ env/
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase service accounts
+*firebase-adminsdk*.json

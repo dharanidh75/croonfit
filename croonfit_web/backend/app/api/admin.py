@@ -13,7 +13,7 @@ from app.core.admin_auth import (
     get_admin_password_hash, verify_admin_password,
 )
 from app.api.products import _build_list_item
-from app.schemas.product import ProductListResponse, ProductListItem
+from app.schemas.product import ProductListResponse, ProductListItem, AdminProductListResponse, AdminProductListItem
 
 router = APIRouter()
 
@@ -33,7 +33,29 @@ def admin_login(data: AdminLogin, db: Session = Depends(get_db)):
 
 # ─── Admin: Products ──────────────────────────────────────────────────────────
 
-@router.get("/products", response_model=ProductListResponse)
+def _build_admin_list_item(p: Product) -> AdminProductListItem:
+    primary_image = next((img.url for img in p.images if img.is_primary), None)
+    if not primary_image and p.images:
+        primary_image = p.images[0].url
+    stock = sum(v.stock_qty for v in p.variants)
+    if len(p.variants) > 1:
+        sku = "Multiple"
+    elif len(p.variants) == 1:
+        sku = p.variants[0].sku
+    else:
+        sku = "—"
+    return AdminProductListItem(
+        id=p.id,
+        name=p.name,
+        sku=sku,
+        price=p.price,
+        stock=stock,
+        is_active=p.is_active,
+        category_name=p.category.name if p.category else None,
+        primary_image=primary_image,
+    )
+
+@router.get("/products", response_model=AdminProductListResponse)
 def admin_list_products(
     db: Session = Depends(get_db),
     admin=Depends(require_admin),
@@ -50,11 +72,26 @@ def admin_list_products(
         q = q.filter(Product.name.ilike(f"%{search}%"))
     total = q.count()
     products = q.offset((page - 1) * per_page).limit(per_page).all()
-    return ProductListResponse(
-        items=[_build_list_item(p) for p in products],
+    return AdminProductListResponse(
+        items=[_build_admin_list_item(p) for p in products],
         total=total, page=page, per_page=per_page,
         has_more=(page * per_page) < total,
     )
+
+@router.get("/products/{product_id}", response_model=ProductOut)
+def admin_get_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    admin=Depends(require_admin),
+):
+    product = db.query(Product).options(
+        joinedload(Product.images),
+        joinedload(Product.variants),
+        joinedload(Product.category).joinedload(Category.size_chart),
+    ).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
 
 
 @router.post("/products", response_model=ProductOut, status_code=201)

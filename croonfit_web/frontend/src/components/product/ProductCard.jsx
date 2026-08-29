@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Heart, Trash2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../../store'
 import { ImageWithFallback } from '../ui/ImageWithFallback'
 
@@ -13,6 +13,7 @@ import { ImageWithFallback } from '../ui/ImageWithFallback'
  * - Hover: box-shadow + image scale(1.04) + heart fades in
  */
 export function ProductCard({ product, mode = 'default' }) {
+  const navigate = useNavigate()
   const [hovered, setHovered] = useState(false)
   const { isWishlisted, toggleWishlist, isAuthenticated, addToCart } = useStore()
   const wishlisted = isWishlisted(product.id)
@@ -106,19 +107,15 @@ export function ProductCard({ product, mode = 'default' }) {
           )}
         </div>
 
-        {/* Add to Cart Button */}
         <button 
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (addToCart) {
-              addToCart(product, product.available_sizes?.[0] || 'M', 1);
-              // Optional: show a quick toast or feedback here
-            }
+            navigate(`/product/${product.slug}`);
           }}
           className="w-full mt-4 h-10 bg-transparent border border-black text-black text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors flex items-center justify-center"
         >
-          Add to Cart
+          View Options
         </button>
       </div>
     </Link>

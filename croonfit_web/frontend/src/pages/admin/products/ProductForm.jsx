@@ -44,12 +44,12 @@ export function ProductForm() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    adminApi.get('/products/categories')
+    adminApi.get('/admin/categories')
       .then(res => setAllCategories(res.data))
       .catch(err => console.error(err))
 
     if (isEditing) {
-      adminApi.get(`/products/${id}`)
+      adminApi.get(`/admin/products/${id}`)
         .then(res => {
           const p = res.data
           setFormData({

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List, Any
 from datetime import datetime
 from app.models.product import GenderCategory
@@ -61,7 +61,7 @@ class ProductVariantCreate(BaseModel):
     size: str
     color: str
     color_hex: Optional[str] = None
-    stock_qty: int = 0
+    stock_qty: int = Field(0, ge=0)
     sku: str
 
 
@@ -115,8 +115,8 @@ class ProductCreate(BaseModel):
     name: str
     slug: str
     description: Optional[str] = None
-    price: float
-    compare_price: Optional[float] = None
+    price: float = Field(..., gt=0)
+    compare_price: Optional[float] = Field(None, ge=0)
     category_id: int
     is_active: bool = True
     is_featured: bool = False
@@ -128,8 +128,8 @@ class ProductCreate(BaseModel):
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    price: Optional[float] = None
-    compare_price: Optional[float] = None
+    price: Optional[float] = Field(None, gt=0)
+    compare_price: Optional[float] = Field(None, ge=0)
     category_id: Optional[int] = None
     is_active: Optional[bool] = None
     is_featured: Optional[bool] = None
@@ -138,6 +138,26 @@ class ProductUpdate(BaseModel):
 
 class ProductListResponse(BaseModel):
     items: List[ProductListItem]
+    total: int
+    page: int
+    per_page: int
+    has_more: bool
+
+class AdminProductListItem(BaseModel):
+    id: int
+    name: str
+    sku: Optional[str] = None
+    price: float
+    stock: int
+    is_active: bool
+    category_name: Optional[str] = None
+    primary_image: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class AdminProductListResponse(BaseModel):
+    items: List[AdminProductListItem]
     total: int
     page: int
     per_page: int

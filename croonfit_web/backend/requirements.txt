@@ -3,9 +3,8 @@ uvicorn
 sqlalchemy
 pydantic
 pydantic-settings
-passlib[bcrypt]
-PyJWT
 python-multipart
 psycopg2-binary
 email-validator
-bcrypt==4.0.1
+firebase-admin
+slowapi
