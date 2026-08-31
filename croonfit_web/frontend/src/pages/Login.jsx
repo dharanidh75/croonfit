@@ -4,6 +4,8 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useStore } from '../store'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
+import { auth, googleProvider } from '../lib/firebase'
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 
 export function Login() {
   const [tab, setTab]               = useState('login')   // 'login' | 'signup'
@@ -19,22 +21,44 @@ export function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!auth) {
+      toast.error("Firebase is not configured. Add keys to .env.development and restart.")
+      return
+    }
     setLoading(true)
     try {
       if (tab === 'login') {
-        const res = await api.post('/auth/login', { email, password })
-        login({ email, name: 'Guest User' }, res.data.access_token)
+        const userCredential = await signInWithEmailAndPassword(auth, email, password)
+        const token = await userCredential.user.getIdToken()
+        login({ email, name: userCredential.user.displayName || 'Guest User' }, token)
         toast.success('Welcome back!')
         navigate('/')
       } else {
-        await api.post('/auth/register', { email, password, first_name: firstName, last_name: lastName })
+        await createUserWithEmailAndPassword(auth, email, password)
+        // Note: setting displayName could be added here if needed
         toast.success('Account created! Please log in.')
         setTab('login')
       }
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Hmm. That didn't work.")
+      toast.error(err.message || "Hmm. That didn't work.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    if (!auth) {
+      toast.error("Firebase is not configured. Add keys to .env.development and restart.")
+      return
+    }
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider)
+      const token = await userCredential.user.getIdToken()
+      login({ email: userCredential.user.email, name: userCredential.user.displayName || 'Guest User' }, token)
+      toast.success('Welcome!')
+      navigate('/')
+    } catch (err) {
+      toast.error(err.message || "Failed to sign in with Google.")
     }
   }
 
@@ -154,7 +178,11 @@ export function Login() {
 
             {/* Social logins */}
             <div className="space-y-3">
-              <button className="w-full h-11 border border-[#CCCCCC] hover:border-[#0A0A0A] flex items-center justify-center gap-3 font-body text-sm font-bold transition-colors duration-150">
+              <button 
+                type="button"
+                onClick={handleGoogleSignIn}
+                className="w-full h-11 border border-[#CCCCCC] hover:border-[#0A0A0A] flex items-center justify-center gap-3 font-body text-sm font-bold transition-colors duration-150"
+              >
                 <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
                 Continue with Google
               </button>
