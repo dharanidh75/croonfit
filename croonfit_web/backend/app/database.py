@@ -7,7 +7,12 @@ from app.config import settings
 # postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL or os.environ.get("DATABASE_URL", "postgresql://user:password@localhost/croonfit")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_size=5,
+    max_overflow=10,
+    pool_pre_ping=True
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

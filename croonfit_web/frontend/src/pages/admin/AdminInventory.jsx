@@ -3,39 +3,7 @@ import { AdminLayout } from '../../components/admin/AdminLayout'
 import { Search, Filter, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react'
 
 export function AdminInventory() {
-  const [products] = useState([
-    {
-      id: 'p1', name: 'Grind Tech Tee', category: 'Mens', totalStock: 85, reserved: 5, available: 80, sold: 120, status: 'In Stock',
-      variants: [
-        { id: 'v11', name: 'Black / S', sku: 'GRIND-TE-S-BLA', stock: 20, reserved: 0, available: 20, sold: 45, status: 'In Stock' },
-        { id: 'v12', name: 'Black / M', sku: 'GRIND-TE-M-BLA', stock: 15, reserved: 2, available: 13, sold: 50, status: 'In Stock' },
-        { id: 'v13', name: 'Black / L', sku: 'GRIND-TE-L-BLA', stock: 5, reserved: 3, available: 2, sold: 10, status: 'Low Stock' },
-        { id: 'v14', name: 'White / M', sku: 'GRIND-TE-M-WHI', stock: 45, reserved: 0, available: 45, sold: 15, status: 'In Stock' }
-      ]
-    },
-    {
-      id: 'p2', name: 'Blackout Hoodie', category: 'Mens', totalStock: 12, reserved: 2, available: 10, sold: 250, status: 'Low Stock',
-      variants: [
-        { id: 'v21', name: 'Black / M', sku: 'BLACKOUT-M-BLA', stock: 12, reserved: 2, available: 10, sold: 150, status: 'Low Stock' },
-        { id: 'v22', name: 'Black / L', sku: 'BLACKOUT-L-BLA', stock: 0, reserved: 0, available: 0, sold: 100, status: 'Out of Stock' }
-      ]
-    },
-    {
-      id: 'p3', name: 'Session Jogger', category: 'Mens', totalStock: 140, reserved: 10, available: 130, sold: 85, status: 'In Stock',
-      variants: [
-        { id: 'v31', name: 'Graphite / S', sku: 'SESSION-S-GRA', stock: 40, reserved: 2, available: 38, sold: 20, status: 'In Stock' },
-        { id: 'v32', name: 'Graphite / M', sku: 'SESSION-M-GRA', stock: 60, reserved: 5, available: 55, sold: 40, status: 'In Stock' },
-        { id: 'v33', name: 'Graphite / L', sku: 'SESSION-L-GRA', stock: 40, reserved: 3, available: 37, sold: 25, status: 'In Stock' }
-      ]
-    },
-    {
-      id: 'p4', name: 'Form Racerback', category: 'Womens', totalStock: 0, reserved: 0, available: 0, sold: 310, status: 'Out of Stock',
-      variants: [
-        { id: 'v41', name: 'Blush / XS', sku: 'FORM-XS-BLU', stock: 0, reserved: 0, available: 0, sold: 150, status: 'Out of Stock' },
-        { id: 'v42', name: 'Blush / S', sku: 'FORM-S-BLU', stock: 0, reserved: 0, available: 0, sold: 160, status: 'Out of Stock' },
-      ]
-    }
-  ])
+  const [products] = useState([])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)

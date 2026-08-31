@@ -1,8 +1,9 @@
 from sqlalchemy import (
-    Column, Integer, String, Boolean, Enum, Float,
-    Text, DateTime, ForeignKey, JSON, func
+    Column, String, Boolean, Enum, Numeric, Integer,
+    Text, DateTime, ForeignKey, JSON, text
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 from app.database import Base
 import enum
 
@@ -17,24 +18,22 @@ class GenderCategory(str, enum.Enum):
 class Category(Base):
     __tablename__ = "categories"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
     name = Column(String(100), nullable=False)
-    slug = Column(String(100), unique=True, index=True, nullable=False)
-    gender = Column(Enum(GenderCategory), nullable=False)
-    description = Column(Text, nullable=True)
-    cover_image_url = Column(String(500), nullable=True)
+    slug = Column(String(100), unique=True, nullable=False)
+    gender = Column(Enum(GenderCategory, name="gender_category"), nullable=False)
+    description = Column(Text)
+    cover_image_url = Column(String(500))
 
+    size_chart = relationship("SizeChart", back_populates="category", uselist=False, cascade="all, delete-orphan")
     products = relationship("Product", back_populates="category")
-    size_chart = relationship("SizeChart", back_populates="category", uselist=False)
 
 
 class SizeChart(Base):
-    """Measurement table per category. Rows is JSON: [{size, chest, length, sleeve, shoulder, fit_note}]"""
     __tablename__ = "size_charts"
 
-    id = Column(Integer, primary_key=True, index=True)
-    category_id = Column(Integer, ForeignKey("categories.id"), unique=True, nullable=False)
-    # rows format: [{"size": "S", "chest_cm": 90, "length_cm": 70, "sleeve_cm": 60, "shoulder_cm": 42, "fit_note": "True to size"}]
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id", ondelete="CASCADE"), unique=True, nullable=False)
     rows = Column(JSON, nullable=False)
 
     category = relationship("Category", back_populates="size_chart")
@@ -43,47 +42,49 @@ class SizeChart(Base):
 class Product(Base):
     __tablename__ = "products"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
     name = Column(String(255), nullable=False)
-    slug = Column(String(255), unique=True, index=True, nullable=False)
-    description = Column(Text, nullable=True)
-    price = Column(Float, nullable=False)
-    compare_price = Column(Float, nullable=True)   # strike-through price
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
-    is_active = Column(Boolean, default=True)
-    is_featured = Column(Boolean, default=False)
-    tags = Column(JSON, nullable=True)             # ["new", "bestseller"] etc.
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    slug = Column(String(255), unique=True, nullable=False)
+    description = Column(Text)
+    price = Column(Numeric(10, 2), nullable=False)
+    compare_price = Column(Numeric(10, 2))
+    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id", ondelete="RESTRICT"), index=True, nullable=False)
+    is_active = Column(Boolean, server_default=text("true"))
+    is_featured = Column(Boolean, server_default=text("false"))
+    tags = Column(JSON)
+    created_at = Column(DateTime(timezone=True), server_default=text("now()"))
+    updated_at = Column(DateTime(timezone=True), server_default=text("now()"), onupdate=text("now()"))
 
     category = relationship("Category", back_populates="products")
     variants = relationship("ProductVariant", back_populates="product", cascade="all, delete-orphan")
-    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan",
-                          order_by="ProductImage.sort_order")
+    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan", order_by="ProductImage.sort_order")
+    wishlisted_by = relationship("Wishlist", back_populates="product", cascade="all, delete-orphan")
 
 
 class ProductVariant(Base):
     __tablename__ = "product_variants"
 
-    id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
-    size = Column(String(10), nullable=False)   # XS, S, M, L, XL, XXL
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    product_id = Column(UUID(as_uuid=True), ForeignKey("products.id", ondelete="CASCADE"), index=True, nullable=False)
+    size = Column(String(10), nullable=False)
     color = Column(String(50), nullable=False)
-    color_hex = Column(String(7), nullable=True) # e.g. "#1A1A1A"
-    stock_qty = Column(Integer, default=0, nullable=False)
+    color_hex = Column(String(7))
+    stock_qty = Column(Integer, server_default=text("0"), nullable=False)
     sku = Column(String(100), unique=True, nullable=False)
 
     product = relationship("Product", back_populates="variants")
+    cart_items = relationship("CartItem", back_populates="variant", cascade="all, delete-orphan")
+    order_items = relationship("OrderItem", back_populates="variant")
 
 
 class ProductImage(Base):
     __tablename__ = "product_images"
 
-    id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    product_id = Column(UUID(as_uuid=True), ForeignKey("products.id", ondelete="CASCADE"), index=True, nullable=False)
     url = Column(String(500), nullable=False)
-    alt = Column(String(255), nullable=True)
-    is_primary = Column(Boolean, default=False)
-    sort_order = Column(Integer, default=0)
+    alt = Column(String(255))
+    is_primary = Column(Boolean, server_default=text("false"))
+    sort_order = Column(Integer, server_default=text("0"))
 
     product = relationship("Product", back_populates="images")

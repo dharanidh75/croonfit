@@ -1,8 +1,9 @@
 from sqlalchemy import (
-    Column, Integer, String, Boolean, Enum,
-    DateTime, func, ForeignKey
+    Column, String, Boolean, Enum,
+    DateTime, text, ForeignKey
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 from app.database import Base
 import enum
 
@@ -15,46 +16,38 @@ class UserRole(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    firebase_uid = Column(String(128), unique=True, index=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
     first_name = Column(String(100))
     last_name = Column(String(100))
-    phone = Column(String(20), nullable=True)
-    avatar_url = Column(String(500), nullable=True)
-    role = Column(Enum(UserRole), default=UserRole.RETAILER)
-    is_active = Column(Boolean, default=True)
-    company_name = Column(String(255), nullable=True)  # wholesalers
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    phone = Column(String(20))
+    avatar_url = Column(String(500))
+    role = Column(Enum(UserRole, name="user_role"), server_default="RETAILER")
+    company_name = Column(String(255))
+    is_active = Column(Boolean, server_default=text("true"))
+    created_at = Column(DateTime(timezone=True), server_default=text("now()"))
+    updated_at = Column(DateTime(timezone=True), server_default=text("now()"), onupdate=text("now()"))
 
     addresses = relationship("UserAddress", back_populates="user", cascade="all, delete-orphan")
-    payment_methods = relationship("UserPaymentMethod", back_populates="user", cascade="all, delete-orphan")
+    cart = relationship("Cart", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    wishlist_items = relationship("Wishlist", back_populates="user", cascade="all, delete-orphan")
+    orders = relationship("Order", back_populates="user")
 
 
 class UserAddress(Base):
     __tablename__ = "user_addresses"
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    name = Column(String(100)) # e.g. Home, Office
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    name = Column(String(100))
     full_name = Column(String(100))
     street = Column(String(255))
     city = Column(String(100))
     state = Column(String(100))
     zip = Column(String(20))
-    is_default = Column(Boolean, default=False)
+    country = Column(String(100), server_default="India")
+    is_default = Column(Boolean, server_default=text("false"))
+    created_at = Column(DateTime(timezone=True), server_default=text("now()"))
 
     user = relationship("User", back_populates="addresses")
-
-
-class UserPaymentMethod(Base):
-    __tablename__ = "user_payment_methods"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    card_type = Column(String(50)) # e.g. Visa, Mastercard
-    last4 = Column(String(4))
-    expiry = Column(String(10))
-    name_on_card = Column(String(100))
-
-    user = relationship("User", back_populates="payment_methods")

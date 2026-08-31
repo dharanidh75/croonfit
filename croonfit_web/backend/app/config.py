@@ -14,9 +14,11 @@ class Settings(BaseSettings):
     # Free shipping threshold (in paise if INR, or cents if USD)
     FREE_SHIPPING_THRESHOLD: float = 999.0
     APP_ENV: str = "development"
+    FIREBASE_CREDENTIALS_PATH: Optional[str] = None
 
     model_config = {
-        "env_file": ".env"
+        "env_file": ".env",
+        "extra": "ignore"
     }
 
 settings = Settings()

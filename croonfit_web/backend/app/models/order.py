@@ -1,8 +1,9 @@
 from sqlalchemy import (
-    Column, Integer, String, Float, Enum,
-    DateTime, ForeignKey, JSON, func, Text
+    Column, String, Enum, Numeric, Integer, Text,
+    DateTime, ForeignKey, JSON, text
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 from app.database import Base
 import enum
 
@@ -24,64 +25,65 @@ class PaymentStatus(str, enum.Enum):
 class Order(Base):
     __tablename__ = "orders"
 
-    id = Column(Integer, primary_key=True, index=True)
-    order_number = Column(String(20), unique=True, index=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)   # null = guest
-    status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
-    payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.UNPAID)
-    subtotal = Column(Float, nullable=False)
-    shipping_cost = Column(Float, default=0.0)
-    total = Column(Float, nullable=False)
-    shipping_address = Column(JSON, nullable=False)  # {name, line1, line2, city, state, pin, country}
-    notes = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    order_number = Column(String(20), unique=True, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), index=True, nullable=False)
+    status = Column(Enum(OrderStatus, name="order_status"), index=True, server_default="PENDING")
+    payment_status = Column(Enum(PaymentStatus, name="payment_status"), server_default="UNPAID")
+    subtotal = Column(Numeric(10, 2), nullable=False)
+    shipping_cost = Column(Numeric(10, 2), server_default=text("0.0"))
+    total = Column(Numeric(10, 2), nullable=False)
+    shipping_address = Column(JSON, nullable=False)
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=text("now()"))
+    updated_at = Column(DateTime(timezone=True), server_default=text("now()"), onupdate=text("now()"))
 
+    user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
-    status_history = relationship("OrderStatusHistory", back_populates="order", cascade="all, delete-orphan")
-    payment = relationship("PaymentRecord", back_populates="order", uselist=False)
+    status_history = relationship("OrderStatusHistory", back_populates="order", cascade="all, delete-orphan", order_by="OrderStatusHistory.changed_at.desc()")
+    payment_record = relationship("PaymentRecord", back_populates="order", uselist=False, cascade="all, delete-orphan")
 
 
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    variant_id = Column(Integer, ForeignKey("product_variants.id"), nullable=False)
-    product_name = Column(String(255), nullable=False)  # snapshot at time of order
-    variant_label = Column(String(100), nullable=False) # e.g. "M / Black"
-    product_image = Column(String(500), nullable=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    order_id = Column(UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+    # variant_id is SET NULL when product is deleted to preserve order history
+    variant_id = Column(UUID(as_uuid=True), ForeignKey("product_variants.id", ondelete="SET NULL"), nullable=True)
+    product_name = Column(String(255), nullable=False)
+    variant_label = Column(String(100), nullable=False)
+    product_image = Column(String(500))
     quantity = Column(Integer, nullable=False)
-    unit_price = Column(Float, nullable=False)
+    unit_price = Column(Numeric(10, 2), nullable=False)
 
     order = relationship("Order", back_populates="items")
+    variant = relationship("ProductVariant", back_populates="order_items")
 
 
 class OrderStatusHistory(Base):
-    """Audit trail for order status transitions."""
     __tablename__ = "order_status_history"
 
-    id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    status = Column(Enum(OrderStatus), nullable=False)
-    note = Column(Text, nullable=True)
-    changed_at = Column(DateTime(timezone=True), server_default=func.now())
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    order_id = Column(UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+    status = Column(Enum(OrderStatus, name="order_status"), nullable=False)
+    note = Column(Text)
+    changed_at = Column(DateTime(timezone=True), server_default=text("now()"))
 
     order = relationship("Order", back_populates="status_history")
 
 
 class PaymentRecord(Base):
-    """Dummy payment ledger — structured like a real Stripe ledger for easy swap later."""
     __tablename__ = "payment_records"
 
-    id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), unique=True, nullable=False)
-    payment_id = Column(String(100), unique=True, nullable=False)  # fake "pi_xxx" id
-    amount = Column(Float, nullable=False)
-    currency = Column(String(3), default="INR")
-    status = Column(Enum(PaymentStatus), default=PaymentStatus.UNPAID)
-    card_last4 = Column(String(4), nullable=True)   # dummy: always "4242"
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    confirmed_at = Column(DateTime(timezone=True), nullable=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    order_id = Column(UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), unique=True, nullable=False)
+    payment_id = Column(String(100), unique=True, nullable=False)
+    amount = Column(Numeric(10, 2), nullable=False)
+    currency = Column(String(3), server_default="INR")
+    status = Column(Enum(PaymentStatus, name="payment_status"), server_default="UNPAID")
+    card_last4 = Column(String(4))
+    created_at = Column(DateTime(timezone=True), server_default=text("now()"))
+    confirmed_at = Column(DateTime(timezone=True))
 
-    order = relationship("Order", back_populates="payment")
+    order = relationship("Order", back_populates="payment_record")

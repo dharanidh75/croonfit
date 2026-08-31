@@ -67,7 +67,7 @@ class ProductVariantCreate(BaseModel):
 
 # ─── Product ─────────────────────────────────────────────────────────────────
 
-class ProductOut(BaseModel):
+class ProductAdminDetail(BaseModel):
     id: int
     name: str
     slug: str
@@ -86,8 +86,22 @@ class ProductOut(BaseModel):
     class Config:
         from_attributes = True
 
+class ProductPublicDetail(BaseModel):
+    id: int
+    name: str
+    slug: str
+    description: Optional[str] = None
+    price: float
+    compare_price: Optional[float] = None
+    tags: Optional[List[str]] = None
+    images: List[ProductImageOut] = []
+    variants: List[ProductVariantOut] = []
+    category: Optional[CategoryOut] = None
 
-class ProductListItem(BaseModel):
+    class Config:
+        from_attributes = True
+
+class ProductPublicListItem(BaseModel):
     """Lighter response for shop grid — no variants, just primary image."""
     id: int
     name: str
@@ -137,13 +151,13 @@ class ProductUpdate(BaseModel):
 
 
 class ProductListResponse(BaseModel):
-    items: List[ProductListItem]
+    items: List[ProductPublicListItem]
     total: int
     page: int
     per_page: int
     has_more: bool
 
-class AdminProductListItem(BaseModel):
+class ProductAdminListItem(BaseModel):
     id: int
     name: str
     sku: Optional[str] = None
@@ -157,7 +171,7 @@ class AdminProductListItem(BaseModel):
         from_attributes = True
 
 class AdminProductListResponse(BaseModel):
-    items: List[AdminProductListItem]
+    items: List[ProductAdminListItem]
     total: int
     page: int
     per_page: int

@@ -2,16 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from typing import List
 from app.database import get_db
-from app.models.wishlist import WishlistItem
+from app.models.shopping import Wishlist as WishlistItem
 from app.models.product import Product, ProductImage
-from app.schemas.product import ProductListItem
-from app.core.security import get_current_user
-from app.api.products import _build_list_item
+from app.schemas.product import ProductPublicListItem
+from app.core.firebase_auth import get_current_user
+from app.services.product_service import ProductService
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[ProductListItem])
+@router.get("", response_model=List[ProductPublicListItem])
 def get_wishlist(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -32,7 +32,7 @@ def get_wishlist(
         .filter(Product.id.in_(product_ids), Product.is_active == True)
         .all()
     )
-    return [_build_list_item(p) for p in products]
+    return [ProductService._build_public_list_item(p) for p in products]
 
 
 @router.post("/{product_id}", status_code=201)

@@ -2,154 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from app.database import get_db
-from app.models.admin import AdminUser
+
 from app.models.product import Product, ProductVariant, ProductImage, Category
 from app.models.order import Order, OrderStatusHistory, PaymentRecord, OrderStatus
 from app.schemas.user import AdminLogin, AdminToken
-from app.schemas.product import ProductCreate, ProductUpdate, ProductOut
 from app.schemas.order import OrderOut, OrderStatusUpdate, PaymentRecordOut
-from app.core.admin_auth import (
-    create_admin_token, require_admin,
-    get_admin_password_hash, verify_admin_password,
-)
-from app.api.products import _build_list_item
-from app.schemas.product import ProductListResponse, ProductListItem, AdminProductListResponse, AdminProductListItem
+from app.core.firebase_auth import require_admin_claim
 
 router = APIRouter()
 
 
-# ─── Admin Auth ───────────────────────────────────────────────────────────────
-
-@router.post("/login", response_model=AdminToken)
-def admin_login(data: AdminLogin, db: Session = Depends(get_db)):
-    admin = db.query(AdminUser).filter(AdminUser.username == data.username).first()
-    if not admin or not verify_admin_password(data.password, admin.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    if not admin.is_active:
-        raise HTTPException(status_code=403, detail="Admin account inactive")
-    token = create_admin_token(admin.id, admin.username)
-    return {"access_token": token, "token_type": "bearer"}
-
-
-# ─── Admin: Products ──────────────────────────────────────────────────────────
-
-def _build_admin_list_item(p: Product) -> AdminProductListItem:
-    primary_image = next((img.url for img in p.images if img.is_primary), None)
-    if not primary_image and p.images:
-        primary_image = p.images[0].url
-    stock = sum(v.stock_qty for v in p.variants)
-    if len(p.variants) > 1:
-        sku = "Multiple"
-    elif len(p.variants) == 1:
-        sku = p.variants[0].sku
-    else:
-        sku = "—"
-    return AdminProductListItem(
-        id=p.id,
-        name=p.name,
-        sku=sku,
-        price=p.price,
-        stock=stock,
-        is_active=p.is_active,
-        category_name=p.category.name if p.category else None,
-        primary_image=primary_image,
-    )
-
-@router.get("/products", response_model=AdminProductListResponse)
-def admin_list_products(
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin),
-    page: int = Query(1, ge=1),
-    per_page: int = Query(20, ge=1, le=100),
-    search: Optional[str] = Query(None),
-):
-    q = db.query(Product).options(
-        joinedload(Product.images),
-        joinedload(Product.variants),
-        joinedload(Product.category),
-    )
-    if search:
-        q = q.filter(Product.name.ilike(f"%{search}%"))
-    total = q.count()
-    products = q.offset((page - 1) * per_page).limit(per_page).all()
-    return AdminProductListResponse(
-        items=[_build_admin_list_item(p) for p in products],
-        total=total, page=page, per_page=per_page,
-        has_more=(page * per_page) < total,
-    )
-
-@router.get("/products/{product_id}", response_model=ProductOut)
-def admin_get_product(
-    product_id: int,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin),
-):
-    product = db.query(Product).options(
-        joinedload(Product.images),
-        joinedload(Product.variants),
-        joinedload(Product.category).joinedload(Category.size_chart),
-    ).filter(Product.id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product
-
-
-@router.post("/products", response_model=ProductOut, status_code=201)
-def admin_create_product(
-    data: ProductCreate,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin),
-):
-    try:
-        product = Product(
-            name=data.name, slug=data.slug, description=data.description,
-            price=data.price, compare_price=data.compare_price,
-            category_id=data.category_id, is_active=data.is_active,
-            is_featured=data.is_featured, tags=data.tags,
-        )
-        for v in data.variants:
-            product.variants.append(ProductVariant(**v.model_dump()))
-        for i in data.images:
-            product.images.append(ProductImage(**i.model_dump()))
-        db.add(product)
-        db.commit()
-        db.refresh(product)
-        return product
-    except Exception as e:
-        db.rollback()
-        import traceback
-        raise HTTPException(status_code=400, detail=str(e) + "\n" + traceback.format_exc())
-
-
-@router.put("/products/{product_id}", response_model=ProductOut)
-def admin_update_product(
-    product_id: int,
-    data: ProductUpdate,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin),
-):
-    product = db.query(Product).filter(Product.id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    for field, value in data.model_dump(exclude_none=True).items():
-        setattr(product, field, value)
-    db.commit()
-    db.refresh(product)
-    return product
-
-
-@router.delete("/products/{product_id}")
-def admin_delete_product(
-    product_id: int,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin),
-):
-    product = db.query(Product).filter(Product.id == product_id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    db.delete(product)
-    db.commit()
-    return {"message": "Product deleted"}
 
 
 # ─── Admin: Orders ────────────────────────────────────────────────────────────
@@ -157,7 +19,7 @@ def admin_delete_product(
 @router.get("/orders", response_model=List[OrderOut])
 def admin_list_orders(
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
     status: Optional[OrderStatus] = Query(None),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
@@ -173,7 +35,7 @@ def admin_list_orders(
 def admin_get_order(
     order_id: int,
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
 ):
     order = db.query(Order).options(joinedload(Order.items)).filter(Order.id == order_id).first()
     if not order:
@@ -186,7 +48,7 @@ def admin_update_order_status(
     order_id: int,
     data: OrderStatusUpdate,
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
 ):
     order = db.query(Order).options(joinedload(Order.items)).filter(Order.id == order_id).first()
     if not order:
@@ -203,7 +65,7 @@ def admin_update_order_status(
 @router.get("/billing", response_model=List[PaymentRecordOut])
 def admin_billing(
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
 ):
@@ -221,7 +83,7 @@ def admin_billing(
 @router.get("/stats")
 def admin_stats(
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
 ):
     from sqlalchemy import func
     from app.models.order import PaymentStatus
@@ -266,7 +128,7 @@ from app.schemas.product import CategoryCreate, CategoryUpdate, CategoryOut
 @router.get("/categories", response_model=List[CategoryOut])
 def admin_list_categories(
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
 ):
     return db.query(Category).options(joinedload(Category.products)).all()
 
@@ -275,7 +137,7 @@ def admin_list_categories(
 def admin_create_category(
     data: CategoryCreate,
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
 ):
     existing = db.query(Category).filter(Category.slug == data.slug).first()
     if existing:
@@ -292,7 +154,7 @@ def admin_update_category(
     category_id: int,
     data: CategoryUpdate,
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
 ):
     cat = db.query(Category).filter(Category.id == category_id).first()
     if not cat:
@@ -308,7 +170,7 @@ def admin_update_category(
 def admin_delete_category(
     category_id: int,
     db: Session = Depends(get_db),
-    admin=Depends(require_admin),
+    admin=Depends(require_admin_claim),
 ):
     cat = db.query(Category).filter(Category.id == category_id).first()
     if not cat:

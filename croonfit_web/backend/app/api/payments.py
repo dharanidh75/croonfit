@@ -17,7 +17,7 @@ from app.schemas.order import (
     PaymentRecordOut,
     StockValidationIssue,
 )
-from app.core.security import get_optional_user
+from app.core.firebase_auth import get_optional_user
 from typing import List
 
 router = APIRouter()
