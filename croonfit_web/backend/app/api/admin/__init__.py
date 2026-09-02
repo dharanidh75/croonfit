@@ -33,7 +33,7 @@ def admin_list_orders(
 
 @router.get("/orders/{order_id}", response_model=OrderOut)
 def admin_get_order(
-    order_id: int,
+    order_id: str,
     db: Session = Depends(get_db),
     admin=Depends(require_admin_claim),
 ):
@@ -45,7 +45,7 @@ def admin_get_order(
 
 @router.patch("/orders/{order_id}/status", response_model=OrderOut)
 def admin_update_order_status(
-    order_id: int,
+    order_id: str,
     data: OrderStatusUpdate,
     db: Session = Depends(get_db),
     admin=Depends(require_admin_claim),
@@ -151,7 +151,7 @@ def admin_create_category(
 
 @router.put("/categories/{category_id}", response_model=CategoryOut)
 def admin_update_category(
-    category_id: int,
+    category_id: str,
     data: CategoryUpdate,
     db: Session = Depends(get_db),
     admin=Depends(require_admin_claim),
@@ -168,7 +168,7 @@ def admin_update_category(
 
 @router.delete("/categories/{category_id}")
 def admin_delete_category(
-    category_id: int,
+    category_id: str,
     db: Session = Depends(get_db),
     admin=Depends(require_admin_claim),
 ):

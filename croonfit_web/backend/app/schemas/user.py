@@ -20,7 +20,7 @@ class UserLogin(BaseModel):
 
 
 class UserOut(BaseModel):
-    id: int
+    id: str
     email: EmailStr
     first_name: str
     last_name: str
@@ -64,8 +64,8 @@ class AddressUpdate(AddressBase):
 
 
 class AddressOut(AddressBase):
-    id: int
-    user_id: int
+    id: str
+    user_id: str
 
     class Config:
         from_attributes = True
@@ -83,8 +83,8 @@ class PaymentMethodCreate(PaymentMethodBase):
 
 
 class PaymentMethodOut(PaymentMethodBase):
-    id: int
-    user_id: int
+    id: str
+    user_id: str
 
     class Config:
         from_attributes = True

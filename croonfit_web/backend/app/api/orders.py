@@ -133,7 +133,7 @@ def get_my_orders(
 
 @router.get("/{order_id}", response_model=OrderOut)
 def get_order(
-    order_id: int,
+    order_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_optional_user),
 ):

@@ -37,7 +37,7 @@ def get_wishlist(
 
 @router.post("/{product_id}", status_code=201)
 def add_to_wishlist(
-    product_id: int,
+    product_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
@@ -60,7 +60,7 @@ def add_to_wishlist(
 
 @router.delete("/{product_id}", status_code=200)
 def remove_from_wishlist(
-    product_id: int,
+    product_id: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):

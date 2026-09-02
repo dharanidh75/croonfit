@@ -8,13 +8,13 @@ from app.models.order import OrderStatus, PaymentStatus
 
 class CartLineItem(BaseModel):
     """Input: what the frontend sends when creating an order."""
-    variant_id: int
+    variant_id: str
     quantity: int
 
 
 class OrderItemOut(BaseModel):
-    id: int
-    variant_id: int
+    id: str
+    variant_id: str
     product_name: str
     variant_label: str
     product_image: Optional[str] = None
@@ -47,7 +47,7 @@ class OrderCreate(BaseModel):
 
 
 class OrderOut(BaseModel):
-    id: int
+    id: str
     order_number: str
     status: OrderStatus
     payment_status: PaymentStatus
@@ -74,7 +74,7 @@ class StockValidationRequest(BaseModel):
 
 
 class StockValidationIssue(BaseModel):
-    variant_id: int
+    variant_id: str
     requested: int
     available: int
     product_name: str
@@ -89,14 +89,14 @@ class StockValidationResponse(BaseModel):
 # ─── Payment ─────────────────────────────────────────────────────────────────
 
 class PaymentIntentCreate(BaseModel):
-    order_id: int
+    order_id: str
 
 
 class PaymentIntentOut(BaseModel):
     payment_id: str
     amount: float
     currency: str
-    order_id: int
+    order_id: str
     status: str
 
 
@@ -118,8 +118,8 @@ class PaymentConfirmOut(BaseModel):
 # ─── Payment Ledger (admin) ───────────────────────────────────────────────────
 
 class PaymentRecordOut(BaseModel):
-    id: int
-    order_id: int
+    id: str
+    order_id: str
     payment_id: str
     amount: float
     currency: str
