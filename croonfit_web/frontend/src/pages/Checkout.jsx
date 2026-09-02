@@ -47,12 +47,14 @@ export function Checkout() {
     if (!discountCode.trim()) return
     setIsApplyingDiscount(true)
     try {
-      const items = cart.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
-      const res = await api.post('/discounts/validate', { code: discountCode, items })
+      const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
+      const res = await api.post('/discounts/validate', { code: discountCode, subtotal })
       setAppliedDiscount(res.data)
       toast.success(`Discount applied: ${res.data.type === 'FREE_SHIPPING' ? 'Free Shipping' : `₹${res.data.discount_amount.toFixed(2)} off`}`)
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Invalid discount code")
+      const errorDetail = err.response?.data?.detail
+      const errorMessage = Array.isArray(errorDetail) ? errorDetail[0]?.msg : (errorDetail || "Invalid discount code")
+      toast.error(errorMessage)
       setAppliedDiscount(null)
       setDiscountCode('')
     } finally {
