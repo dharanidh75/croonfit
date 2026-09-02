@@ -11,15 +11,24 @@ from app.config import settings
 from typing import Optional
 
 # Initialize Firebase Admin SDK
+firebase_creds_json = getattr(settings, "FIREBASE_CREDENTIALS_JSON", None) or os.environ.get("FIREBASE_CREDENTIALS_JSON")
 firebase_creds_path = getattr(settings, "FIREBASE_CREDENTIALS_PATH", None) or os.environ.get("FIREBASE_CREDENTIALS_PATH")
-if firebase_creds_path:
+
+if firebase_creds_json:
+    try:
+        cred_dict = json.loads(firebase_creds_json)
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
+    except Exception as e:
+        print(f"Failed to initialize Firebase Admin from JSON string: {e}")
+elif firebase_creds_path:
     try:
         cred = credentials.Certificate(firebase_creds_path)
         firebase_admin.initialize_app(cred)
     except Exception as e:
-        print(f"Failed to initialize Firebase Admin: {e}")
+        print(f"Failed to initialize Firebase Admin from path: {e}")
 else:
-    print("Warning: FIREBASE_CREDENTIALS_PATH not set. Auth will fail.")
+    print("Warning: Neither FIREBASE_CREDENTIALS_JSON nor FIREBASE_CREDENTIALS_PATH set. Auth will fail.")
 
 
 security = HTTPBearer()
