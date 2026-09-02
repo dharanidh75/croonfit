@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { adminApi } from '../../lib/api'
+import { useStore } from '../../store'
 
 export function AdminProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null)
+  const { user, token: firebaseToken } = useStore()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = sessionStorage.getItem('croonfit-admin-token')
-      if (!token) {
-        setIsAuthenticated(false)
-        return
-      }
-
-      try {
-        // Quick verification of the token
-        await adminApi.get('/admin/stats') // Or a dedicated /admin/me endpoint
-        setIsAuthenticated(true)
-      } catch (err) {
-        setIsAuthenticated(false)
-        sessionStorage.removeItem('croonfit-admin-token')
-      }
+    // Path 1: User is already logged in via Firebase as ADMIN role
+    // Their Firebase token is valid for all admin API calls — let them straight through
+    if (user?.role === 'ADMIN' && firebaseToken) {
+      setIsAuthenticated(true)
+      return
     }
 
-    checkAuth()
-  }, [])
+    // Path 2: Legacy admin session token (from /admin/login username+password)
+    const adminToken = sessionStorage.getItem('croonfit-admin-token')
+    if (adminToken) {
+      setIsAuthenticated(true)
+      return
+    }
+
+    // Neither — redirect to admin login
+    setIsAuthenticated(false)
+  }, [user, firebaseToken])
 
   if (isAuthenticated === null) {
     return (
