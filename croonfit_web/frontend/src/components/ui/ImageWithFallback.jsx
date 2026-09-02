@@ -12,9 +12,20 @@ export function ImageWithFallback({ src, alt, className, ...props }) {
     );
   }
 
+  // Handle relative backend URLs (e.g., from local uploads)
+  const getFullUrl = (url) => {
+    if (url && url.startsWith('/uploads/')) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      // If VITE_API_BASE_URL is 'http://localhost:8000/api', we just want the base domain
+      const rootUrl = baseUrl.replace('/api', '');
+      return `${rootUrl}${url}`;
+    }
+    return url;
+  }
+
   return (
     <img
-      src={src}
+      src={getFullUrl(src)}
       alt={alt}
       className={className}
       onError={() => setError(true)}

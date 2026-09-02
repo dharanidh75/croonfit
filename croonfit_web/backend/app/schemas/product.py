@@ -26,6 +26,7 @@ class CategoryOut(BaseModel):
     description: Optional[str] = None
     cover_image_url: Optional[str] = None
     size_chart: Optional[SizeChartOut] = None
+    product_count: Optional[int] = 0
 
     class Config:
         from_attributes = True
@@ -139,6 +140,24 @@ class ProductCreate(BaseModel):
     variants: List[ProductVariantCreate] = []
     images: List[ProductImageCreate] = []
 
+class ProductVariantUpdate(BaseModel):
+    id: Optional[UUID] = None
+    size: str
+    color: str
+    color_hex: Optional[str] = None
+    stock_qty: int = Field(0, ge=0)
+    sku: str
+    price: Optional[float] = None
+    image_url: Optional[str] = None
+
+class ProductImageUpdate(BaseModel):
+    id: Optional[UUID] = None
+    url: str
+    alt: Optional[str] = None
+    is_primary: bool = False
+    sort_order: int = 0
+
+
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -149,6 +168,8 @@ class ProductUpdate(BaseModel):
     is_active: Optional[bool] = None
     is_featured: Optional[bool] = None
     tags: Optional[List[str]] = None
+    variants: Optional[List[ProductVariantUpdate]] = None
+    images: Optional[List[ProductImageUpdate]] = None
 
 
 class ProductListResponse(BaseModel):

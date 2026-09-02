@@ -36,10 +36,10 @@ export function ProductForm() {
     sku: '',
   })
 
-  // Variants — at least one
   const [variants, setVariants] = useState([
     { size: '', color: '', color_hex: '#000000', stock_qty: '', sku: '', price: '', image_file: null }
   ])
+  const [existingImages, setExistingImages] = useState([])
   const [mainImages, setMainImages] = useState([])
   const [saving, setSaving] = useState(false)
 
@@ -67,6 +67,9 @@ export function ProductForm() {
           if (p.category && p.category.gender) {
             setSelectedGender(p.category.gender)
           }
+          if (p.images && p.images.length > 0) {
+            setExistingImages(p.images)
+          }
           if (p.variants && p.variants.length > 0) {
             setVariants(p.variants.map(v => ({
               id: v.id,
@@ -75,7 +78,8 @@ export function ProductForm() {
               color_hex: v.color_hex || '#000000',
               stock_qty: v.stock_qty || 0,
               sku: v.sku || '',
-              price: v.price || ''
+              price: v.price || '',
+              image_url: v.image_url || null,
             })))
           }
         })
@@ -152,6 +156,40 @@ export function ProductForm() {
     setSaving(true)
     try {
       const slug = formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-')
+      const uploadedImages = [...existingImages]
+      let maxSort = uploadedImages.length > 0 ? Math.max(...uploadedImages.map(img => img.sort_order || 0)) : -1
+      
+      for (let i = 0; i < mainImages.length; i++) {
+        const file = mainImages[i]
+        const fData = new FormData()
+        fData.append('file', file)
+        const res = await adminApi.post('/admin/upload', fData)
+        maxSort++
+        uploadedImages.push({ url: res.data.url, is_primary: uploadedImages.length === 0, sort_order: maxSort })
+      }
+
+      const uploadedVariants = []
+      for (let i = 0; i < variants.length; i++) {
+        const v = variants[i]
+        let uploadedUrl = null
+        if (v.image_file) {
+          const fData = new FormData()
+          fData.append('file', v.image_file)
+          const res = await adminApi.post('/admin/upload', fData)
+          uploadedUrl = res.data.url
+        }
+        uploadedVariants.push({
+          ...v,
+          stock_qty: parseInt(v.stock_qty || 0),
+          sku: v.sku || `${slug}-${v.size}-${v.color}-${i}`.toLowerCase().replace(/\s+/g, '-'),
+          price: v.price ? parseFloat(v.price) : null,
+          image_url: uploadedUrl,
+        })
+        if (uploadedUrl) {
+          uploadedImages.push({ url: uploadedUrl, is_primary: uploadedImages.length === 0, sort_order: uploadedImages.length })
+        }
+      }
+
       const payload = {
         ...formData,
         slug,
@@ -161,13 +199,8 @@ export function ProductForm() {
         is_active: formData.status === 'PUBLISHED',
         status: formData.status,
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-        images: [], // Images handled per-variant now
-        variants: variants.map((v, i) => ({
-          ...v,
-          stock_qty: parseInt(v.stock_qty || 0),
-          sku: v.sku || `${slug}-${v.size}-${v.color}-${i}`.toLowerCase().replace(/\s+/g, '-'),
-          price: v.price ? parseFloat(v.price) : null,
-        })),
+        images: uploadedImages,
+        variants: uploadedVariants,
       }
       
       if (isEditing) {
@@ -351,7 +384,7 @@ export function ProductForm() {
                               Replace
                               <input 
                                 type="file" 
-                                accept=".webp" 
+                                accept="image/*"
                                 className="hidden"
                                 onChange={(e) => e.target.files && handleVariantChange(i, 'image_file', e.target.files[0])}
                               />
@@ -367,7 +400,7 @@ export function ProductForm() {
                       ) : (
                         <input 
                           type="file" 
-                          accept=".webp" 
+                          accept="image/*"
                           onChange={(e) => e.target.files && handleVariantChange(i, 'image_file', e.target.files[0])}
                           className="block w-full text-sm text-[#666666] file:mr-4 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#111111] file:text-white hover:file:bg-[#333333] transition-colors cursor-pointer"
                         />
@@ -392,8 +425,19 @@ export function ProductForm() {
             <CardHeader title="Product Images" />
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-2">
+                {existingImages.map((img, i) => (
+                  <div key={`exist-${i}`} className="relative aspect-square rounded-lg border border-[#E5E5E5] overflow-hidden group bg-[#FAFAFA]">
+                    <img src={img.url.startsWith('http') ? img.url : `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'}${img.url}`} alt="product" className="w-full h-full object-cover" />
+                    <button 
+                      onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))}
+                      className="absolute top-1 right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
                 {mainImages.map((img, i) => (
-                  <div key={i} className="relative aspect-square rounded-lg border border-[#E5E5E5] overflow-hidden group bg-[#FAFAFA]">
+                  <div key={`new-${i}`} className="relative aspect-square rounded-lg border border-[#E5E5E5] overflow-hidden group bg-[#FAFAFA]">
                     <img src={URL.createObjectURL(img)} alt="product" className="w-full h-full object-cover" />
                     <button 
                       onClick={() => setMainImages(prev => prev.filter((_, idx) => idx !== i))}
@@ -405,9 +449,9 @@ export function ProductForm() {
                 ))}
                 <label className="flex flex-col items-center justify-center aspect-square rounded-lg border border-dashed border-[#CCCCCC] bg-[#FAFAFA] hover:border-[#111111] hover:text-[#111111] text-[#888888] cursor-pointer transition-colors">
                   <Plus className="w-5 h-5 mb-1" />
-                  <span className="text-[10px] font-semibold">Add .webp</span>
+                  <span className="text-[10px] font-semibold">Add Image</span>
                   <input 
-                    type="file" multiple accept=".webp" className="hidden"
+                    type="file" multiple accept="image/*" className="hidden"
                     onChange={(e) => {
                       if (e.target.files) {
                         setMainImages(prev => [...prev, ...Array.from(e.target.files)])

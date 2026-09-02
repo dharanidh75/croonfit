@@ -5,12 +5,20 @@ from app.config import settings
 # pyrefly: ignore [missing-import]
 from app.api import products, orders, payments, wishlist, admin, auth, addresses, discounts
 from app.api.admin import products as admin_products
+from fastapi.staticfiles import StaticFiles
+import os
 
 app = FastAPI(
     title="Croonfit API",
     description="Backend for Croonfit clothing e-commerce platform",
     version="1.0.0",
 )
+
+# Use absolute path so uploads are found regardless of working directory
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_UPLOADS_DIR = os.path.normpath(os.path.join(_BASE_DIR, "..", "uploads"))
+os.makedirs(_UPLOADS_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=_UPLOADS_DIR), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,

@@ -93,14 +93,30 @@ class ProductService:
             db.rollback()
             raise HTTPException(status_code=400, detail=str(e))
 
-    @staticmethod
-    def update_product(db: Session, product_id: str, data: ProductUpdate):
+    @classmethod
+    def update_product(cls, db: Session, product_id: str, data: ProductUpdate):
         product = ProductRepository.get_admin_product_by_id(db, product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
             
         update_data = data.model_dump(exclude_none=True)
-        return ProductRepository.update_product(db, product, update_data)
+        images_data = update_data.pop('images', None)
+        variants_data = update_data.pop('variants', None)
+
+        if variants_data is not None:
+            new_variant_ids = {str(v['id']) for v in variants_data if v.get('id')}
+            existing_variant_ids = {str(v.id) for v in product.variants}
+            deleted_variant_ids = list(existing_variant_ids - new_variant_ids)
+            
+            if deleted_variant_ids:
+                blocked = ProductRepository.check_variants_in_orders(db, deleted_variant_ids, cls.ACTIVE_ORDER_STATUSES)
+                if blocked:
+                    raise HTTPException(
+                        status_code=409, 
+                        detail=f"Cannot delete variants {blocked} because they are in active orders."
+                    )
+
+        return ProductRepository.update_product(db, product, update_data, images_data, variants_data)
 
     @classmethod
     def delete_product(cls, db: Session, product_id: str):

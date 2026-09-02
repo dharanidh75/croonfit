@@ -142,7 +142,7 @@ export function Categories() {
                   <td className="px-6 py-4 font-semibold text-[#111111]">{cat.name}</td>
                   <td className="px-4 py-4 text-[#666666] font-mono text-xs">{cat.slug}</td>
                   <td className="px-4 py-4">{genderBadge(cat.gender)}</td>
-                  <td className="px-4 py-4 text-[#666666]">{cat.products?.length ?? 0} products</td>
+                  <td className="px-4 py-4 text-[#666666]">{cat.product_count ?? 0} products</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-end">
                       <button
@@ -213,6 +213,43 @@ export function Categories() {
                   rows={3} placeholder="Optional description..."
                   className="w-full p-3 border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none resize-none"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#111111] mb-2">Cover Image (Optional)</label>
+                <div className="flex items-center gap-4">
+                  {form.cover_image_url ? (
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={form.cover_image_url.startsWith('http') ? form.cover_image_url : `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace('/api', '')}${form.cover_image_url}`} 
+                        alt="preview" 
+                        className="w-16 h-16 rounded-lg object-cover border border-[#E5E5E5]"
+                      />
+                      <button 
+                        onClick={() => setForm(p => ({ ...p, cover_image_url: '' }))}
+                        className="text-xs text-red-600 hover:underline font-semibold"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={async (e) => {
+                        if (!e.target.files?.[0]) return
+                        const fData = new FormData()
+                        fData.append('file', e.target.files[0])
+                        try {
+                          const res = await adminApi.post('/admin/upload', fData)
+                          setForm(p => ({ ...p, cover_image_url: res.data.url }))
+                        } catch (err) {
+                          alert('Upload failed')
+                        }
+                      }}
+                      className="block w-full text-sm text-[#666666] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#111111] file:text-white hover:file:bg-[#333333] transition-colors cursor-pointer"
+                    />
+                  )}
+                </div>
               </div>
 
               {error && (

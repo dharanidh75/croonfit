@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
+import { ImageWithFallback } from '../components/ui/ImageWithFallback'
 import api from '../lib/api'
 
 export function Category() {
@@ -103,7 +104,7 @@ export function Category() {
                     to={`/category/${category}/${sub.slug}`}
                     className="group block relative overflow-hidden rounded-2xl aspect-[4/5] bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
                   >
-                    <img
+                    <ImageWithFallback
                       src={sub.cover_image_url || 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ce3?w=600&q=80&auto=format&fit=crop'}
                       alt={sub.name}
                       className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"

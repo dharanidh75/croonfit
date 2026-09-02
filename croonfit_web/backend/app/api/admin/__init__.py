@@ -9,7 +9,7 @@ from app.schemas.user import AdminLogin, AdminToken
 from app.schemas.order import OrderOut, OrderStatusUpdate, PaymentRecordOut
 from app.core.firebase_auth import require_admin_claim
 
-from app.api.admin import products, purchase_orders, inventory, discounts, customers, dealers
+from app.api.admin import products, purchase_orders, inventory, discounts, customers, dealers, upload
 
 router = APIRouter()
 
@@ -18,7 +18,8 @@ router.include_router(purchase_orders.router, prefix="/purchase-orders", tags=["
 router.include_router(inventory.router, prefix="/inventory", tags=["admin_inventory"])
 router.include_router(discounts.router, prefix="/discounts", tags=["admin_discounts"])
 router.include_router(customers.router, prefix="/customers", tags=["admin_customers"])
-router.include_router(dealers.router, prefix="/dealers", tags=["admin_dealers"])
+router.include_router(dealers.router, prefix="/dealers", tags=["Admin Dealers"])
+router.include_router(upload.router, prefix="/upload", tags=["Admin Upload"])
 # ─── Admin: Orders ────────────────────────────────────────────────────────────
 
 @router.get("/orders", response_model=List[OrderOut])
@@ -258,7 +259,10 @@ def admin_list_categories(
     db: Session = Depends(get_db),
     admin=Depends(require_admin_claim),
 ):
-    return db.query(Category).options(joinedload(Category.products)).all()
+    categories = db.query(Category).options(joinedload(Category.products)).all()
+    for c in categories:
+        c.product_count = len(c.products)
+    return categories
 
 
 @router.post("/categories", response_model=CategoryOut, status_code=201)

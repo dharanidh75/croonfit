@@ -120,9 +120,40 @@ class ProductRepository:
         return product
 
     @staticmethod
-    def update_product(db: Session, product: Product, update_data: dict) -> Product:
+    def update_product(db: Session, product: Product, update_data: dict, images_data: Optional[List[dict]] = None, variants_data: Optional[List[dict]] = None) -> Product:
         for key, value in update_data.items():
             setattr(product, key, value)
+            
+        if images_data is not None:
+            for img in list(product.images):
+                db.delete(img)
+            product.images.clear()
+            for img_data in images_data:
+                img_data.pop('id', None)
+                new_img = ProductImage(**img_data)
+                product.images.append(new_img)
+                
+        if variants_data is not None:
+            existing_variants = {str(v.id): v for v in product.variants}
+            new_variants = []
+            
+            for v_data in variants_data:
+                v_id = v_data.pop('id', None)
+                if v_id and str(v_id) in existing_variants:
+                    v = existing_variants[str(v_id)]
+                    for k, v_val in v_data.items():
+                        setattr(v, k, v_val)
+                    new_variants.append(v)
+                else:
+                    new_v = ProductVariant(**v_data)
+                    new_variants.append(new_v)
+            
+            for v_id, v in existing_variants.items():
+                if v not in new_variants:
+                    db.delete(v)
+                    
+            product.variants = new_variants
+
         db.commit()
         db.refresh(product)
         return product
