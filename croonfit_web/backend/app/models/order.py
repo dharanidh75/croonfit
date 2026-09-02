@@ -27,7 +27,7 @@ class Order(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
     order_number = Column(String(20), unique=True, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), index=True, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), index=True, nullable=True)
     status = Column(Enum(OrderStatus, name="order_status"), index=True, server_default="PENDING")
     payment_status = Column(Enum(PaymentStatus, name="payment_status"), server_default="UNPAID")
     subtotal = Column(Numeric(10, 2), nullable=False)

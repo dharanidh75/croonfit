@@ -43,7 +43,7 @@ export function AdminOrders() {
     let matchesSearch = true
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      const searchStr = `${order.id} ${order.customer?.name} ${order.customer?.email} ${order.user_id}`.toLowerCase()
+      const searchStr = `${order.id} ${order.shipping_address?.full_name} ${order.user_id}`.toLowerCase()
       matchesSearch = searchStr.includes(q)
     }
     
@@ -74,18 +74,21 @@ export function AdminOrders() {
     {
       header: 'Customer',
       accessorKey: 'customer',
-      cell: row => (
-        <div>
-          <p className="font-bold text-[#111111]">{row.customer?.name || `User #${row.user_id}`}</p>
-          {row.customer?.email && <p className="text-xs text-[#888888]">{row.customer.email}</p>}
-        </div>
-      )
+      cell: row => {
+        const name = row.shipping_address?.full_name || `User #${row.user_id}`
+        return (
+          <div>
+            <p className="font-bold text-[#111111]">{name}</p>
+            {row.shipping_address?.phone && <p className="text-xs text-[#888888]">{row.shipping_address.phone}</p>}
+          </div>
+        )
+      }
     },
     {
       header: 'Total Amount',
-      accessorKey: 'total_amount',
+      accessorKey: 'total',
       align: 'right',
-      cell: row => <span className="font-medium">₹{(row.total_amount || 0).toFixed(2)}</span>
+      cell: row => <span className="font-medium">₹{(row.total || 0).toFixed(2)}</span>
     },
     {
       header: 'Payment Status',
@@ -258,9 +261,8 @@ export function AdminOrders() {
                 <div>
                   <h4 className="text-xs font-bold text-[#888888] uppercase tracking-widest mb-3">Customer Details</h4>
                   <div className="bg-[#F9F9F9] rounded-xl p-4 border border-[#E5E5E5] space-y-2">
-                    <p className="text-sm font-bold text-[#111111]">{selectedOrder.customer?.name || `User #${selectedOrder.user_id}`}</p>
-                    {selectedOrder.customer?.email && <p className="text-sm text-[#666666]">{selectedOrder.customer.email}</p>}
-                    {selectedOrder.customer?.phone && <p className="text-sm text-[#666666]">{selectedOrder.customer.phone}</p>}
+                    <p className="text-sm font-bold text-[#111111]">{selectedOrder.shipping_address?.full_name || `User #${selectedOrder.user_id}`}</p>
+                    {selectedOrder.shipping_address?.phone && <p className="text-sm text-[#666666]">{selectedOrder.shipping_address.phone}</p>}
                   </div>
                 </div>
 
@@ -268,9 +270,16 @@ export function AdminOrders() {
                 <div>
                   <h4 className="text-xs font-bold text-[#888888] uppercase tracking-widest mb-3">Shipping Address</h4>
                   <div className="bg-[#F9F9F9] rounded-xl p-4 border border-[#E5E5E5]">
-                    <p className="text-sm text-[#666666] leading-relaxed">
-                      {selectedOrder.shipping_address || 'No shipping address provided.'}
-                    </p>
+                    {selectedOrder.shipping_address ? (
+                      <div className="text-sm text-[#666666] leading-relaxed">
+                        <p>{selectedOrder.shipping_address.line1}</p>
+                        {selectedOrder.shipping_address.line2 && <p>{selectedOrder.shipping_address.line2}</p>}
+                        <p>{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.pin}</p>
+                        <p>{selectedOrder.shipping_address.country}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[#666666] leading-relaxed">No shipping address provided.</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -325,15 +334,15 @@ export function AdminOrders() {
                 <div className="w-full md:w-1/2 space-y-2">
                   <div className="flex justify-between text-sm text-[#666666]">
                     <span>Subtotal</span>
-                    <span>₹{(selectedOrder.total_amount || 0).toFixed(2)}</span>
+                    <span>₹{(selectedOrder.subtotal || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-[#666666]">
                     <span>Shipping</span>
-                    <span>Free</span>
+                    <span>{selectedOrder.shipping_cost === 0 ? 'Free' : `₹${selectedOrder.shipping_cost.toFixed(2)}`}</span>
                   </div>
                   <div className="border-t border-[#E5E5E5] pt-2 mt-2 flex justify-between font-bold text-[#111111]">
                     <span>Total</span>
-                    <span>₹{(selectedOrder.total_amount || 0).toFixed(2)}</span>
+                    <span>₹{(selectedOrder.total || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

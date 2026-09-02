@@ -44,7 +44,7 @@ export function Orders() {
 
           {loading ? (
             <div className="py-12 text-center text-muted font-body">Loading orders...</div>
-          ) : orders.length === 0 ? (
+          ) : orders.filter(o => o.status !== 'PENDING').length === 0 ? (
             <div className="bg-[#F5F5F5] p-12 text-center rounded-2xl">
               <Package className="w-12 h-12 text-[#888888] mx-auto mb-4 opacity-50" />
               <p className="font-body text-[#555555] mb-6">You haven't placed any orders yet.</p>
@@ -54,7 +54,7 @@ export function Orders() {
             </div>
           ) : (
             <div className="space-y-6">
-              {orders.map(order => (
+              {orders.filter(o => o.status !== 'PENDING').map(order => (
                 <div key={order.id} className="border border-[#E5E5E5] rounded-2xl p-6 hover:shadow-sm transition-shadow duration-300">
                   <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 pb-4 border-b border-[#F5F5F5] gap-4">
                     <div>

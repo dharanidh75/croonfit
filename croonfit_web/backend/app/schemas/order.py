@@ -95,7 +95,7 @@ class PaymentIntentCreate(BaseModel):
 
 
 class PaymentIntentOut(BaseModel):
-    payment_id: UUID
+    payment_id: str
     amount: float
     currency: str
     order_id: UUID
@@ -103,7 +103,7 @@ class PaymentIntentOut(BaseModel):
 
 
 class PaymentConfirm(BaseModel):
-    payment_id: UUID
+    payment_id: str
     # Dummy card details — never stored beyond last4
     card_number: str   # always "4242 4242 4242 4242" in test mode
     card_expiry: str
@@ -113,7 +113,7 @@ class PaymentConfirm(BaseModel):
 class PaymentConfirmOut(BaseModel):
     success: bool
     order_number: str
-    payment_id: UUID
+    payment_id: str
     message: str
 
 
@@ -122,7 +122,7 @@ class PaymentConfirmOut(BaseModel):
 class PaymentRecordOut(BaseModel):
     id: UUID
     order_id: UUID
-    payment_id: UUID
+    payment_id: str
     amount: float
     currency: str
     status: PaymentStatus

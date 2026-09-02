@@ -18,6 +18,27 @@ export function Checkout() {
   const [address, setAddress] = useState({})
   const [isProcessing, setIsProcessing] = useState(false)
   const [stockIssues, setStockIssues] = useState([])
+  
+  const [discountCode, setDiscountCode] = useState('')
+  const [appliedDiscount, setAppliedDiscount] = useState(null)
+  const [isApplyingDiscount, setIsApplyingDiscount] = useState(false)
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) return
+    setIsApplyingDiscount(true)
+    try {
+      const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
+      const res = await api.post('/discounts/validate', { code: discountCode.trim(), subtotal })
+      setAppliedDiscount({ ...res.data, code: discountCode.trim() })
+      toast.success("Discount applied!")
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Invalid discount code")
+      setDiscountCode('')
+      setAppliedDiscount(null)
+    } finally {
+      setIsApplyingDiscount(false)
+    }
+  }
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -64,7 +85,11 @@ export function Checkout() {
       const items = cart.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
 
       // 1. Create Order
-      const orderRes = await api.post('/orders', { items, shipping_address: address })
+      const orderPayload = { items, shipping_address: address }
+      if (appliedDiscount) {
+        orderPayload.discount_code = appliedDiscount.code
+      }
+      const orderRes = await api.post('/orders', orderPayload)
       const order = orderRes.data
 
       // 2. Create Payment Intent
@@ -152,7 +177,16 @@ export function Checkout() {
 
             {/* Right: Summary */}
             <div className="w-full lg:w-[40%] xl:w-[35%]">
-              <OrderSummary cart={cart} outOfStockIssues={stockIssues} />
+              <OrderSummary 
+                cart={cart} 
+                outOfStockIssues={stockIssues}
+                discountCode={discountCode}
+                setDiscountCode={setDiscountCode}
+                appliedDiscount={appliedDiscount}
+                setAppliedDiscount={setAppliedDiscount}
+                onApplyDiscount={handleApplyDiscount}
+                isApplyingDiscount={isApplyingDiscount}
+              />
             </div>
 
           </div>
