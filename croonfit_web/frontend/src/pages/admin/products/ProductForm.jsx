@@ -182,12 +182,7 @@ export function ProductForm() {
           ...v,
           stock_qty: parseInt(v.stock_qty || 0),
           sku: v.sku || `${slug}-${v.size}-${v.color}-${i}`.toLowerCase().replace(/\s+/g, '-'),
-          price: v.price ? parseFloat(v.price) : null,
-          image_url: uploadedUrl,
         })
-        if (uploadedUrl) {
-          uploadedImages.push({ url: uploadedUrl, is_primary: uploadedImages.length === 0, sort_order: uploadedImages.length })
-        }
       }
 
       const payload = {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { adminApi } from '../../lib/api'
+import { ImageWithFallback } from '../../components/ui/ImageWithFallback'
 import { Search, Filter, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react'
 
 export function AdminInventory() {
@@ -199,7 +200,15 @@ export function AdminInventory() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded bg-[#F5F5F5] flex-shrink-0 flex items-center justify-center text-[10px] text-[#888888] border border-[#E5E5E5]">IMG</div>
+                          {product.primary_image ? (
+                            <ImageWithFallback
+                              src={product.primary_image}
+                              alt={product.name}
+                              className="w-10 h-10 rounded object-cover border border-[#E5E5E5] flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded bg-[#F5F5F5] flex-shrink-0 flex items-center justify-center text-[10px] text-[#888888] border border-[#E5E5E5]">IMG</div>
+                          )}
                           <div>
                             <p className="font-bold text-[#111111] text-sm">{product.name}</p>
                             <p className="text-xs text-[#666666]">{product.category}</p>

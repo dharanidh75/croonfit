@@ -15,6 +15,7 @@ class InventoryProductOut(BaseModel):
     id: UUID
     name: str
     category: str
+    primary_image: Optional[str] = None
     totalStock: int
     available: int
     sold: int

@@ -41,6 +41,7 @@ class InventoryService:
         
         # We query ProductVariant left joined with sold_subq and incoming_subq
         # Then join Product and Category
+        from sqlalchemy.orm import selectinload
         query = (
             db.query(
                 ProductVariant,
@@ -53,6 +54,7 @@ class InventoryService:
             .join(Category, Category.id == Product.category_id)
             .outerjoin(sold_subq, sold_subq.c.variant_id == ProductVariant.id)
             .outerjoin(incoming_subq, incoming_subq.c.variant_id == ProductVariant.id)
+            .options(selectinload(Product.images))
         )
         
         results = query.all()
@@ -72,10 +74,15 @@ class InventoryService:
             
             # Group by product
             if product.id not in product_map:
+                primary_image = None
+                if product.images:
+                    primary_image = product.images[0].url
+                
                 product_map[product.id] = {
                     "id": product.id,
                     "name": product.name,
                     "category": category.name,
+                    "primary_image": primary_image,
                     "totalStock": 0,
                     "available": 0,
                     "sold": 0,

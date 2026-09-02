@@ -15,8 +15,8 @@ import { ImageWithFallback } from '../ui/ImageWithFallback'
 export function ProductCard({ product, mode = 'default' }) {
   const navigate = useNavigate()
   const [hovered, setHovered] = useState(false)
-  const { isWishlisted, toggleWishlist, isAuthenticated, addToCart } = useStore()
-  const wishlisted = isWishlisted(product.id)
+  const { wishlist, toggleWishlist, isAuthenticated, addToCart } = useStore()
+  const wishlisted = wishlist.some(item => item.id === product.id)
 
   const discount = product.compare_price
     ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)

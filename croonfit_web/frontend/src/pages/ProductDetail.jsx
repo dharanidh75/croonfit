@@ -24,7 +24,7 @@ export function ProductDetail() {
   const [shippingOpen, setShippingOpen] = useState(false)
   const [recommended, setRecommended] = useState([])
 
-  const { cart, addToCart, updateCartQty, removeFromCart, openCart, isWishlisted, toggleWishlist, isAuthenticated } = useStore()
+  const { cart, wishlist, addToCart, updateCartQty, removeFromCart, openCart, toggleWishlist, isAuthenticated } = useStore()
 
   const selectedVariant = product?.variants?.find(v => v.size === selectedSize && v.color === selectedColor?.name)
     || product?.variants?.find(v => v.size === selectedSize)
@@ -100,7 +100,7 @@ export function ProductDetail() {
     )
   }
 
-  const wishlisted = isWishlisted(product.id)
+  const wishlisted = wishlist.some(item => item.id === product.id)
 
   const handleAddToCart = () => {
     if (!selectedVariant) {

@@ -29,6 +29,34 @@ export function AdminDealers() {
   const [showFilters, setShowFilters] = useState(false)
   const [advancedFilters, setAdvancedFilters] = useState({ status: 'all' })
   const [showAddPartner, setShowAddPartner] = useState(false)
+  const [partnerForm, setPartnerForm] = useState({ company: '', contact: '', email: '' })
+  const [addingPartner, setAddingPartner] = useState(false)
+
+  const handleAddPartner = async () => {
+    if (!partnerForm.company || !partnerForm.contact || !partnerForm.email) {
+      import('react-hot-toast').then(({ default: toast }) => toast.error('Please fill all required fields.'))
+      return
+    }
+    setAddingPartner(true)
+    try {
+      const res = await adminApi.post('/admin/dealers', {
+        company: partnerForm.company,
+        contact: partnerForm.contact,
+        email: partnerForm.email,
+        ytd_spend: 0,
+        status: 'Pending',
+      })
+      setDealers(prev => [...prev, res.data])
+      setPartnerForm({ company: '', contact: '', email: '' })
+      setShowAddPartner(false)
+      import('react-hot-toast').then(({ default: toast }) => toast.success('Partner created successfully!'))
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Failed to create partner.'
+      import('react-hot-toast').then(({ default: toast }) => toast.error(msg))
+    } finally {
+      setAddingPartner(false)
+    }
+  }
 
   const filteredDealers = dealers.filter(d => {
     let matchesSearch = true
@@ -168,32 +196,30 @@ export function AdminDealers() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-[#111111] mb-1">Company Name *</label>
-                  <input type="text" className="w-full h-10 px-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-[#111111]" />
-                </div>
+                  <input type="text" value={partnerForm.company} onChange={e => setPartnerForm(p => ({...p, company: e.target.value}))} className="w-full h-10 px-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-[#111111]" placeholder="e.g. Apex Retailers" /></
+                div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111111] mb-1">Contact Person *</label>
-                  <input type="text" className="w-full h-10 px-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-[#111111]" />
-                </div>
+                  <input type="text" value={partnerForm.contact} onChange={e => setPartnerForm(p => ({...p, contact: e.target.value}))} className="w-full h-10 px-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-[#111111]" placeholder="e.g. Karthik S" /></
+                div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111111] mb-1">Email *</label>
-                  <input type="email" className="w-full h-10 px-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-[#111111]" />
+                  <input type="email" value={partnerForm.email} onChange={e => setPartnerForm(p => ({...p, email: e.target.value}))} className="w-full h-10 px-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-[#111111]" placeholder="partner@company.com" />
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button 
-                  onClick={() => setShowAddPartner(false)}
+                  onClick={() => { setShowAddPartner(false); setPartnerForm({ company: '', contact: '', email: '' }) }}
                   className="px-4 py-2 text-sm font-medium text-[#666666] hover:text-[#111111]"
                 >
                   Cancel
                 </button>
                 <button 
-                  onClick={() => {
-                    alert("Partner created successfully!")
-                    setShowAddPartner(false)
-                  }}
-                  className="px-5 py-2 bg-[#111111] text-white text-sm font-medium rounded-lg hover:bg-black"
+                  onClick={handleAddPartner}
+                  disabled={addingPartner}
+                  className="px-5 py-2 bg-[#111111] text-white text-sm font-medium rounded-lg hover:bg-black disabled:opacity-60"
                 >
-                  Add Partner
+                  {addingPartner ? 'Adding...' : 'Add Partner'}
                 </button>
               </div>
             </div>

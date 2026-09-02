@@ -57,3 +57,52 @@ def admin_list_dealers(
             "ytd_spend": float(r[6])
         })
     return dealers
+
+from pydantic import EmailStr
+
+class DealerCreate(BaseModel):
+    company: str
+    contact: str
+    email: EmailStr
+    ytd_spend: float = 0
+    status: str = 'Pending'
+
+@router.post("", response_model=DealerListOut, status_code=201)
+def admin_create_dealer(
+    data: DealerCreate,
+    db: Session = Depends(get_db),
+    admin=Depends(require_admin_claim)
+):
+    # Check if email already exists
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="A user with this email already exists.")
+    
+    import uuid
+    name_parts = data.contact.strip().split(' ', 1)
+    first_name = name_parts[0]
+    last_name = name_parts[1] if len(name_parts) > 1 else ''
+    
+    # Create user with WHOLESALER role — use a placeholder firebase_uid
+    user = User(
+        firebase_uid=f"admin-created-{uuid.uuid4().hex}",
+        email=data.email,
+        first_name=first_name,
+        last_name=last_name,
+        company_name=data.company,
+        role=UserRole.WHOLESALER,
+        is_active=(data.status == 'Approved'),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    return {
+        "id": str(user.id).split("-")[0].upper(),
+        "company": user.company_name or data.company,
+        "contact": f"{user.first_name} {user.last_name}".strip(),
+        "email": user.email,
+        "status": "Approved" if user.is_active else "Pending",
+        "total_orders": 0,
+        "ytd_spend": 0.0,
+    }

@@ -10,7 +10,7 @@ from app.schemas.order import (
     OrderCreate, OrderOut,
     StockValidationRequest, StockValidationResponse, StockValidationIssue,
 )
-from app.core.firebase_auth import get_current_user
+from app.core.firebase_auth import get_current_user, get_optional_user
 from app.config import settings
 
 
@@ -63,7 +63,7 @@ from app.models.discount import Discount, DiscountRedemption, DiscountType
 def create_order(
     order_in: OrderCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(get_optional_user),
 ):
     subtotal = Decimal("0.0")
     order_items = []
@@ -173,7 +173,7 @@ def create_order(
 
     order = Order(
         order_number=_generate_order_number(),
-        user_id=current_user.id,
+        user_id=current_user.id if current_user else None,
         subtotal=subtotal,
         shipping_cost=shipping_cost,
         total=total,
@@ -188,7 +188,7 @@ def create_order(
         redemption = DiscountRedemption(
             discount=discount,
             order=order,
-            user_id=current_user.id,
+            user_id=current_user.id if current_user else None,
             discount_applied=discount_amount
         )
         db.add(redemption)
