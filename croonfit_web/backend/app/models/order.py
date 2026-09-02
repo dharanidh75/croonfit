@@ -84,6 +84,9 @@ class PaymentRecord(Base):
     currency = Column(String(3), server_default="INR")
     status = Column(Enum(PaymentStatus, name="payment_status"), server_default="UNPAID")
     card_last4 = Column(String(4))
+    razorpay_order_id = Column(String(100), nullable=True)
+    razorpay_payment_id = Column(String(100), nullable=True)
+    razorpay_signature = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=text("now()"))
     confirmed_at = Column(DateTime(timezone=True))
 

@@ -2,82 +2,71 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
+import { OrderSummary } from '../components/checkout/OrderSummary'
 import { CheckoutForm } from '../components/checkout/CheckoutForm'
 import { PaymentForm } from '../components/checkout/PaymentForm'
-import { OrderSummary } from '../components/checkout/OrderSummary'
+import { Check } from 'lucide-react'
 import { useStore } from '../store'
 import api from '../lib/api'
 import toast from 'react-hot-toast'
 
-
 export function Checkout() {
-  const { cart, clearCart, setLastOrder } = useStore()
   const navigate = useNavigate()
-
-  const [step, setStep] = useState(1) // 1 = Address, 2 = Payment
-  const [address, setAddress] = useState({})
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [stockIssues, setStockIssues] = useState([])
+  const { cart, clearCart } = useStore()
+  const [step, setStep] = useState(1)
   
+  const [address, setAddress] = useState({})
+  const [stockIssues, setStockIssues] = useState([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [lastOrder, setLastOrder] = useState(null)
+
   const [discountCode, setDiscountCode] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState(null)
   const [isApplyingDiscount, setIsApplyingDiscount] = useState(false)
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    // Load Razorpay script
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    document.body.appendChild(script)
+    
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (cart.length === 0 && !isProcessing && !lastOrder) {
+      navigate('/cart')
+    }
+  }, [cart, navigate, isProcessing, lastOrder])
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) return
     setIsApplyingDiscount(true)
     try {
-      const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
-      const res = await api.post('/discounts/validate', { code: discountCode.trim(), subtotal })
-      setAppliedDiscount({ ...res.data, code: discountCode.trim() })
-      toast.success("Discount applied!")
+      const items = cart.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
+      const res = await api.post('/discounts/validate', { code: discountCode, items })
+      setAppliedDiscount(res.data)
+      toast.success(`Discount applied: ${res.data.type === 'FREE_SHIPPING' ? 'Free Shipping' : `₹${res.data.discount_amount.toFixed(2)} off`}`)
     } catch (err) {
       toast.error(err.response?.data?.detail || "Invalid discount code")
-      setDiscountCode('')
       setAppliedDiscount(null)
+      setDiscountCode('')
     } finally {
       setIsApplyingDiscount(false)
     }
   }
 
-  // Redirect if cart is empty
-  useEffect(() => {
-    if (cart.length === 0 && !isProcessing) {
-      navigate('/retail')
-    }
-  }, [cart, navigate, isProcessing])
-
-  const handleAddressSubmit = async (e) => {
-    e.preventDefault()
-
-    // Rev 2: Validate stock before proceeding to payment
-    setIsProcessing(true)
-    setStockIssues([])
-
-    try {
-      const items = cart.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
-      const res = await api.post('/orders/validate-stock', { items })
-
-      if (res.data.valid) {
-        setStep(2)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      } else {
-        setStockIssues(res.data.issues)
-        toast.error("Some items are no longer available.")
-      }
-    } catch (err) {
-      if (err.response?.status === 409) {
-        setStockIssues(err.response.data.issues)
-        toast.error("Some items are no longer available in the requested quantity.")
-      } else {
-        toast.error("Failed to validate stock. Please try again.")
-      }
-    } finally {
-      setIsProcessing(false)
-    }
+  const handleShippingSubmit = (addr) => {
+    setAddress(addr)
+    setStep(2)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handlePaymentConfirm = async (cardDetails) => {
+  const handlePaymentConfirm = async (paymentDetails) => {
     setIsProcessing(true)
     setStockIssues([])
 
@@ -94,36 +83,70 @@ export function Checkout() {
 
       // 2. Create Payment Intent
       const intentRes = await api.post('/payments/intent', { order_id: order.id })
-      const paymentId = intentRes.data.payment_id
+      const razorpayOrderId = intentRes.data.payment_id // Backend sends razorpay order id here
 
-      // 3. Confirm Payment (simulate network delay)
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const confirmRes = await api.post('/payments/confirm', {
-        payment_id: paymentId,
-        card_number: cardDetails.number,
-        card_expiry: cardDetails.expiry,
-        card_cvv: cardDetails.cvv
-      })
+      // 3. Open Razorpay Checkout
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY', 
+        amount: intentRes.data.amount * 100,
+        currency: intentRes.data.currency,
+        name: 'Croon Fit',
+        description: `Order #${order.order_number}`,
+        order_id: razorpayOrderId,
+        handler: async function (response) {
+          try {
+            // 4. Confirm Payment on Backend
+            const confirmRes = await api.post('/payments/confirm', {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature
+            })
 
-      if (confirmRes.data.success) {
-        setLastOrder({
-          order_number: confirmRes.data.order_number,
-          total: order.total,
-          email: address.full_name
-        })
-        clearCart()
-        toast.success("Payment successful! Your order has been placed.")
-        navigate('/order-success')
+            if (confirmRes.data.success) {
+              setLastOrder({
+                order_number: confirmRes.data.order_number,
+                total: order.total,
+                email: address.full_name
+              })
+              clearCart()
+              toast.success("Payment successful! Your order has been placed.")
+              navigate('/order-success')
+            }
+          } catch (err) {
+            toast.error(err.response?.data?.detail || "Payment verification failed. Please contact support.")
+            setIsProcessing(false)
+          }
+        },
+        prefill: {
+          name: address.full_name,
+          email: `${address.full_name.replace(' ', '').toLowerCase()}@example.com`,
+          contact: address.phone
+        },
+        theme: {
+          color: '#0A0A0A'
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false)
+            toast.error("Payment was cancelled. You can try again.")
+          }
+        }
       }
+
+      const rzp = new window.Razorpay(options)
+      rzp.on('payment.failed', function (response) {
+        setIsProcessing(false)
+        toast.error(response.error.description || "Payment failed. Please try again.")
+      })
+      rzp.open()
 
     } catch (err) {
       if (err.response?.status === 409) {
-        // Race condition caught at checkout confirm!
         setStep(1)
-        setStockIssues(err.response.data.issues)
+        setStockIssues(err.response.data.issues || [])
         toast.error("Inventory changed during checkout! Please review your cart.")
       } else {
-        toast.error(err.response?.data?.detail || "Payment failed. Please try again.")
+        toast.error(err.response?.data?.detail || "Failed to initialize payment. Please try again.")
       }
       setIsProcessing(false)
     }
@@ -140,55 +163,73 @@ export function Checkout() {
           <h1 className="text-4xl md:text-5xl font-light uppercase tracking-tight mb-2">
             Checkout
           </h1>
-          <p className="text-sm font-medium uppercase tracking-widest text-[#888888]">
-            Secure Payment
-          </p>
+          <p className="text-sm font-light text-[#555555]">Almost there. Complete your details below.</p>
         </div>
 
-        <div className="max-w-[1440px] mx-auto px-6">
-          <div className="flex flex-col lg:flex-row gap-12 xl:gap-24">
-
-            {/* Left: Forms */}
-            <div className="w-full lg:w-[60%] xl:w-[65%]">
-
-              {/* Wizard Nav */}
-              <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest mb-12 pb-6 border-b border-[#F5F5F5]">
-                <button
-                  onClick={() => { if (!isProcessing) setStep(1) }}
-                  className={`transition-colors duration-300 ${step === 1 ? 'text-[#0A0A0A]' : 'text-[#888888] hover:text-[#0A0A0A]'}`}
-                >
-                  <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full mr-2 ${step === 1 ? 'bg-black text-white' : 'bg-[#F5F5F5] text-[#888888]'}`}>1</span>
-                  Shipping
-                </button>
-                <div className="w-8 h-px bg-[#E5E5E5]"></div>
-                <span className={`transition-colors duration-300 ${step === 2 ? 'text-[#0A0A0A]' : 'text-[#888888]'}`}>
-                  <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full mr-2 ${step === 2 ? 'bg-black text-white' : 'bg-[#F5F5F5] text-[#888888]'}`}>2</span>
-                  Payment
-                </span>
+        <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+          <div className="lg:col-span-7 xl:col-span-8">
+            <div className="flex gap-4 mb-10">
+              <button 
+                onClick={() => setStep(1)}
+                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 1 ? 'border-black text-black' : 'border-transparent text-[#888888] hover:text-black'}`}
+              >
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-black text-white' : 'bg-[#E5E5E5] text-[#555555]'}`}>1</span>
+                Shipping
+              </button>
+              <div className="flex items-center text-[#E5E5E5] pb-2">
+                <Check className="w-4 h-4" />
               </div>
-
-              {step === 1 ? (
-                <CheckoutForm address={address} setAddress={setAddress} onSubmit={handleAddressSubmit} />
-              ) : (
-                <PaymentForm onConfirm={handlePaymentConfirm} isProcessing={isProcessing} />
-              )}
-
+              <button
+                disabled={!address.full_name}
+                onClick={() => address.full_name && setStep(2)}
+                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 2 ? 'border-black text-black' : 'border-transparent text-[#888888]'} ${!address.full_name && 'opacity-50 cursor-not-allowed'}`}
+              >
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-black text-white' : 'bg-[#E5E5E5] text-[#555555]'}`}>2</span>
+                Payment
+              </button>
             </div>
 
-            {/* Right: Summary */}
-            <div className="w-full lg:w-[40%] xl:w-[35%]">
-              <OrderSummary 
-                cart={cart} 
-                outOfStockIssues={stockIssues}
-                discountCode={discountCode}
-                setDiscountCode={setDiscountCode}
-                appliedDiscount={appliedDiscount}
-                setAppliedDiscount={setAppliedDiscount}
-                onApplyDiscount={handleApplyDiscount}
-                isApplyingDiscount={isApplyingDiscount}
+            {step === 1 ? (
+              <CheckoutForm
+                address={address}
+                setAddress={setAddress}
+                onSubmit={(e) => { e.preventDefault(); handleShippingSubmit(address); }}
               />
-            </div>
+            ) : (
+              <PaymentForm 
+                onConfirm={handlePaymentConfirm} 
+                isProcessing={isProcessing} 
+              />
+            )}
+          </div>
 
+          <div className="lg:col-span-5 xl:col-span-4">
+            <OrderSummary 
+              cart={cart} 
+              outOfStockIssues={stockIssues}
+              discountCode={discountCode}
+              setDiscountCode={setDiscountCode}
+              appliedDiscount={appliedDiscount}
+              setAppliedDiscount={setAppliedDiscount}
+              onApplyDiscount={handleApplyDiscount}
+              isApplyingDiscount={isApplyingDiscount}
+            />
+            {step === 2 && (
+              <button
+                onClick={() => handlePaymentConfirm({})}
+                disabled={isProcessing}
+                className="w-full mt-6 h-14 bg-black text-white rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-[#333333] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isProcessing ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    Processing
+                  </div>
+                ) : (
+                  'Pay Securely'
+                )}
+              </button>
+            )}
           </div>
         </div>
       </main>

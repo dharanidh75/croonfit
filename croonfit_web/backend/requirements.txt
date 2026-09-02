@@ -8,3 +8,4 @@ psycopg2-binary
 email-validator
 firebase-admin
 slowapi
+razorpay==2.0.1

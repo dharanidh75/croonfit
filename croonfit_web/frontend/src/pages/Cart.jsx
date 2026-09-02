@@ -14,7 +14,10 @@ export function Cart() {
   const navigate = useNavigate()
   const [crossSell, setCrossSell] = useState([])
 
-  const cartSubtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0)
+  const cartSubtotal = cart.reduce((acc, item) => {
+    const price = Number(item.variant?.price || item.product?.price || 0)
+    return acc + (price * Number(item.quantity || 1))
+  }, 0)
   const shipping = cartSubtotal >= 999 ? 0 : 99 // Free shipping over ₹999
   const total = cartSubtotal > 0 ? cartSubtotal + shipping : 0
 
@@ -88,7 +91,7 @@ export function Cart() {
                             {item.product.name}
                           </Link>
                           <p className="text-xs font-light text-[#555555] mt-2">Size: {item.variant.size}</p>
-                          <p className="text-xs font-medium mt-2 md:hidden">₹{item.product.price}</p>
+                          <p className="text-xs font-medium mt-2 md:hidden">₹{Number(item.variant?.price || item.product?.price || 0)}</p>
 
                           <button
                             onClick={() => {
@@ -124,8 +127,10 @@ export function Cart() {
                       </div>
 
                       {/* Total Price */}
-                      <div className="col-span-1 md:col-span-3 hidden md:flex items-center justify-end">
-                        <span className="text-base font-medium">₹{item.product.price * item.quantity}</span>
+                      <div className="col-span-1 md:col-span-3 flex items-center justify-end text-black">
+                        <span className="text-base font-medium">
+                          {`₹${(Number(item.variant?.price || item.product?.price || 0) * Number(item.quantity || 1)).toFixed(2)}`}
+                        </span>
                       </div>
                     </div>
                   ))}

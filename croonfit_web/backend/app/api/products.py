@@ -56,7 +56,7 @@ def get_featured(
 @router.get("/categories", response_model=List[dict])
 def get_categories(db: Session = Depends(get_db)):
     categories = ProductService.get_categories(db)
-    return [{"id": str(c.id), "name": c.name, "slug": c.slug, "gender": c.gender} for c in categories]
+    return [{"id": str(c.id), "name": c.name, "slug": c.slug, "gender": c.gender, "cover_image_url": c.cover_image_url} for c in categories]
 
 @router.get("/{slug}", response_model=ProductPublicDetail)
 def get_product(slug: str, db: Session = Depends(get_db)):

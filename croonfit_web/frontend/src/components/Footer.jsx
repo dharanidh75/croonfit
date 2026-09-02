@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer className="bg-[#000000] text-white">
       {/* Main grid */}
-      <div className="max-w-[1280px] mx-auto px-6 pt-16 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="max-w-[1280px] mx-auto px-6 pt-16 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
 
         {/* Brand column */}
         <div>
@@ -70,21 +70,6 @@ export function Footer() {
           </ul>
         </div>
 
-        {/* Newsletter */}
-        <div>
-          <h4 className="font-heading font-bold text-xs uppercase tracking-[0.12em] mb-5 text-white">Stay Updated</h4>
-          <p className="font-body text-sm text-[#888888] mb-4">Get 10% off your first order.</p>
-          <form onSubmit={(e) => e.preventDefault()} className="flex border border-[#333333] focus-within:border-[#888888] transition-colors duration-150">
-            <input
-              type="email"
-              placeholder="Your email"
-              className="bg-transparent px-3 py-2.5 w-full outline-none font-body text-sm text-white placeholder:text-[#888888]"
-            />
-            <button type="submit" className="px-4 font-heading font-bold text-xs uppercase tracking-wider whitespace-nowrap text-[#888888] hover:text-white transition-colors duration-150">
-              JOIN
-            </button>
-          </form>
-        </div>
       </div>
 
       {/* Bottom bar */}

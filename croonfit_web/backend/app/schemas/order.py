@@ -103,11 +103,9 @@ class PaymentIntentOut(BaseModel):
 
 
 class PaymentConfirm(BaseModel):
-    payment_id: str
-    # Dummy card details — never stored beyond last4
-    card_number: str   # always "4242 4242 4242 4242" in test mode
-    card_expiry: str
-    card_cvv: str
+    razorpay_payment_id: str
+    razorpay_order_id: str
+    razorpay_signature: str
 
 
 class PaymentConfirmOut(BaseModel):

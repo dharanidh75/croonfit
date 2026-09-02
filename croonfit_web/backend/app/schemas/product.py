@@ -54,6 +54,8 @@ class ProductVariantOut(BaseModel):
     color_hex: Optional[str] = None
     stock_qty: int
     sku: str
+    price: Optional[float] = None
+    image_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -65,6 +67,8 @@ class ProductVariantCreate(BaseModel):
     color_hex: Optional[str] = None
     stock_qty: int = Field(0, ge=0)
     sku: str
+    price: Optional[float] = None
+    image_url: Optional[str] = None
 
 
 # ─── Product ─────────────────────────────────────────────────────────────────

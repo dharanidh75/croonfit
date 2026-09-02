@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from datetime import datetime, timezone
 from decimal import Decimal
 
@@ -11,7 +12,7 @@ router = APIRouter()
 
 @router.post("/validate", response_model=DiscountValidateResponse)
 def validate_discount(req: DiscountValidateRequest, db: Session = Depends(get_db)):
-    discount = db.query(Discount).filter(Discount.code == req.code).first()
+    discount = db.query(Discount).filter(func.upper(Discount.code) == req.code.upper()).first()
     
     if not discount:
         raise HTTPException(status_code=404, detail="Discount code not found")

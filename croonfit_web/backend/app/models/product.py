@@ -71,6 +71,8 @@ class ProductVariant(Base):
     color_hex = Column(String(7))
     stock_qty = Column(Integer, server_default=text("0"), nullable=False)
     sku = Column(String(100), unique=True, nullable=False)
+    price = Column(Numeric(10, 2), nullable=True)
+    image_url = Column(String(500), nullable=True)
 
     product = relationship("Product", back_populates="variants")
     cart_items = relationship("CartItem", back_populates="variant", cascade="all, delete-orphan")

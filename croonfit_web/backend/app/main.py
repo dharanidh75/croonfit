@@ -7,11 +7,23 @@ from app.api import products, orders, payments, wishlist, admin, auth, addresses
 from app.api.admin import products as admin_products
 from fastapi.staticfiles import StaticFiles
 import os
+from contextlib import asynccontextmanager
+import asyncio
+from app.tasks import auto_cancel_pending_orders
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Start the background task
+    task = asyncio.create_task(auto_cancel_pending_orders())
+    yield
+    # Cleanup task on shutdown
+    task.cancel()
 
 app = FastAPI(
     title="Croonfit API",
     description="Backend for Croonfit clothing e-commerce platform",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Use absolute path so uploads are found regardless of working directory

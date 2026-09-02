@@ -11,8 +11,9 @@ export function OrderSummary({
   isApplyingDiscount = false
 }) {
   const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
-  const shipping = subtotal >= 999 ? 0 : 99
-  const discountAmount = appliedDiscount?.amount || 0
+  const isFreeShipping = appliedDiscount?.type === 'FREE_SHIPPING'
+  const shipping = (subtotal >= 999 || isFreeShipping) ? 0 : 99
+  const discountAmount = appliedDiscount?.discount_amount || 0
   const total = Math.max(0, subtotal + shipping - discountAmount)
 
   return (
@@ -96,7 +97,7 @@ export function OrderSummary({
         {appliedDiscount && (
           <div className="flex justify-between text-[#111111] font-medium">
             <span>Discount ({appliedDiscount.code})</span>
-            <span className="text-[#E53E3E]">-₹{appliedDiscount.amount.toFixed(2)}</span>
+            <span className="text-[#E53E3E]">-₹{(appliedDiscount.discount_amount || 0).toFixed(2)}</span>
           </div>
         )}
       </div>
