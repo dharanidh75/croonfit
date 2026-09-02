@@ -4,8 +4,6 @@ import { Footer } from '../components/Footer'
 import { useStore } from '../store'
 import { useNavigate, Link, useParams } from 'react-router-dom'
 import { LogOut, Package, ChevronRight, Mail, User as UserIcon, Phone, Shield, MapPin, CreditCard, Heart, Headphones, Settings } from 'lucide-react'
-import { auth } from '../lib/firebase'
-import { onAuthStateChanged } from 'firebase/auth'
 
 // Sub-components
 import { SecuritySection } from '../components/account/SecuritySection'
@@ -21,29 +19,13 @@ export function Account() {
   
   const activeView = tab || 'dashboard'
 
-  const [isAdmin, setIsAdmin] = useState(false)
+  const isAdmin = user?.role === 'ADMIN'
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login')
     }
   }, [isAuthenticated, navigate])
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        try {
-          const idTokenResult = await currentUser.getIdTokenResult(true)
-          setIsAdmin(!!idTokenResult.claims.admin)
-        } catch (e) {
-          console.error("Failed to fetch custom claims", e)
-        }
-      } else {
-        setIsAdmin(false)
-      }
-    })
-    return () => unsubscribe()
-  }, [])
 
   const handleLogout = () => {
     logout()

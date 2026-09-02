@@ -25,6 +25,7 @@ class SyncUserResponse(BaseModel):
     last_name: Optional[str] = None
     avatar_url: Optional[str] = None
     is_new: bool
+    role: str
 
     class Config:
         from_attributes = True
@@ -93,4 +94,5 @@ def sync_user(
         last_name=user.last_name,
         avatar_url=user.avatar_url,
         is_new=is_new,
+        role=user.role,
     )
