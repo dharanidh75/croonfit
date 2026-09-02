@@ -1,11 +1,35 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useStore } from '../store'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
 import { auth, googleProvider } from '../lib/firebase'
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import { signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+
+// Friendly error messages for Firebase auth codes
+function getAuthErrorMessage(code) {
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+      return 'No account found with these details. Please check your email & password, or Sign Up first.'
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists. Try logging in instead.'
+    case 'auth/weak-password':
+      return 'Password is too weak. Please use at least 6 characters.'
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.'
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please wait a moment and try again.'
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your internet connection.'
+    case 'auth/popup-closed-by-user':
+      return 'Sign-in was cancelled. Please try again.'
+    default:
+      return 'Something went wrong. Please try again.'
+  }
+}
 
 // Syncs the Firebase user to our Supabase backend after any login
 async function syncUserToBackend(firebaseUser) {
@@ -33,6 +57,42 @@ export function Login() {
   const navigate = useNavigate()
   const { login } = useStore()
 
+  // Handle the result after returning from Google redirect
+  useEffect(() => {
+    if (!auth) return
+    setLoading(true)
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result && result.user) {
+          const firebaseUser = result.user
+          const token = await firebaseUser.getIdToken()
+          // Try to sync to backend, but don't block login if it fails
+          try {
+            const { syncedUser } = await syncUserToBackend(firebaseUser)
+            login(
+              { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || firebaseUser.displayName || 'Guest', ...syncedUser },
+              token
+            )
+          } catch (syncErr) {
+            // Backend sync failed (e.g. not deployed yet) — still log user in from Firebase data
+            console.warn('Backend sync failed, logging in from Firebase data:', syncErr)
+            login(
+              { email: firebaseUser.email, name: firebaseUser.displayName || 'Guest', avatar_url: firebaseUser.photoURL },
+              token
+            )
+          }
+          toast.success('Welcome!')
+          navigate('/')
+        }
+      })
+      .catch((err) => {
+        if (err.code && err.code !== 'auth/no-current-user') {
+          toast.error(getAuthErrorMessage(err.code))
+        }
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!auth) {
@@ -45,7 +105,7 @@ export function Login() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
         const { token, syncedUser } = await syncUserToBackend(userCredential.user)
         login(
-          { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || 'Guest User', ...syncedUser },
+          { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || 'Guest', ...syncedUser },
           token
         )
         toast.success('Welcome back!')
@@ -57,29 +117,19 @@ export function Login() {
         setTab('login')
       }
     } catch (err) {
-      toast.error(err.message || "Hmm. That didn't work.")
+      toast.error(getAuthErrorMessage(err.code))
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     if (!auth) {
       toast.error("Firebase is not configured. Add keys to .env.development and restart.")
       return
     }
-    try {
-      const userCredential = await signInWithPopup(auth, googleProvider)
-      const { token, syncedUser } = await syncUserToBackend(userCredential.user)
-      login(
-        { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || userCredential.user.displayName || 'Guest User', ...syncedUser },
-        token
-      )
-      toast.success('Welcome!')
-      navigate('/')
-    } catch (err) {
-      toast.error(err.message || "Failed to sign in with Google.")
-    }
+    // Redirect to Google — no popup, no browser permission dialog
+    signInWithRedirect(auth, googleProvider)
   }
 
   return (
