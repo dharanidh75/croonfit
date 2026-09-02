@@ -157,7 +157,7 @@ export function ProductForm() {
         slug,
         price: parseFloat(formData.price),
         compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
-        category_id: parseInt(formData.category_id),
+        category_id: formData.category_id,
         is_active: formData.status === 'PUBLISHED',
         status: formData.status,
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # pyrefly: ignore [missing-import]
 from app.config import settings
 # pyrefly: ignore [missing-import]
-from app.api import products, orders, payments, wishlist, admin, auth
+from app.api import products, orders, payments, wishlist, admin, auth, addresses
 from app.api.admin import products as admin_products
 
 app = FastAPI(
@@ -28,6 +28,7 @@ app.add_middleware(
 
 # Auth routes (user sync after Firebase login)
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(addresses.router, prefix="/api/auth", tags=["Addresses"])
 
 # Customer routes
 app.include_router(products.router, prefix="/api/products", tags=["Products"])

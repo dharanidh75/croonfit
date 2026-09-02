@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel, Field
 from typing import Optional, List, Any
 from datetime import datetime
@@ -7,8 +8,8 @@ from app.models.product import GenderCategory
 # ─── SizeChart ───────────────────────────────────────────────────────────────
 
 class SizeChartOut(BaseModel):
-    id: str
-    category_id: str
+    id: UUID
+    category_id: UUID
     rows: List[Any]  # [{size, chest_cm, length_cm, sleeve_cm, shoulder_cm, fit_note}]
 
     class Config:
@@ -18,7 +19,7 @@ class SizeChartOut(BaseModel):
 # ─── Category ────────────────────────────────────────────────────────────────
 
 class CategoryOut(BaseModel):
-    id: str
+    id: UUID
     name: str
     slug: str
     gender: GenderCategory
@@ -33,7 +34,7 @@ class CategoryOut(BaseModel):
 # ─── ProductImage ─────────────────────────────────────────────────────────────
 
 class ProductImageOut(BaseModel):
-    id: str
+    id: UUID
     url: str
     alt: Optional[str] = None
     is_primary: bool
@@ -46,7 +47,7 @@ class ProductImageOut(BaseModel):
 # ─── ProductVariant ───────────────────────────────────────────────────────────
 
 class ProductVariantOut(BaseModel):
-    id: str
+    id: UUID
     size: str
     color: str
     color_hex: Optional[str] = None
@@ -68,13 +69,13 @@ class ProductVariantCreate(BaseModel):
 # ─── Product ─────────────────────────────────────────────────────────────────
 
 class ProductAdminDetail(BaseModel):
-    id: str
+    id: UUID
     name: str
     slug: str
     description: Optional[str] = None
     price: float
     compare_price: Optional[float] = None
-    category_id: str
+    category_id: UUID
     is_active: bool
     is_featured: bool
     tags: Optional[List[str]] = None
@@ -87,7 +88,7 @@ class ProductAdminDetail(BaseModel):
         from_attributes = True
 
 class ProductPublicDetail(BaseModel):
-    id: str
+    id: UUID
     name: str
     slug: str
     description: Optional[str] = None
@@ -103,7 +104,7 @@ class ProductPublicDetail(BaseModel):
 
 class ProductPublicListItem(BaseModel):
     """Lighter response for shop grid — no variants, just primary image."""
-    id: str
+    id: UUID
     name: str
     slug: str
     price: float
@@ -131,7 +132,7 @@ class ProductCreate(BaseModel):
     description: Optional[str] = None
     price: float = Field(..., gt=0)
     compare_price: Optional[float] = Field(None, ge=0)
-    category_id: str
+    category_id: UUID
     is_active: bool = True
     is_featured: bool = False
     tags: Optional[List[str]] = None
@@ -144,7 +145,7 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
     compare_price: Optional[float] = Field(None, ge=0)
-    category_id: Optional[str] = None
+    category_id: Optional[UUID] = None
     is_active: Optional[bool] = None
     is_featured: Optional[bool] = None
     tags: Optional[List[str]] = None
@@ -158,7 +159,7 @@ class ProductListResponse(BaseModel):
     has_more: bool
 
 class ProductAdminListItem(BaseModel):
-    id: str
+    id: UUID
     name: str
     sku: Optional[str] = None
     price: float

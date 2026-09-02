@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel
 from typing import Optional, List, Any, Dict
 from datetime import datetime
@@ -8,13 +9,13 @@ from app.models.order import OrderStatus, PaymentStatus
 
 class CartLineItem(BaseModel):
     """Input: what the frontend sends when creating an order."""
-    variant_id: str
+    variant_id: UUID
     quantity: int
 
 
 class OrderItemOut(BaseModel):
-    id: str
-    variant_id: str
+    id: UUID
+    variant_id: UUID
     product_name: str
     variant_label: str
     product_image: Optional[str] = None
@@ -47,7 +48,7 @@ class OrderCreate(BaseModel):
 
 
 class OrderOut(BaseModel):
-    id: str
+    id: UUID
     order_number: str
     status: OrderStatus
     payment_status: PaymentStatus
@@ -74,7 +75,7 @@ class StockValidationRequest(BaseModel):
 
 
 class StockValidationIssue(BaseModel):
-    variant_id: str
+    variant_id: UUID
     requested: int
     available: int
     product_name: str
@@ -89,19 +90,19 @@ class StockValidationResponse(BaseModel):
 # ─── Payment ─────────────────────────────────────────────────────────────────
 
 class PaymentIntentCreate(BaseModel):
-    order_id: str
+    order_id: UUID
 
 
 class PaymentIntentOut(BaseModel):
-    payment_id: str
+    payment_id: UUID
     amount: float
     currency: str
-    order_id: str
+    order_id: UUID
     status: str
 
 
 class PaymentConfirm(BaseModel):
-    payment_id: str
+    payment_id: UUID
     # Dummy card details — never stored beyond last4
     card_number: str   # always "4242 4242 4242 4242" in test mode
     card_expiry: str
@@ -111,16 +112,16 @@ class PaymentConfirm(BaseModel):
 class PaymentConfirmOut(BaseModel):
     success: bool
     order_number: str
-    payment_id: str
+    payment_id: UUID
     message: str
 
 
 # ─── Payment Ledger (admin) ───────────────────────────────────────────────────
 
 class PaymentRecordOut(BaseModel):
-    id: str
-    order_id: str
-    payment_id: str
+    id: UUID
+    order_id: UUID
+    payment_id: UUID
     amount: float
     currency: str
     status: PaymentStatus

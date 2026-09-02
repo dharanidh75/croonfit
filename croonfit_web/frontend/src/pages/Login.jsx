@@ -5,7 +5,7 @@ import { useStore } from '../store'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
 import { auth, googleProvider } from '../lib/firebase'
-import { signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 
 // Friendly error messages for Firebase auth codes
 function getAuthErrorMessage(code) {
@@ -57,41 +57,7 @@ export function Login() {
   const navigate = useNavigate()
   const { login } = useStore()
 
-  // Handle the result after returning from Google redirect
-  useEffect(() => {
-    if (!auth) return
-    setLoading(true)
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result && result.user) {
-          const firebaseUser = result.user
-          const token = await firebaseUser.getIdToken()
-          // Try to sync to backend, but don't block login if it fails
-          try {
-            const { syncedUser } = await syncUserToBackend(firebaseUser)
-            login(
-              { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || firebaseUser.displayName || 'Guest', ...syncedUser },
-              token
-            )
-          } catch (syncErr) {
-            // Backend sync failed (e.g. not deployed yet) — still log user in from Firebase data
-            console.warn('Backend sync failed, logging in from Firebase data:', syncErr)
-            login(
-              { email: firebaseUser.email, name: firebaseUser.displayName || 'Guest', avatar_url: firebaseUser.photoURL },
-              token
-            )
-          }
-          toast.success('Welcome!')
-          navigate('/')
-        }
-      })
-      .catch((err) => {
-        if (err.code && err.code !== 'auth/no-current-user') {
-          toast.error(getAuthErrorMessage(err.code))
-        }
-      })
-      .finally(() => setLoading(false))
-  }, [])
+  // Removed getRedirectResult useEffect as we will use signInWithPopup now
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -123,13 +89,40 @@ export function Login() {
     }
   }
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     if (!auth) {
       toast.error("Firebase is not configured. Add keys to .env.development and restart.")
       return
     }
-    // Redirect to Google — no popup, no browser permission dialog
-    signInWithRedirect(auth, googleProvider)
+    setLoading(true)
+    try {
+      const result = await signInWithPopup(auth, googleProvider)
+      if (result && result.user) {
+        const firebaseUser = result.user
+        const token = await firebaseUser.getIdToken()
+        try {
+          const { syncedUser } = await syncUserToBackend(firebaseUser)
+          login(
+            { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || firebaseUser.displayName || 'Guest', ...syncedUser },
+            token
+          )
+        } catch (syncErr) {
+          console.warn('Backend sync failed, logging in from Firebase data:', syncErr)
+          login(
+            { email: firebaseUser.email, name: firebaseUser.displayName || 'Guest', avatar_url: firebaseUser.photoURL },
+            token
+          )
+        }
+        toast.success('Welcome!')
+        navigate('/')
+      }
+    } catch (err) {
+      if (err.code && err.code !== 'auth/popup-closed-by-user') {
+        toast.error(getAuthErrorMessage(err.code))
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

@@ -9,11 +9,13 @@ from app.schemas.user import AdminLogin, AdminToken
 from app.schemas.order import OrderOut, OrderStatusUpdate, PaymentRecordOut
 from app.core.firebase_auth import require_admin_claim
 
+from app.api.admin import products, purchase_orders, inventory
+
 router = APIRouter()
 
-
-
-
+router.include_router(products.router, prefix="/products", tags=["admin_products"])
+router.include_router(purchase_orders.router, prefix="/purchase-orders", tags=["admin_purchase_orders"])
+router.include_router(inventory.router, prefix="/inventory", tags=["admin_inventory"])
 # ─── Admin: Orders ────────────────────────────────────────────────────────────
 
 @router.get("/orders", response_model=List[OrderOut])

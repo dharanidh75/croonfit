@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
@@ -20,7 +21,7 @@ class UserLogin(BaseModel):
 
 
 class UserOut(BaseModel):
-    id: str
+    id: UUID
     email: EmailStr
     first_name: str
     last_name: str
@@ -64,8 +65,8 @@ class AddressUpdate(AddressBase):
 
 
 class AddressOut(AddressBase):
-    id: str
-    user_id: str
+    id: UUID
+    user_id: UUID
 
     class Config:
         from_attributes = True
@@ -83,8 +84,8 @@ class PaymentMethodCreate(PaymentMethodBase):
 
 
 class PaymentMethodOut(PaymentMethodBase):
-    id: str
-    user_id: str
+    id: UUID
+    user_id: UUID
 
     class Config:
         from_attributes = True
