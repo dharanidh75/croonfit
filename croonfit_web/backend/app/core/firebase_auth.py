@@ -46,12 +46,21 @@ def verify_firebase_token(credentials: HTTPAuthorizationCredentials = Security(s
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-def require_admin_claim(decoded_token: dict = Security(verify_firebase_token)) -> dict:
-    """Ensures the decoded token has the 'admin' custom claim set to true."""
-    if not decoded_token.get("admin") is True:
+def require_admin_claim(
+    decoded_token: dict = Security(verify_firebase_token),
+    db: Session = Depends(get_db)
+) -> dict:
+    """Ensures the user has the 'ADMIN' role in the database."""
+    from app.models.user import User, UserRole
+    firebase_uid = decoded_token.get("uid")
+    if not firebase_uid:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+        
+    user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
+    if not user or user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=403,
-            detail="Not authorized. Admin privileges required.",
+            detail="Not authorized. Admin privileges required in database.",
         )
     return decoded_token
 

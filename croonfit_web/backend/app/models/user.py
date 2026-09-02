@@ -11,6 +11,7 @@ import enum
 class UserRole(str, enum.Enum):
     RETAILER = "RETAILER"
     WHOLESALER = "WHOLESALER"
+    ADMIN = "ADMIN"
 
 
 class User(Base):
