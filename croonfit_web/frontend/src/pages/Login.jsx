@@ -7,6 +7,20 @@ import api from '../lib/api'
 import { auth, googleProvider } from '../lib/firebase'
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 
+// Syncs the Firebase user to our Supabase backend after any login
+async function syncUserToBackend(firebaseUser) {
+  const token = await firebaseUser.getIdToken()
+  const nameParts = (firebaseUser.displayName || '').split(' ')
+  const res = await api.post('/auth/sync', {
+    first_name: nameParts[0] || null,
+    last_name: nameParts.slice(1).join(' ') || null,
+    avatar_url: firebaseUser.photoURL || null,
+  }, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  return { token, syncedUser: res.data }
+}
+
 export function Login() {
   const [tab, setTab]               = useState('login')   // 'login' | 'signup'
   const [email, setEmail]           = useState('')
@@ -29,13 +43,16 @@ export function Login() {
     try {
       if (tab === 'login') {
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
-        const token = await userCredential.user.getIdToken()
-        login({ email, name: userCredential.user.displayName || 'Guest User' }, token)
+        const { token, syncedUser } = await syncUserToBackend(userCredential.user)
+        login(
+          { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || 'Guest User', ...syncedUser },
+          token
+        )
         toast.success('Welcome back!')
         navigate('/')
       } else {
-        await createUserWithEmailAndPassword(auth, email, password)
-        // Note: setting displayName could be added here if needed
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+        await syncUserToBackend(userCredential.user)
         toast.success('Account created! Please log in.')
         setTab('login')
       }
@@ -53,8 +70,11 @@ export function Login() {
     }
     try {
       const userCredential = await signInWithPopup(auth, googleProvider)
-      const token = await userCredential.user.getIdToken()
-      login({ email: userCredential.user.email, name: userCredential.user.displayName || 'Guest User' }, token)
+      const { token, syncedUser } = await syncUserToBackend(userCredential.user)
+      login(
+        { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || userCredential.user.displayName || 'Guest User', ...syncedUser },
+        token
+      )
       toast.success('Welcome!')
       navigate('/')
     } catch (err) {

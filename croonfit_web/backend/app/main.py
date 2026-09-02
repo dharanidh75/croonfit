@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # pyrefly: ignore [missing-import]
 from app.config import settings
 # pyrefly: ignore [missing-import]
-from app.api import products, orders, payments, wishlist, admin
+from app.api import products, orders, payments, wishlist, admin, auth
 from app.api.admin import products as admin_products
 
 app = FastAPI(
@@ -18,11 +18,16 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:3000",
+        "https://croonfit.vercel.app",
+        # Add any other Vercel preview URLs below if needed
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Auth routes (user sync after Firebase login)
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 
 # Customer routes
 app.include_router(products.router, prefix="/api/products", tags=["Products"])
