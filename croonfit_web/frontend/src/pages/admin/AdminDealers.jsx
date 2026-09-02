@@ -1,14 +1,19 @@
 import React, { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { DataTable } from '../../components/admin/ui/DataTable'
+import { adminApi } from '../../lib/api'
 import { Search, Filter, Plus } from 'lucide-react'
 
 export function AdminDealers() {
-  const [dealers, setDealers] = useState([
-    { id: 'W001', company: 'Urban Thread Co.', contact: 'Michael Chang', email: 'mike@urbanthread.com', status: 'Approved', total_orders: 45, ytd_spend: 1250000 },
-    { id: 'W002', company: 'FitStyle Retailers', contact: 'Sarah Jenkins', email: 'sarah@fitstyle.com', status: 'Pending', total_orders: 0, ytd_spend: 0 },
-    { id: 'W003', company: 'Core Athletics', contact: 'David Rossi', email: 'd.rossi@coreathletics.it', status: 'Approved', total_orders: 112, ytd_spend: 4500000 },
-  ])
+  const [dealers, setDealers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    adminApi.get('/admin/dealers')
+      .then(res => setDealers(res.data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
+  }, [])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -140,7 +145,7 @@ export function AdminDealers() {
         </div>
       </div>
 
-      <DataTable columns={columns} data={filteredDealers} emptyMessage="No partners found." />
+      <DataTable columns={columns} data={filteredDealers} emptyMessage={loading ? "Loading partners..." : "No partners found."} />
 
       {/* Add Partner Modal */}
       {showAddPartner && (

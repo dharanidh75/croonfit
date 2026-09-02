@@ -1,17 +1,30 @@
 import React, { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { DataTable } from '../../components/admin/ui/DataTable'
+import { adminApi } from '../../lib/api'
 import { Search, Filter, Download, X } from 'lucide-react'
 
 export function AdminCustomers() {
-  const [customers] = useState([
-    { id: '1001', name: 'Emily Chen', email: 'emily.chen@example.com', phone: '+91 9876543210', address: '123 Main St, Apartment 4B, Mumbai, Maharashtra, 400001', orders: 12, spent: 42500, last_active: '2026-07-10T14:30:00Z', joined: '2025-01-15T10:00:00Z', status: 'Active', order_history: [{ id: '1042', date: '2026-07-10', total: 3398, status: 'DELIVERED', items: 2 }, { id: '984', date: '2026-05-12', total: 1499, status: 'DELIVERED', items: 1 }] },
-    { id: '1002', name: 'Marcus Johnson', email: 'marcus.j@example.com', phone: '+91 9876543211', address: '45 Park Avenue, Bangalore, Karnataka, 560001', orders: 3, spent: 8500, last_active: '2026-07-05T09:15:00Z', joined: '2026-03-22T11:00:00Z', status: 'Active', order_history: [{ id: '1035', date: '2026-07-05', total: 4250, status: 'SHIPPED', items: 3 }] },
-    { id: '1003', name: 'Sarah Williams', email: 'sarah.w@example.com', phone: '+91 9876543212', address: 'No address provided', orders: 0, spent: 0, last_active: '2026-06-20T11:45:00Z', joined: '2026-06-15T09:30:00Z', status: 'Inactive', order_history: [] },
-    { id: '1004', name: 'David Lee', email: 'david.lee@example.com', phone: '+91 9876543213', address: '88 Tech Park Rd, Hyderabad, Telangana, 500081', orders: 8, spent: 28900, last_active: '2026-07-11T08:20:00Z', joined: '2025-11-05T14:20:00Z', status: 'Active', order_history: [{ id: '1045', date: '2026-07-11', total: 5500, status: 'PLACED', items: 4 }] },
-  ])
+  const [customers, setCustomers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    adminApi.get('/admin/customers')
+      .then(res => setCustomers(res.data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
+  }, [])
 
   const [selectedCustomer, setSelectedCustomer] = useState(null)
+  
+  const fetchCustomerDetails = async (id) => {
+    try {
+      const res = await adminApi.get(`/admin/customers/${id}`)
+      setSelectedCustomer(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -73,7 +86,7 @@ export function AdminCustomers() {
     { 
       header: 'Last Order', 
       accessorKey: 'last_active', 
-      cell: row => <span className="text-[#666666]">{new Date(row.last_active).toLocaleDateString()}</span> 
+      cell: row => <span className="text-[#666666]">{row.last_active ? new Date(row.last_active).toLocaleDateString() : 'Never'}</span> 
     }
   ]
 
@@ -148,7 +161,7 @@ export function AdminCustomers() {
         </div>
       </div>
 
-      <DataTable columns={columns} data={filteredCustomers} emptyMessage="No customers found." onRowClick={setSelectedCustomer} />
+      <DataTable columns={columns} data={filteredCustomers} emptyMessage={loading ? "Loading customers..." : "No customers found."} onRowClick={(row) => fetchCustomerDetails(row.id)} />
 
       {/* Customer Details Modal */}
       {selectedCustomer && (

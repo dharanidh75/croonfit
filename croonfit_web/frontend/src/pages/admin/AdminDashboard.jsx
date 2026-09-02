@@ -36,16 +36,7 @@ export function AdminDashboard() {
 
   if (!stats) return null
 
-  const chartData = [
-    { label: 'Jan', value: Math.floor((stats.revenue || 4250000) * 0.4) },
-    { label: 'Feb', value: Math.floor((stats.revenue || 4250000) * 0.5) },
-    { label: 'Mar', value: Math.floor((stats.revenue || 4250000) * 0.45) },
-    { label: 'Apr', value: Math.floor((stats.revenue || 4250000) * 0.6) },
-    { label: 'May', value: Math.floor((stats.revenue || 4250000) * 0.75) },
-    { label: 'Jun', value: Math.floor((stats.revenue || 4250000) * 0.8) },
-    { label: 'Jul', value: Math.floor((stats.revenue || 4250000) * 0.9) },
-    { label: 'Aug', value: Math.floor(stats.revenue || 4250000) }
-  ]
+  const chartData = stats.revenue_chart || []
 
   const lowStockCols = [
     { header: 'Product', accessorKey: 'product', cell: (row) => <span className="font-medium">{row.product}</span> },
@@ -75,15 +66,15 @@ export function AdminDashboard() {
         <KPICard
           title="Total Revenue"
           value={`₹${stats.revenue.toFixed(2)}`}
-          trend="up"
-          trendValue="12.5%"
+          trend={stats.trends?.revenue >= 0 ? "up" : "down"}
+          trendValue={`${Math.abs(stats.trends?.revenue || 0).toFixed(1)}%`}
           icon={IndianRupee}
         />
         <KPICard
           title="Total Orders"
           value={stats.orders.total}
-          trend="up"
-          trendValue="8.2%"
+          trend={stats.trends?.orders >= 0 ? "up" : "down"}
+          trendValue={`${Math.abs(stats.trends?.orders || 0).toFixed(1)}%`}
           icon={ShoppingBag}
         />
         <KPICard
@@ -95,9 +86,9 @@ export function AdminDashboard() {
         />
         <KPICard
           title="Active Customers"
-          value="1,249" // Mock metric to fill out the 4-grid
-          trend="up"
-          trendValue="4.1%"
+          value={stats.active_customers || 0}
+          trend="neutral"
+          trendValue="90-Day"
           icon={Users}
         />
       </div>
@@ -118,18 +109,13 @@ export function AdminDashboard() {
             <CardHeader title="Recent Activity" />
             <CardContent className="flex-1">
               <div className="space-y-6">
-                {[
-                  { text: 'New order #1042 placed', time: '10 mins ago' },
-                  { text: 'Stock alert: "Classic Tee - Black M" is low', time: '1 hr ago' },
-                  { text: 'Dealer application from "FitStore Inc." approved', time: '3 hrs ago' },
-                  { text: 'Product "Oversized Hoodie" was updated', time: '5 hrs ago' },
-                ].map((item, i) => (
+                {(stats.recent_activity || []).map((item, i) => (
                   <div key={i} className="flex gap-4 relative">
-                    {i !== 3 && <div className="absolute top-6 bottom-[-24px] left-1.5 w-px bg-[#E5E5E5]"></div>}
+                    {i !== (stats.recent_activity?.length - 1) && <div className="absolute top-6 bottom-[-24px] left-1.5 w-px bg-[#E5E5E5]"></div>}
                     <div className="w-3 h-3 rounded-full bg-[#111111] mt-1.5 shrink-0 z-10 ring-4 ring-white"></div>
                     <div>
                       <p className="text-sm font-medium text-[#111111]">{item.text}</p>
-                      <p className="text-xs text-[#888888] mt-0.5">{item.time}</p>
+                      <p className="text-xs text-[#888888] mt-0.5">{new Date(item.time).toLocaleString()}</p>
                     </div>
                   </div>
                 ))}
@@ -167,8 +153,6 @@ export function AdminDashboard() {
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          {/* We use low_stock_variants array length logic to display mock recent orders for now, 
-              until Phase 3 where we fetch actual recent orders list */}
           <DataTable
             columns={[
               { header: 'Order ID', accessorKey: 'id', cell: row => <span className="font-medium">#{row.id}</span> },

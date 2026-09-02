@@ -45,6 +45,7 @@ class OrderCreate(BaseModel):
     items: List[CartLineItem]
     shipping_address: ShippingAddress
     notes: Optional[str] = None
+    discount_code: Optional[str] = None
 
 
 class OrderOut(BaseModel):

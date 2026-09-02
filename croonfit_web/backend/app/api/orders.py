@@ -56,6 +56,8 @@ def validate_stock(req: StockValidationRequest, db: Session = Depends(get_db)):
 
 
 from decimal import Decimal
+from datetime import datetime, timezone
+from app.models.discount import Discount, DiscountRedemption, DiscountType
 
 @router.post("", response_model=OrderOut, status_code=201)
 def create_order(
@@ -130,8 +132,44 @@ def create_order(
             },
         )
 
-    shipping_cost = Decimal("0.0") if subtotal >= Decimal(str(settings.FREE_SHIPPING_THRESHOLD)) else Decimal("99.0")
-    total = subtotal + shipping_cost
+    # Process Discount
+    discount_amount = Decimal("0.0")
+    discount = None
+    if order_in.discount_code:
+        discount = (
+            db.query(Discount)
+            .filter(Discount.code == order_in.discount_code)
+            .with_for_update()
+            .first()
+        )
+        if not discount:
+            db.rollback()
+            raise HTTPException(status_code=400, detail="Invalid discount code")
+        if not discount.is_active:
+            db.rollback()
+            raise HTTPException(status_code=400, detail="Discount code is not active")
+        if discount.expires_at and discount.expires_at < datetime.now(timezone.utc):
+            db.rollback()
+            raise HTTPException(status_code=400, detail="Discount code has expired")
+        if discount.usage_cap is not None and discount.current_usage >= discount.usage_cap:
+            db.rollback()
+            raise HTTPException(status_code=400, detail="Discount code usage cap reached")
+
+        if discount.type == DiscountType.PERCENTAGE:
+            discount_amount = subtotal * (Decimal(str(discount.percentage_off)) / Decimal("100.0"))
+        elif discount.type == DiscountType.FIXED_AMOUNT:
+            discount_amount = min(Decimal(str(discount.fixed_amount_off)), subtotal)
+        elif discount.type == DiscountType.FREE_SHIPPING:
+            discount_amount = Decimal("0.0") # Handled below
+
+    post_discount_subtotal = subtotal - discount_amount
+
+    shipping_cost = Decimal("0.0") if post_discount_subtotal >= Decimal(str(settings.FREE_SHIPPING_THRESHOLD)) else Decimal("99.0")
+    if discount and discount.type == DiscountType.FREE_SHIPPING:
+        discount_amount = shipping_cost
+        shipping_cost = Decimal("0.0")
+
+    total = post_discount_subtotal + shipping_cost
 
     order = Order(
         order_number=_generate_order_number(),
@@ -144,6 +182,17 @@ def create_order(
         items=order_items,
     )
     order.status_history = [OrderStatusHistory(status=OrderStatus.PENDING)]
+    
+    if discount:
+        discount.current_usage += 1
+        redemption = DiscountRedemption(
+            discount=discount,
+            order=order,
+            user_id=current_user.id,
+            discount_applied=discount_amount
+        )
+        db.add(redemption)
+        
     db.add(order)
     db.commit()
     db.refresh(order)

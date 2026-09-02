@@ -42,6 +42,7 @@ class Order(Base):
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
     status_history = relationship("OrderStatusHistory", back_populates="order", cascade="all, delete-orphan", order_by="OrderStatusHistory.changed_at.desc()")
     payment_record = relationship("PaymentRecord", back_populates="order", uselist=False, cascade="all, delete-orphan")
+    discount_redemption = relationship("DiscountRedemption", back_populates="order", uselist=False, cascade="all, delete-orphan")
 
 
 class OrderItem(Base):
