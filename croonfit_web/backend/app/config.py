@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     FIREBASE_CREDENTIALS_PATH: Optional[str] = None
     FIREBASE_CREDENTIALS_JSON: Optional[str] = None
+    RAZORPAY_KEY_ID: str = "rzp_test_YOUR_KEY"
+    RAZORPAY_KEY_SECRET: str = "YOUR_SECRET"
+    RAZORPAY_WEBHOOK_SECRET: str = "YOUR_WEBHOOK_SECRET"
 
     model_config = {
         "env_file": ".env",

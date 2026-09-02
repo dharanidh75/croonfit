@@ -2,6 +2,7 @@ import razorpay
 import uuid
 import os
 import asyncio
+import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
@@ -15,18 +16,22 @@ from app.schemas.order import (
     StockValidationIssue,
 )
 from app.core.firebase_auth import get_optional_user
+from app.core.limiter import limiter
+from app.config import settings
 from typing import List
 
 router = APIRouter()
 
-RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_YOUR_KEY")
-RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "YOUR_SECRET")
-RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "YOUR_WEBHOOK_SECRET")
+RAZORPAY_KEY_ID = settings.RAZORPAY_KEY_ID
+RAZORPAY_KEY_SECRET = settings.RAZORPAY_KEY_SECRET
+RAZORPAY_WEBHOOK_SECRET = settings.RAZORPAY_WEBHOOK_SECRET
 
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 @router.post("/intent", response_model=PaymentIntentOut)
+@limiter.limit("10/minute")
 def create_payment_intent(
+    request: Request,
     data: PaymentIntentCreate,
     db: Session = Depends(get_db),
     current_user=Depends(get_optional_user),
@@ -71,7 +76,9 @@ def create_payment_intent(
 
 
 @router.post("/confirm", response_model=PaymentConfirmOut)
+@limiter.limit("10/minute")
 def confirm_payment(
+    request: Request,
     data: PaymentConfirm,
     db: Session = Depends(get_db),
     current_user=Depends(get_optional_user),
@@ -92,7 +99,7 @@ def confirm_payment(
     except razorpay.errors.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid payment signature")
 
-    record = db.query(PaymentRecord).filter(PaymentRecord.razorpay_order_id == razorpay_order_id).first()
+    record = db.query(PaymentRecord).with_for_update().filter(PaymentRecord.razorpay_order_id == razorpay_order_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Payment record not found")
     if record.status == PaymentStatus.PAID:
@@ -150,7 +157,7 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
         if not razorpay_order_id:
             return {"status": "ok"}
 
-        record = db.query(PaymentRecord).filter(PaymentRecord.razorpay_order_id == razorpay_order_id).first()
+        record = db.query(PaymentRecord).with_for_update().filter(PaymentRecord.razorpay_order_id == razorpay_order_id).first()
         if not record:
             return {"status": "ok"}
             

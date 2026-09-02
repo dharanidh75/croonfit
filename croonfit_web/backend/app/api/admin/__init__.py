@@ -66,19 +66,13 @@ def admin_update_order_status(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    # Handle discount reversal on cancellation
+    # Handle full cancellation via shared service
     if data.status == OrderStatus.CANCELLED and order.status != OrderStatus.CANCELLED:
-        redemption = order.discount_redemption
-        if redemption and not redemption.is_reversed:
-            # Re-fetch discount with row lock to decrement safely
-            from app.models.discount import Discount
-            discount = db.query(Discount).filter(Discount.id == redemption.discount_id).with_for_update().first()
-            if discount and discount.current_usage > 0:
-                discount.current_usage -= 1
-            redemption.is_reversed = True
-
-    order.status = data.status
-    order.status_history.append(OrderStatusHistory(status=data.status, note=data.note))
+        from app.services.order_service import cancel_order
+        cancel_order(db, order, data.note or "Admin manually cancelled")
+    else:
+        order.status = data.status
+        order.status_history.append(OrderStatusHistory(status=data.status, note=data.note))
     db.commit()
     db.refresh(order)
     return order

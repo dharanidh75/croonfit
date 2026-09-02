@@ -27,18 +27,9 @@ async def auto_cancel_pending_orders():
             for order in stale_orders:
                 logger.info(f"Auto-canceling stale order {order.order_number}")
                 
-                # 1. Update status
-                order.status = OrderStatus.CANCELLED
-                order.status_history.append(
-                    OrderStatusHistory(status=OrderStatus.CANCELLED, note="Auto-cancelled due to payment timeout")
-                )
-                
-                # 2. Restore stock for each item
-                for item in order.items:
-                    if item.variant_id:
-                        variant = db.query(ProductVariant).filter(ProductVariant.id == item.variant_id).first()
-                        if variant:
-                            variant.stock_qty += item.quantity
+                # Use shared service to handle all cancellation logic consistently
+                from app.services.order_service import cancel_order
+                cancel_order(db, order, "Auto-cancelled due to payment timeout")
             
             if stale_orders:
                 db.commit()

@@ -65,6 +65,7 @@ def require_admin_claim(
     return decoded_token
 
 def get_current_user(
+    request: Request,
     decoded_token: dict = Security(verify_firebase_token),
     db: Session = Depends(get_db)
 ):
@@ -75,9 +76,11 @@ def get_current_user(
     user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")
+    request.state.user = user
     return user
 
 def get_optional_user(
+    request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Security(HTTPBearer(auto_error=False)),
     db: Session = Depends(get_db)
 ):
@@ -88,6 +91,7 @@ def get_optional_user(
         from app.models.user import User
         user = db.query(User).filter(User.firebase_uid == decoded_token.get("uid")).first()
         if user and user.is_active:
+            request.state.user = user
             return user
     except Exception:
         pass

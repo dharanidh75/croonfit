@@ -1,6 +1,6 @@
 import random
 import string
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from app.database import get_db
@@ -11,6 +11,7 @@ from app.schemas.order import (
     StockValidationRequest, StockValidationResponse, StockValidationIssue,
 )
 from app.core.firebase_auth import get_current_user, get_optional_user
+from app.core.limiter import limiter
 from app.config import settings
 
 
@@ -60,7 +61,9 @@ from datetime import datetime, timezone
 from app.models.discount import Discount, DiscountRedemption, DiscountType
 
 @router.post("", response_model=OrderOut, status_code=201)
+@limiter.limit("5/minute")
 def create_order(
+    request: Request,
     order_in: OrderCreate,
     db: Session = Depends(get_db),
     current_user=Depends(get_optional_user),

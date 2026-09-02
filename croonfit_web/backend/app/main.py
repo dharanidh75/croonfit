@@ -10,6 +10,9 @@ import os
 from contextlib import asynccontextmanager
 import asyncio
 from app.tasks import auto_cancel_pending_orders
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.core.limiter import limiter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,6 +28,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# Add limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Use absolute path so uploads are found regardless of working directory
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))

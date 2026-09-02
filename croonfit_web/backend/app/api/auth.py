@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -8,6 +8,9 @@ import uuid
 from app.database import get_db
 from app.models.user import User
 from app.core.firebase_auth import verify_firebase_token
+from app.schemas.auth import UserResponse, AddressCreate, AddressResponse
+from app.core.limiter import limiter
+from app.api.deps import get_current_user
 
 router = APIRouter()
 

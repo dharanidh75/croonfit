@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from app.database import get_db
@@ -7,11 +7,14 @@ from app.schemas.product import (
     ProductPublicDetail, ProductPublicListItem, ProductListResponse
 )
 from app.services.product_service import ProductService
+from app.core.limiter import limiter
 
 router = APIRouter()
 
 @router.get("", response_model=ProductListResponse)
+@limiter.limit("100/minute")
 def list_products(
+    request: Request,
     db: Session = Depends(get_db),
     category: Optional[str] = Query(None, description="Category slug"),
     gender: Optional[GenderCategory] = Query(None),

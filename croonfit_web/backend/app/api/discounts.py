@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timezone
@@ -7,11 +7,13 @@ from decimal import Decimal
 from app.database import get_db
 from app.models.discount import Discount, DiscountType
 from app.schemas.discount import DiscountValidateRequest, DiscountValidateResponse
+from app.core.limiter import limiter
 
 router = APIRouter()
 
 @router.post("/validate", response_model=DiscountValidateResponse)
-def validate_discount(req: DiscountValidateRequest, db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def validate_discount(request: Request, req: DiscountValidateRequest, db: Session = Depends(get_db)):
     discount = db.query(Discount).filter(func.upper(Discount.code) == req.code.upper()).first()
     
     if not discount:
