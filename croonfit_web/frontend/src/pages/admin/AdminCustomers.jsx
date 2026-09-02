@@ -10,8 +10,18 @@ export function AdminCustomers() {
 
   useEffect(() => {
     adminApi.get('/admin/customers')
-      .then(res => setCustomers(res.data))
-      .catch(err => console.error(err))
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          setCustomers(res.data)
+        } else {
+          console.error("Expected array, got:", res.data)
+          setCustomers([])
+        }
+      })
+      .catch(err => {
+        console.error("Customers fetch error:", err)
+        setCustomers([])
+      })
       .finally(() => setLoading(false))
   }, [])
 

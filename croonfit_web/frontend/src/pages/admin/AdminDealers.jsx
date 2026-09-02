@@ -10,8 +10,18 @@ export function AdminDealers() {
 
   useEffect(() => {
     adminApi.get('/admin/dealers')
-      .then(res => setDealers(res.data))
-      .catch(err => console.error(err))
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          setDealers(res.data)
+        } else {
+          console.error("Expected array, got:", res.data)
+          setDealers([])
+        }
+      })
+      .catch(err => {
+        console.error("Dealers fetch error:", err)
+        setDealers([])
+      })
       .finally(() => setLoading(false))
   }, [])
 

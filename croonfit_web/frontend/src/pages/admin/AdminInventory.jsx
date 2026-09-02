@@ -1,9 +1,29 @@
 import React, { useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
+import { adminApi } from '../../lib/api'
 import { Search, Filter, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react'
 
 export function AdminInventory() {
-  const [products] = useState([])
+  const [products, setProducts] = useState([])
+  const [summary, setSummary] = useState({ total_value: 0, low_stock_variants: 0, incoming: 0 })
+  const [loading, setLoading] = useState(true)
+
+  React.useEffect(() => {
+    adminApi.get('/admin/inventory')
+      .then(res => {
+        if (res.data && res.data.items) {
+          setProducts(res.data.items)
+          setSummary(res.data.summary || { total_value: 0, low_stock_variants: 0, incoming: 0 })
+        } else {
+          setProducts([])
+        }
+      })
+      .catch(err => {
+        console.error("Inventory fetch error:", err)
+        setProducts([])
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -65,7 +85,7 @@ export function AdminInventory() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-[#666666]">Total Value</span>
           </div>
-          <p className="text-2xl font-bold text-[#111111]">₹4,250,000</p>
+          <p className="text-2xl font-bold text-[#111111]">₹{summary.total_value.toLocaleString()}</p>
         </div>
         <div className="bg-white border border-red-200 rounded-xl p-5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-16 h-16 bg-red-50 rounded-bl-full flex items-start justify-end p-3">
@@ -74,13 +94,13 @@ export function AdminInventory() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-red-800">Low Stock Variants</span>
           </div>
-          <p className="text-2xl font-bold text-red-600">24</p>
+          <p className="text-2xl font-bold text-red-600">{summary.low_stock_variants}</p>
         </div>
         <div className="bg-white border border-[#E5E5E5] rounded-xl p-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-[#666666]">Incoming</span>
           </div>
-          <p className="text-2xl font-bold text-[#111111]">1,450 <span className="text-sm font-normal text-[#888888]">units</span></p>
+          <p className="text-2xl font-bold text-[#111111]">{summary.incoming.toLocaleString()} <span className="text-sm font-normal text-[#888888]">units</span></p>
         </div>
       </div>
 
@@ -161,7 +181,7 @@ export function AdminInventory() {
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="py-8 text-center text-sm text-[#888888]">
-                    No inventory items found.
+                    {loading ? "Loading inventory..." : "No inventory items found."}
                   </td>
                 </tr>
               ) : (
