@@ -14,7 +14,7 @@ export function Checkout() {
   const navigate = useNavigate()
   const { cart, clearCart } = useStore()
   const [step, setStep] = useState(1)
-  
+
   const [address, setAddress] = useState({})
   const [stockIssues, setStockIssues] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -31,7 +31,7 @@ export function Checkout() {
     script.src = 'https://checkout.razorpay.com/v1/checkout.js'
     script.async = true
     document.body.appendChild(script)
-    
+
     return () => {
       document.body.removeChild(script)
     }
@@ -89,7 +89,7 @@ export function Checkout() {
 
       // 3. Open Razorpay Checkout
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY', 
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY',
         amount: intentRes.data.amount * 100,
         currency: intentRes.data.currency,
         name: 'Croon Fit',
@@ -128,7 +128,7 @@ export function Checkout() {
           color: '#0A0A0A'
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setIsProcessing(false)
             toast.error("Payment was cancelled. You can try again.")
           }
@@ -171,7 +171,7 @@ export function Checkout() {
         <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
           <div className="lg:col-span-7 xl:col-span-8">
             <div className="flex gap-4 mb-10">
-              <button 
+              <button
                 onClick={() => setStep(1)}
                 className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 1 ? 'border-black text-black' : 'border-transparent text-[#888888] hover:text-black'}`}
               >
@@ -198,16 +198,16 @@ export function Checkout() {
                 onSubmit={(e) => { e.preventDefault(); handleShippingSubmit(address); }}
               />
             ) : (
-              <PaymentForm 
-                onConfirm={handlePaymentConfirm} 
-                isProcessing={isProcessing} 
+              <PaymentForm
+                onConfirm={handlePaymentConfirm}
+                isProcessing={isProcessing}
               />
             )}
           </div>
 
           <div className="lg:col-span-5 xl:col-span-4">
-            <OrderSummary 
-              cart={cart} 
+            <OrderSummary
+              cart={cart}
               outOfStockIssues={stockIssues}
               discountCode={discountCode}
               setDiscountCode={setDiscountCode}
