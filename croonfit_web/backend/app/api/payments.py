@@ -21,6 +21,7 @@ from app.config import settings
 from typing import List
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 RAZORPAY_KEY_ID = settings.RAZORPAY_KEY_ID
 RAZORPAY_KEY_SECRET = settings.RAZORPAY_KEY_SECRET
@@ -42,6 +43,11 @@ def create_payment_intent(
     if order.payment_status == PaymentStatus.PAID:
         raise HTTPException(status_code=400, detail="Order already paid")
 
+    # Log masked keys for debugging Render auth failure
+    masked_key_id = f"{RAZORPAY_KEY_ID[:10]}...{RAZORPAY_KEY_ID[-4:]}" if len(RAZORPAY_KEY_ID) > 14 else "TOO_SHORT"
+    key_secret_len = len(RAZORPAY_KEY_SECRET)
+    logger.info(f"Attempting Razorpay order creation. Masked Key ID: {masked_key_id} (length {len(RAZORPAY_KEY_ID)}). Key Secret Length: {key_secret_len}.")
+    
     # Create Razorpay order
     razorpay_order_data = {
         "amount": int(order.total * 100),
