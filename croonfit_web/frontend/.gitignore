@@ -1,4 +1,7 @@
 node_modules/
 dist/
 .env
-.venv
+.venv.env
+.env.local
+.env.*
+.env.development
