@@ -330,6 +330,283 @@ function HeroBannerEditor({ onBack }) {
   )
 }
 
+
+function AboutUsEditor({ onBack }) {
+  const [activeTab, setActiveTab] = useState('heritage')
+
+  // Heritage Section
+  const [heritageHeading, setHeritageHeading] = useState('Redefining premium\napparel through\nuncompromising\nquality.')
+  const [heritageDesc, setHeritageDesc] = useState('Founded on the belief that clothing should be both a statement and a sanctuary, Croonfit blends editorial fashion with everyday wearability. We design for the modern individual who refuses to compromise on quality.')
+  
+  // Factory Section
+  const [factoryHeading, setFactoryHeading] = useState('Where craft meets precision.')
+  const [qualityHeading, setQualityHeading] = useState('Obsessive detail.')
+
+  // Mission & Vision
+  const [missionText, setMissionText] = useState('To engineer apparel that empowers individuals, setting a new global standard for how premium clothing is manufactured, sourced, and worn.')
+  const [visionText, setVisionText] = useState('A world where high-end fashion is accessible, sustainable, and built to endure the rigors of every lifestyle and generation.')
+
+  // Stats
+  const [stats, setStats] = useState([
+    { label: 'YEARS EXPERIENCE', value: '10+' },
+    { label: 'GLOBAL RETAILERS', value: '500+' },
+    { label: 'GARMENTS PRODUCED', value: '1M+' },
+    { label: 'CITIES REACHED', value: '50+' },
+  ])
+
+  // Images
+  const fileInputRef = useRef(null)
+  const [uploadTarget, setUploadTarget] = useState(null)
+  const [images, setImages] = useState({
+    heritage1: null,
+    heritage2: null,
+    factory: null,
+    quality: null
+  })
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]
+    if (file && uploadTarget) {
+      const url = URL.createObjectURL(file)
+      setImages(prev => ({ ...prev, [uploadTarget]: url }))
+      setUploadTarget(null)
+    }
+  }
+
+  const triggerUpload = (target) => {
+    setUploadTarget(target)
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
+  const ImageUploaderBox = ({ targetKey, label, className = "h-40" }) => (
+    <div>
+      <label className="block text-sm font-semibold text-[#111111] mb-2">{label}</label>
+      <div 
+        onClick={() => triggerUpload(targetKey)}
+        className={`w-full ${className} border-2 border-dashed border-[#E5E5E5] rounded-xl overflow-hidden bg-[#FAFAFA] hover:bg-[#F5F5F5] transition-colors flex flex-col items-center justify-center cursor-pointer relative group`}
+      >
+        {images[targetKey] ? (
+          <>
+            <img src={images[targetKey]} alt={label} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-sm font-bold tracking-widest uppercase">Change</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <Upload className="w-6 h-6 text-[#888888] mb-2" />
+            <p className="text-sm font-medium text-[#111111]">Upload Image</p>
+          </>
+        )}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="animate-fade-in-up pb-12">
+      <div className="flex items-center gap-4 mb-8">
+        <button 
+          onClick={onBack}
+          className="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center text-[#666666] hover:text-[#111111] hover:border-[#111111] transition-all shadow-sm"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Edit About Us Page</h1>
+          <p className="text-sm text-[#666666] mt-1">Manage the story, images, and statistics shown on your About page.</p>
+        </div>
+      </div>
+
+      <input 
+        type="file" 
+        accept="image/webp,image/png,image/jpeg" 
+        ref={fileInputRef} 
+        onChange={handleFileUpload} 
+        className="hidden" 
+      />
+
+      {/* Tabs */}
+      <div className="flex space-x-1 border-b border-[#E5E5E5] mb-8">
+        {['heritage', 'media', 'mission', 'stats'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-3 text-sm font-bold uppercase tracking-widest transition-colors border-b-2 ${
+              activeTab === tab 
+                ? 'border-[#111111] text-[#111111]' 
+                : 'border-transparent text-[#888888] hover:text-[#111111]'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      <div className="max-w-4xl">
+        {activeTab === 'heritage' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader title="Heritage Content" />
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-[#111111] mb-2">Main Heading</label>
+                  <textarea 
+                    value={heritageHeading}
+                    onChange={(e) => setHeritageHeading(e.target.value)}
+                    rows={4}
+                    className="w-full p-3 bg-white border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none resize-y"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111111] mb-2">Description</label>
+                  <textarea 
+                    value={heritageDesc}
+                    onChange={(e) => setHeritageDesc(e.target.value)}
+                    rows={4}
+                    className="w-full p-3 bg-white border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none resize-y"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'media' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader title="Page Images" />
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageUploaderBox targetKey="heritage1" label="Heritage Left Image (e.g., Cargo Pants)" className="h-64" />
+                  <ImageUploaderBox targetKey="heritage2" label="Heritage Right Image (e.g., Polo Model)" className="h-64" />
+                  <ImageUploaderBox targetKey="factory" label="Factory Section Image" className="h-48" />
+                  <ImageUploaderBox targetKey="quality" label="Quality Section Image" className="h-48" />
+                </div>
+                
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#111111] mb-2">Factory Heading</label>
+                    <input 
+                      type="text" 
+                      value={factoryHeading}
+                      onChange={(e) => setFactoryHeading(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#111111] mb-2">Quality Heading</label>
+                    <input 
+                      type="text" 
+                      value={qualityHeading}
+                      onChange={(e) => setQualityHeading(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'mission' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader title="Mission & Vision" />
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-[#111111] mb-2">Our Mission</label>
+                  <textarea 
+                    value={missionText}
+                    onChange={(e) => setMissionText(e.target.value)}
+                    rows={3}
+                    className="w-full p-3 bg-white border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none resize-y"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111111] mb-2">Our Vision</label>
+                  <textarea 
+                    value={visionText}
+                    onChange={(e) => setVisionText(e.target.value)}
+                    rows={3}
+                    className="w-full p-3 bg-white border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none resize-y"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'stats' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader title="Company Statistics" />
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {stats.map((stat, idx) => (
+                    <div key={idx} className="flex gap-2 p-4 bg-[#FAFAFA] rounded-lg border border-[#E5E5E5]">
+                      <div className="flex-1 space-y-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-[#666666] mb-1">Value</label>
+                          <input 
+                            type="text" 
+                            value={stat.value}
+                            onChange={(e) => {
+                              const newStats = [...stats];
+                              newStats[idx].value = e.target.value;
+                              setStats(newStats);
+                            }}
+                            className="w-full h-9 px-2 bg-white border border-[#E5E5E5] rounded text-sm font-bold focus:border-[#111111] outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-[#666666] mb-1">Label</label>
+                          <input 
+                            type="text" 
+                            value={stat.label}
+                            onChange={(e) => {
+                              const newStats = [...stats];
+                              newStats[idx].label = e.target.value;
+                              setStats(newStats);
+                            }}
+                            className="w-full h-9 px-2 bg-white border border-[#E5E5E5] rounded text-sm focus:border-[#111111] outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3 mt-8">
+          <button 
+            onClick={() => {
+              toast('Changes discarded', { icon: 'ℹ️' })
+              onBack()
+            }} 
+            className="px-5 py-2.5 text-sm font-medium text-[#666666] hover:text-[#111111]"
+          >
+            Discard Changes
+          </button>
+          <button 
+            onClick={() => {
+              toast.success('About Us updated successfully!')
+              onBack()
+            }}
+            className="px-6 py-2.5 bg-[#111111] text-white text-sm font-bold rounded-lg hover:bg-black transition-colors shadow-md"
+          >
+            Save & Publish
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function AdminCMS() {
   const [activeEditor, setActiveEditor] = useState(null) // null | 'hero'
 
@@ -339,6 +616,14 @@ export function AdminCMS() {
     { id: 'collection', title: 'Home Collection', icon: Layout, status: 'Published', lastUpdated: '3 days ago' },
     { id: 'footer', title: 'Footer Links', icon: Globe, status: 'Published', lastUpdated: '1 week ago' },
   ]
+
+  if (activeEditor === 'about') {
+    return (
+      <AdminLayout>
+        <AboutUsEditor onBack={() => setActiveEditor(null)} />
+      </AdminLayout>
+    )
+  }
 
   if (activeEditor === 'hero') {
     return (
@@ -367,6 +652,8 @@ export function AdminCMS() {
               onClick={() => {
                 if (section.id === 'hero') {
                   setActiveEditor('hero')
+                } else if (section.id === 'about') {
+                  setActiveEditor('about')
                 } else {
                   alert(`Editor for ${section.title} is coming soon!`)
                 }
