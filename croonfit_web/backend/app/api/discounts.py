@@ -43,6 +43,7 @@ def validate_discount(request: Request, req: DiscountValidateRequest, db: Sessio
 
     return DiscountValidateResponse(
         valid=True,
+        code=discount.code,
         discount_amount=float(discount_amount),
         type=discount.type
     )

@@ -9,6 +9,12 @@ def get_user_or_ip(request: Request):
     """
     if hasattr(request.state, "user") and request.state.user:
         return str(request.state.user.id)
+    
+    # Render sits behind a reverse proxy, extract real IP from headers
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+        
     return get_remote_address(request)
 
 limiter = Limiter(key_func=get_user_or_ip)

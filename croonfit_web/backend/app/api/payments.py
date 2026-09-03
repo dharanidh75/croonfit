@@ -108,10 +108,18 @@ def confirm_payment(
     record = db.query(PaymentRecord).with_for_update().filter(PaymentRecord.razorpay_order_id == razorpay_order_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Payment record not found")
-    if record.status == PaymentStatus.PAID:
-        raise HTTPException(status_code=400, detail="Payment already confirmed")
-
     order = db.query(Order).filter(Order.id == record.order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if record.status == PaymentStatus.PAID:
+        # Webhook likely processed it first, return idempotency success
+        return PaymentConfirmOut(
+            success=True,
+            order_number=order.order_number,
+            payment_id=razorpay_payment_id,
+            message="Payment confirmed. Your order has been placed!",
+        )
 
     # Update payment record
     record.status = PaymentStatus.PAID

@@ -57,6 +57,7 @@ class DiscountValidateRequest(BaseModel):
 
 class DiscountValidateResponse(BaseModel):
     valid: bool
+    code: str
     discount_amount: float
     type: DiscountType
 
