@@ -64,7 +64,7 @@ export function AdminOrders() {
     {
       header: 'Order ID',
       accessorKey: 'id',
-      cell: row => <span className="font-bold text-[#111111]">#{row.id}</span>
+      cell: row => <span className="font-bold text-[#111111]">#{row.order_number}</span>
     },
     {
       header: 'Date',
@@ -246,7 +246,7 @@ export function AdminOrders() {
             
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E5E5]">
               <div>
-                <h3 className="text-lg font-bold text-[#111111]">Order #{selectedOrder.id}</h3>
+                <h3 className="text-lg font-bold text-[#111111]">Order #{selectedOrder.order_number}</h3>
                 <p className="text-xs text-[#666666]">{new Date(selectedOrder.created_at).toLocaleString()}</p>
               </div>
               <button onClick={() => setSelectedOrder(null)} className="p-2 text-[#888888] hover:text-[#111111] transition-colors rounded-full hover:bg-[#F5F5F5]">
@@ -302,8 +302,8 @@ export function AdminOrders() {
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-md bg-[#F0F0F0] overflow-hidden flex-shrink-0 border border-[#E5E5E5]">
-                                {item.image_url ? (
-                                  <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
+                                {item.product_image ? (
+                                  <img src={item.product_image} alt={item.product_name} className="w-full h-full object-cover mix-blend-multiply" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <svg className="w-4 h-4 text-[#CCCCCC]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -314,14 +314,14 @@ export function AdminOrders() {
                               </div>
                               <div>
                                 <p className="text-sm font-medium text-[#111111]">{item.product_name}</p>
-                                {(item.color || item.size) && (
-                                  <p className="text-xs text-[#888888] mt-0.5">{item.color} {item.color && item.size ? '/' : ''} {item.size}</p>
+                                {item.variant_label && (
+                                  <p className="text-xs text-[#888888] mt-0.5">{item.variant_label}</p>
                                 )}
                               </div>
                             </div>
                           </td>
                           <td className="py-3 px-4 text-sm text-right font-medium">{item.quantity}</td>
-                          <td className="py-3 px-4 text-sm text-right font-medium">₹{item.price || 0}</td>
+                          <td className="py-3 px-4 text-sm text-right font-medium">₹{((item.unit_price || 0) * item.quantity).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -10,7 +10,7 @@ import { ImageWithFallback } from '../components/ui/ImageWithFallback'
 import api from '../lib/api'
 
 export function Cart() {
-  const { cart, updateCartQty, removeFromCart, isAuthenticated } = useStore()
+  const { cart, updateCartQty, removeFromCart, isAuthenticated, clearBuyNowItem } = useStore()
   const navigate = useNavigate()
   const [crossSell, setCrossSell] = useState([])
 
@@ -29,6 +29,7 @@ export function Cart() {
   }, [])
 
   const handleCheckout = () => {
+    if (clearBuyNowItem) clearBuyNowItem()
     if (isAuthenticated) {
       navigate('/checkout')
     } else {
@@ -129,7 +130,7 @@ export function Cart() {
                       {/* Total Price */}
                       <div className="col-span-1 md:col-span-3 flex items-center justify-end text-black">
                         <span className="text-base font-medium">
-                          {`₹${(Number(item.variant?.price || item.product?.price || 0) * Number(item.quantity || 1)).toFixed(2)}`}
+                          {`₹${(parseFloat(item.product?.price || 0) * Number(item.quantity || 1)).toFixed(2)}`}
                         </span>
                       </div>
                     </div>

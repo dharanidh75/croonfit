@@ -69,6 +69,11 @@ export const useStore = create(
       // ─── Last Order (post-checkout) ───────────────────────────────────────
       lastOrder: null,
       setLastOrder: (order) => set({ lastOrder: order }),
+
+      // ─── Buy Now ──────────────────────────────────────────────────────────
+      buyNowItem: null,
+      setBuyNowItem: (item) => set({ buyNowItem: item }),
+      clearBuyNowItem: () => set({ buyNowItem: null }),
     }),
     {
       name: 'croonfit-storage',
@@ -80,6 +85,7 @@ export const useStore = create(
         cart: state.cart,
         wishlist: state.wishlist,
         lastOrder: state.lastOrder,
+        buyNowItem: state.buyNowItem,
       }),
     }
   )

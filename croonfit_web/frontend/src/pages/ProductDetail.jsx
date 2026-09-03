@@ -127,11 +127,12 @@ export function ProductDetail() {
   }
 
   const handleBuyNow = () => {
-    if (!selectedVariant) return
-    if (!cartItem) {
-      addToCart(product, selectedVariant, 1)
+    if (!selectedVariant) {
+      toast.error('Please select a size')
+      return
     }
-    window.location.href = '/checkout'
+    setBuyNowItem({ product, variant: selectedVariant, quantity: 1 })
+    navigate('/checkout')
   }
 
   const discount = product.compare_price

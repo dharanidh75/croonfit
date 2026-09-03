@@ -1,18 +1,23 @@
-import React, { useState } from 'react'
-import { ArrowLeft, Shield } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { ArrowLeft, Shield, Info } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useStore } from '../../store'
 import api from '../../lib/api'
+import { auth } from '../../lib/firebase'
 
 export function SecuritySection({ onBack }) {
   const { user, updateUser } = useStore()
   
+  // Detect if user signed in with Google (no password)
+  const isGoogleUser = auth?.currentUser?.providerData?.some(p => p.providerId === 'google.com') ?? false
+
   const [formData, setFormData] = useState({
     full_name: user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : user?.full_name || '',
     email: user?.email || '',
     phone: user?.phone || '',
     current_password: '',
-    new_password: ''
+    new_password: '',
+    confirm_password: ''
   })
   
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,6 +28,12 @@ export function SecuritySection({ onBack }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    if (!isGoogleUser && formData.new_password && formData.new_password !== formData.confirm_password) {
+      toast.error('New passwords do not match')
+      return
+    }
+
     setIsSubmitting(true)
     
     const parts = formData.full_name.trim().split(' ')
@@ -36,7 +47,7 @@ export function SecuritySection({ onBack }) {
       phone: formData.phone
     }
 
-    if (formData.current_password && formData.new_password) {
+    if (!isGoogleUser && formData.current_password && formData.new_password) {
       payload.current_password = formData.current_password
       payload.new_password = formData.new_password
     }
@@ -55,6 +66,8 @@ export function SecuritySection({ onBack }) {
       })
   }
 
+  const inputClass = "w-full px-4 py-3 bg-white border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+
   return (
     <div className="animate-fade-in-up">
       <button 
@@ -70,10 +83,19 @@ export function SecuritySection({ onBack }) {
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-heading font-bold text-xl uppercase tracking-wide">Login & Security</h2>
+            <h2 className="font-heading font-bold text-xl uppercase tracking-wide">Login &amp; Security</h2>
             <p className="text-sm text-[#888888]">Update your personal information and password</p>
           </div>
         </div>
+
+        {isGoogleUser && (
+          <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+            <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-blue-700 leading-relaxed">
+              You signed in with <strong>Google</strong>. Your email and password are managed by Google — you can update your name and phone number here.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6 max-w-lg">
           
@@ -87,7 +109,7 @@ export function SecuritySection({ onBack }) {
                 name="full_name"
                 value={formData.full_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                className={inputClass}
                 required
               />
             </div>
@@ -99,9 +121,13 @@ export function SecuritySection({ onBack }) {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                className={`${inputClass} ${isGoogleUser ? 'bg-[#F5F5F5] text-[#888888] cursor-not-allowed' : ''}`}
+                disabled={isGoogleUser}
                 required
               />
+              {isGoogleUser && (
+                <p className="text-[10px] text-[#888888] mt-1.5 ml-1">Email is managed by Google and cannot be changed here.</p>
+              )}
             </div>
 
             <div>
@@ -111,38 +137,53 @@ export function SecuritySection({ onBack }) {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                className={inputClass}
               />
             </div>
           </div>
 
-          <div className="space-y-4 pt-6 border-t border-[#EBEBEB]">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-[#555555]">Change Password</h3>
-            
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">Current Password</label>
-              <input 
-                type="password" 
-                name="current_password"
-                value={formData.current_password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                placeholder="Leave blank to keep unchanged"
-              />
-            </div>
+          {/* Only show password section for non-Google users */}
+          {!isGoogleUser && (
+            <div className="space-y-4 pt-6 border-t border-[#EBEBEB]">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[#555555]">Change Password</h3>
+              
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">Current Password</label>
+                <input 
+                  type="password" 
+                  name="current_password"
+                  value={formData.current_password}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Leave blank to keep unchanged"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">New Password</label>
-              <input 
-                type="password" 
-                name="new_password"
-                value={formData.new_password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                placeholder="Leave blank to keep unchanged"
-              />
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">New Password</label>
+                <input 
+                  type="password" 
+                  name="new_password"
+                  value={formData.new_password}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Leave blank to keep unchanged"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">Confirm New Password</label>
+                <input 
+                  type="password" 
+                  name="confirm_password"
+                  value={formData.confirm_password}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Re-enter new password"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="pt-4">
             <button 

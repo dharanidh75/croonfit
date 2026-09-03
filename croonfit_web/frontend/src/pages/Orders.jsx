@@ -59,7 +59,7 @@ export function Orders() {
                   <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 pb-4 border-b border-[#F5F5F5] gap-4">
                     <div>
                       <div className="font-heading font-bold uppercase tracking-wider text-sm mb-1">
-                        Order #{order.id}
+                        Order #{order.order_number}
                       </div>
                       <div className="font-body text-xs text-[#888888]">
                         Placed on {new Date(order.created_at).toLocaleDateString()}

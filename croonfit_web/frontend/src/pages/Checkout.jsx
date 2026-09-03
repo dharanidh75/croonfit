@@ -12,13 +12,15 @@ import toast from 'react-hot-toast'
 
 export function Checkout() {
   const navigate = useNavigate()
-  const { cart, clearCart } = useStore()
+  const { cart, clearCart, setLastOrder, buyNowItem, clearBuyNowItem } = useStore()
   const [step, setStep] = useState(1)
+
+  const checkoutItems = buyNowItem ? [buyNowItem] : cart
 
   const [address, setAddress] = useState({})
   const [stockIssues, setStockIssues] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const [lastOrder, setLastOrder] = useState(null)
+  const [localLastOrder, setLocalLastOrder] = useState(null)
 
   const [discountCode, setDiscountCode] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState(null)
@@ -38,16 +40,16 @@ export function Checkout() {
   }, [])
 
   useEffect(() => {
-    if (cart.length === 0 && !isProcessing && !lastOrder) {
+    if (checkoutItems.length === 0 && !isProcessing && !localLastOrder) {
       navigate('/cart')
     }
-  }, [cart, navigate, isProcessing, lastOrder])
+  }, [checkoutItems, navigate, isProcessing, localLastOrder])
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) return
     setIsApplyingDiscount(true)
     try {
-      const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
+      const subtotal = checkoutItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
       const res = await api.post('/discounts/validate', { code: discountCode, subtotal })
       setAppliedDiscount(res.data)
       toast.success(`Discount applied: ${res.data.type === 'FREE_SHIPPING' ? 'Free Shipping' : `₹${res.data.discount_amount.toFixed(2)} off`}`)
@@ -73,7 +75,7 @@ export function Checkout() {
     setStockIssues([])
 
     try {
-      const items = cart.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
+      const items = checkoutItems.map(item => ({ variant_id: item.variant.id, quantity: item.quantity }))
 
       // 1. Create Order
       const orderPayload = { items, shipping_address: address }
@@ -105,12 +107,20 @@ export function Checkout() {
             })
 
             if (confirmRes.data.success) {
-              setLastOrder({
+              const orderData = {
                 order_number: confirmRes.data.order_number,
                 total: order.total,
                 email: address.full_name
-              })
-              clearCart()
+              }
+              setLastOrder(orderData)
+              setLocalLastOrder(orderData) // Prevent cart redirect race condition
+              
+              if (buyNowItem) {
+                clearBuyNowItem()
+              } else {
+                clearCart()
+              }
+              
               toast.success("Payment successful! Your order has been placed.")
               navigate('/order-success')
             }
@@ -154,7 +164,7 @@ export function Checkout() {
     }
   }
 
-  if (cart.length === 0 && !isProcessing) return null
+  if (checkoutItems.length === 0 && !isProcessing) return null
 
   return (
     <div className="min-h-screen bg-white font-sans text-[#0A0A0A] flex flex-col">
@@ -207,7 +217,7 @@ export function Checkout() {
 
           <div className="lg:col-span-5 xl:col-span-4">
             <OrderSummary
-              cart={cart}
+              cart={checkoutItems}
               outOfStockIssues={stockIssues}
               discountCode={discountCode}
               setDiscountCode={setDiscountCode}
@@ -216,22 +226,6 @@ export function Checkout() {
               onApplyDiscount={handleApplyDiscount}
               isApplyingDiscount={isApplyingDiscount}
             />
-            {step === 2 && (
-              <button
-                onClick={() => handlePaymentConfirm({})}
-                disabled={isProcessing}
-                className="w-full mt-6 h-14 bg-black text-white rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-[#333333] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isProcessing ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                    Processing
-                  </div>
-                ) : (
-                  'Pay Securely'
-                )}
-              </button>
-            )}
           </div>
         </div>
       </main>
