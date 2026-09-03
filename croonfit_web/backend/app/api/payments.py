@@ -46,7 +46,7 @@ def create_payment_intent(
     # Log masked keys for debugging Render auth failure
     masked_key_id = f"{RAZORPAY_KEY_ID[:10]}...{RAZORPAY_KEY_ID[-4:]}" if len(RAZORPAY_KEY_ID) > 14 else "TOO_SHORT"
     key_secret_len = len(RAZORPAY_KEY_SECRET)
-    logger.info(f"Attempting Razorpay order creation. Masked Key ID: {masked_key_id} (length {len(RAZORPAY_KEY_ID)}). Key Secret Length: {key_secret_len}.")
+    print(f"Attempting Razorpay order creation. Masked Key ID: {masked_key_id} (length {len(RAZORPAY_KEY_ID)}). Key Secret Length: {key_secret_len}.", flush=True)
     
     # Create Razorpay order
     razorpay_order_data = {
