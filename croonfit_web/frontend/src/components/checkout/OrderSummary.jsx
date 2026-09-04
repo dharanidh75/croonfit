@@ -29,7 +29,7 @@ export function OrderSummary({
               <div className="relative flex-shrink-0">
                 <div className="w-16 md:w-20 aspect-[3/4] bg-[#F5F5F5] rounded-xl overflow-hidden">
                   <ImageWithFallback 
-                    src={item.product.primary_image || item.product.images?.[0]?.url} 
+                    src={item.product.thumbnail_url || item.product.primary_image || item.product.images?.[0]?.url} 
                     alt={item.product.name} 
                     className={`w-full h-full object-cover mix-blend-multiply ${issue ? 'grayscale opacity-50' : ''}`}
                   />
