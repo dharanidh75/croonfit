@@ -87,6 +87,7 @@ export const useStore = create(
         lastOrder: state.lastOrder,
         buyNowItem: state.buyNowItem,
       }),
+      version: 1, // Add version to invalidate old caches with broken image structures
     }
   )
 )
