@@ -12,93 +12,74 @@ export function ReturnPolicy() {
       <Navbar />
 
       <main className="flex-1 pt-24 pb-20 px-6 sm:px-12 max-w-4xl mx-auto w-full">
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 uppercase">Returns &middot; Exchange &middot; Refund</h1>
-        <p className="text-sm md:text-base font-bold tracking-widest text-[#666666] mb-16 uppercase">Easy exchanges, honest rules.</p>
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-16 uppercase">Return & Refund Policy</h1>
 
-        <div className="space-y-16">
-          <p className="text-base md:text-xl leading-relaxed text-[#333333]">
-            Every product is made and quality-checked with care. Here's exactly how exchanges and refunds work — at a glance.
+        <div className="space-y-12">
+          <p className="text-base md:text-lg leading-relaxed text-[#444444]">
+            We carefully manufacture and quality-check every product before it is shipped. To maintain product quality and ensure a fair process for all customers, we offer exchanges for eligible products, subject to the conditions mentioned below.
           </p>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-6 uppercase">01 — When You Can Exchange</h2>
-            <div className="space-y-4">
-              <h3 className="text-lg md:text-xl font-bold text-[#111111] uppercase">No Exchange Fee*</h3>
-              <p className="text-base md:text-lg text-[#444444]">There is no exchange fee for eligible exchanges.</p>
-              <p className="text-base md:text-lg text-[#444444]">Exchange requests should be placed within 7 days of delivery, provided the product is in good condition and the original tag is attached.</p>
-            </div>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Exchange Policy</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              Eligible products can be exchanged within 7 days of delivery. The product must be unused, unwashed, in its original condition, and have all original tags attached. Eligible exchanges are provided without an exchange fee.
+            </p>
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-6 uppercase">02 — Free Exchange for Damaged or Defective Items</h2>
-            <p className="text-base md:text-lg text-[#444444] mb-8 font-medium">Received something damaged, defective, or incorrect?</p>
-            <p className="text-base md:text-lg text-[#444444] mb-10">We'll arrange a free replacement at no extra cost, once the required conditions are met.</p>
-            
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-[#111111] mb-2 uppercase">01 — Report within 48 Hrs</h3>
-                <p className="text-base md:text-lg text-[#444444]">Raise your claim within 48 hours of delivery.</p>
-              </div>
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-[#111111] mb-2 uppercase">02 — Unboxing Video</h3>
-                <p className="text-base md:text-lg text-[#444444]">A clear unboxing video is mandatory for every damage or defect claim.</p>
-              </div>
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-[#111111] mb-2 uppercase">03 — Photos for Proof</h3>
-                <p className="text-base md:text-lg text-[#444444]">Share clear photos or videos showing the issue.</p>
-              </div>
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-[#111111] mb-2 uppercase">04 — Original Condition</h3>
-                <p className="text-base md:text-lg text-[#444444]">The item must be unused, unwashed, and have its tags intact.</p>
-              </div>
-            </div>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Damaged, Defective, or Incorrect Products</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              If you receive a damaged, defective, or incorrect product, please report the issue within 48 hours of delivery. Once the claim is reviewed and the required conditions are met, we will arrange a replacement at no additional cost.
+            </p>
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-6 uppercase text-[#D32F2F]">Exchange Not Applicable If</h2>
-            <p className="text-base md:text-lg text-[#444444] mb-6">An exchange cannot be processed in the following cases:</p>
-            <ul className="list-disc list-inside space-y-3 text-base md:text-lg text-[#444444]">
-              <li>There are signs of use, washing, or damage after delivery.</li>
-              <li>The issue is reported after the 48-hour reporting window.</li>
-              <li>There is no unboxing video for a damage or defect claim.</li>
-              <li>Tags are missing or the item is not in its original condition.</li>
-              <li>The item was purchased under a Clearance Sale.</li>
-            </ul>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Proof of Damage or Defect</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              For damaged or defective product claims, a clear unboxing video is mandatory. Customers must also provide clear photographs or videos showing the issue with the product. These materials are required to verify and process the claim.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Product Condition</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              Products submitted for exchange must be unused and unwashed and must remain in their original condition with the original tags attached. Products showing signs of use, washing, or damage after delivery may not be eligible for exchange.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Exchange Restrictions</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              An exchange request may be rejected if it is submitted after the applicable 7-day exchange period, if a damaged or defective item is reported after the 48-hour reporting window, if the required unboxing video is not provided for a damage or defect claim, or if the product is missing its original tags or is not in its original condition.
+            </p>
           </section>
 
           <section className="p-8 bg-[#FAFAFA] border border-[#E5E5E5] rounded-sm">
-            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-6 uppercase">Clearance Sale</h2>
-            <p className="text-base md:text-lg font-bold text-[#111111] mb-4 uppercase">All clearance items are final sale.</p>
-            <p className="text-base md:text-lg text-[#444444] mb-3">All items purchased under a Clearance Sale are considered final sale.</p>
-            <p className="text-base md:text-lg text-[#444444]">No exchanges, returns, or refunds are accepted under any circumstances.</p>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Clearance Sale Products</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              All products purchased under a Clearance Sale are final sale. Clearance Sale products are not eligible for returns, exchanges, or refunds under any circumstances.
+            </p>
           </section>
 
           <section>
-            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-6 uppercase">No Refunds or Returns</h2>
-            <div className="space-y-6 text-base md:text-lg text-[#444444]">
-              <p>Once an order has been placed and delivered, it cannot be returned or refunded.</p>
-              <p>We offer exchanges only, as described in this policy.</p>
-              <p>For eligible damaged, defective, or incorrect items, a replacement may be arranged after the claim is reviewed and the required conditions are met.</p>
-            </div>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Refund Policy</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              Once an order has been delivered, we do not accept returns or provide refunds. Our policy is based on exchanges only for products that meet the applicable eligibility requirements described above.
+            </p>
           </section>
 
-          <section className="border-t border-[#E5E5E5] pt-10">
-            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-8 uppercase">Important Note</h2>
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-[#111111] mb-4 uppercase">Exchange Eligibility</h3>
-                <p className="text-base md:text-lg text-[#444444] mb-4">To be eligible for an exchange:</p>
-                <ul className="list-disc list-inside space-y-2 text-base md:text-lg text-[#444444]">
-                  <li>The request must be made within 7 days of delivery.</li>
-                  <li>The product must be in original condition.</li>
-                  <li>The product must be unused and unwashed.</li>
-                  <li>Original tags must be attached.</li>
-                </ul>
-              </div>
-              <p className="text-base md:text-lg text-[#444444] italic">
-                For damaged or defective products, the issue must be reported within 48 hours of delivery, along with the required unboxing video and supporting photos/videos.
-              </p>
-            </div>
+          <section>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Cancellation Refunds</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              Refunds are applicable only to eligible prepaid orders that are successfully cancelled before dispatch, in accordance with our Shipping Policy. Approved cancellation refunds are processed to the original payment method and typically take 5–7 business days.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl md:text-2xl font-bold tracking-wide mb-4">Contact Us</h2>
+            <p className="text-base md:text-lg text-[#444444]">
+              If you have any questions regarding an exchange, damaged or defective product, cancellation, or refund, please contact our support team through the contact details provided on our website.
+            </p>
           </section>
         </div>
       </main>
