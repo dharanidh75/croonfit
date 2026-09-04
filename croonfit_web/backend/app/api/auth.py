@@ -7,7 +7,7 @@ import uuid
 
 from app.database import get_db
 from app.models.user import User
-from app.core.firebase_auth import verify_firebase_token
+from app.core.firebase_auth import verify_firebase_token, get_current_user
 
 router = APIRouter()
 
@@ -95,4 +95,57 @@ def sync_user(
         avatar_url=user.avatar_url,
         is_new=is_new,
         role=user.role,
+    )
+
+class UpdateUserRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    current_password: Optional[str] = None
+    new_password: Optional[str] = None
+
+
+@router.patch("/me", response_model=SyncUserResponse)
+def update_me(
+    body: UpdateUserRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    from firebase_admin import auth as fb_auth
+    
+    # Update Supabase database fields
+    if body.first_name is not None:
+        current_user.first_name = body.first_name
+    if body.last_name is not None:
+        current_user.last_name = body.last_name
+    if body.phone is not None:
+        current_user.phone = body.phone
+        
+    # If they are changing their email, we must update Firebase too
+    if body.email and body.email != current_user.email:
+        try:
+            fb_auth.update_user(current_user.firebase_uid, email=body.email)
+            current_user.email = body.email
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to update email in Firebase: {e}")
+
+    # If they want to change password, update via Firebase Admin
+    if body.new_password:
+        try:
+            fb_auth.update_user(current_user.firebase_uid, password=body.new_password)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to update password: {e}")
+
+    db.commit()
+    db.refresh(current_user)
+    
+    return SyncUserResponse(
+        id=str(current_user.id),
+        email=current_user.email,
+        first_name=current_user.first_name,
+        last_name=current_user.last_name,
+        avatar_url=current_user.avatar_url,
+        is_new=False,
+        role=current_user.role,
     )
