@@ -139,6 +139,7 @@ function ScrollToTop() {
 }
 
 import { ErrorBoundary } from './components/layout/ErrorBoundary'
+import { SearchOverlay } from './components/ui/SearchOverlay'
 
 function App() {
   return (
@@ -160,6 +161,7 @@ function App() {
             },
           }}
         />
+        <SearchOverlay />
         <AnimatedRoutes />
       </BrowserRouter>
     </ErrorBoundary>

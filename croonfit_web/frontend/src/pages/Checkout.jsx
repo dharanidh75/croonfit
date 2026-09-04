@@ -181,24 +181,21 @@ export function Checkout() {
         <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
           <div className="lg:col-span-7 xl:col-span-8">
             <div className="flex gap-4 mb-10">
-              <button
-                onClick={() => setStep(1)}
-                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 1 ? 'border-black text-black' : 'border-transparent text-[#888888] hover:text-black'}`}
+              <div
+                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 1 ? 'border-black text-black' : 'border-transparent text-[#888888]'}`}
               >
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-black text-white' : 'bg-[#E5E5E5] text-[#555555]'}`}>1</span>
                 Shipping
-              </button>
+              </div>
               <div className="flex items-center text-[#E5E5E5] pb-2">
                 <Check className="w-4 h-4" />
               </div>
-              <button
-                disabled={!address.full_name}
-                onClick={() => address.full_name && setStep(2)}
-                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 2 ? 'border-black text-black' : 'border-transparent text-[#888888]'} ${!address.full_name && 'opacity-50 cursor-not-allowed'}`}
+              <div
+                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 2 ? 'border-black text-black' : 'border-transparent text-[#888888]'}`}
               >
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-black text-white' : 'bg-[#E5E5E5] text-[#555555]'}`}>2</span>
                 Payment
-              </button>
+              </div>
             </div>
 
             {step === 1 ? (

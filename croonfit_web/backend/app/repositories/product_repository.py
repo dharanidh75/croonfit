@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from typing import Optional, List
-from app.models.product import Product, ProductVariant, ProductImage, Category, GenderCategory
+from app.models.product import Product, ProductVariant, VariantImage, Category, GenderCategory
 from app.models.order import OrderItem, Order
 
 class ProductRepository:
@@ -9,8 +9,8 @@ class ProductRepository:
     @staticmethod
     def get_admin_products(db: Session, page: int, per_page: int, search: Optional[str] = None):
         q = db.query(Product).options(
-            joinedload(Product.images),
-            joinedload(Product.variants),
+            
+            joinedload(Product.variants).joinedload(ProductVariant.images),
             joinedload(Product.category),
         )
         if search:
@@ -22,8 +22,8 @@ class ProductRepository:
     @staticmethod
     def get_admin_product_by_id(db: Session, product_id: str) -> Optional[Product]:
         return db.query(Product).options(
-            joinedload(Product.images),
-            joinedload(Product.variants),
+            
+            joinedload(Product.variants).joinedload(ProductVariant.images),
             joinedload(Product.category).joinedload(Category.size_chart),
         ).filter(Product.id == product_id).first()
         
@@ -44,8 +44,8 @@ class ProductRepository:
         q = (
             db.query(Product)
             .options(
-                joinedload(Product.images),
-                joinedload(Product.variants),
+                
+                joinedload(Product.variants).joinedload(ProductVariant.images),
                 joinedload(Product.category),
             )
             .filter(Product.is_active == True)
@@ -89,8 +89,8 @@ class ProductRepository:
         return (
             db.query(Product)
             .options(
-                joinedload(Product.images),
-                joinedload(Product.variants),
+                
+                joinedload(Product.variants).joinedload(ProductVariant.images),
                 joinedload(Product.category).joinedload(Category.size_chart),
             )
             .filter(Product.slug == slug, Product.is_active == True)
@@ -101,7 +101,7 @@ class ProductRepository:
     def get_featured_products(db: Session, limit: int = 8):
         return (
             db.query(Product)
-            .options(joinedload(Product.images), joinedload(Product.variants), joinedload(Product.category))
+            .options( joinedload(Product.variants).joinedload(ProductVariant.images), joinedload(Product.category))
             .filter(Product.is_active == True, Product.is_featured == True)
             .order_by(Product.created_at.desc())
             .limit(limit)
@@ -120,33 +120,44 @@ class ProductRepository:
         return product
 
     @staticmethod
-    def update_product(db: Session, product: Product, update_data: dict, images_data: Optional[List[dict]] = None, variants_data: Optional[List[dict]] = None) -> Product:
+    def update_product(db: Session, product: Product, update_data: dict, variants_data: Optional[List[dict]] = None) -> Product:
         for key, value in update_data.items():
             setattr(product, key, value)
-            
-        if images_data is not None:
-            for img in list(product.images):
-                db.delete(img)
-            product.images.clear()
-            for img_data in images_data:
-                img_data.pop('id', None)
-                new_img = ProductImage(**img_data)
-                product.images.append(new_img)
                 
         if variants_data is not None:
             existing_variants = {str(v.id): v for v in product.variants}
             new_variants = []
             
             for v_data in variants_data:
+                v_imgs_data = v_data.pop('images', [])
                 v_id = v_data.pop('id', None)
+                
                 if v_id and str(v_id) in existing_variants:
                     v = existing_variants[str(v_id)]
                     for k, v_val in v_data.items():
                         setattr(v, k, v_val)
-                    new_variants.append(v)
                 else:
-                    new_v = ProductVariant(**v_data)
-                    new_variants.append(new_v)
+                    v = ProductVariant(**v_data)
+                
+                # Handle variant images
+                existing_imgs = {str(i.id): i for i in v.images}
+                new_imgs = []
+                for img_data in v_imgs_data:
+                    img_id = img_data.pop('id', None)
+                    if img_id and str(img_id) in existing_imgs:
+                        img = existing_imgs[str(img_id)]
+                        for k, i_val in img_data.items():
+                            setattr(img, k, i_val)
+                        new_imgs.append(img)
+                    else:
+                        new_imgs.append(VariantImage(**img_data))
+                
+                for img_id, img in existing_imgs.items():
+                    if img not in new_imgs:
+                        db.delete(img)
+                v.images = new_imgs
+                
+                new_variants.append(v)
             
             for v_id, v in existing_variants.items():
                 if v not in new_variants:

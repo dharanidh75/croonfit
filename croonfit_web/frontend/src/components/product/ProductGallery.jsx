@@ -7,20 +7,27 @@ export function ProductGallery({ images }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
-  if (!images || images.length === 0) {
+  // Reset active index when images array changes completely (e.g., variant changed)
+  React.useEffect(() => {
+    setActiveIndex(0)
+  }, [images])
+
+  const allImages = images || []
+
+  if (allImages.length === 0) {
     return <div className="aspect-[3/4] bg-[#F5F5F5] rounded-2xl" />
   }
 
-  const activeImage = images[activeIndex]
+  const activeImage = allImages[activeIndex] || allImages[0]
 
   const nextImage = (e) => {
     e.stopPropagation()
-    setActiveIndex((prev) => (prev + 1) % images.length)
+    setActiveIndex((prev) => (prev + 1) % allImages.length)
   }
 
   const prevImage = (e) => {
     e.stopPropagation()
-    setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+    setActiveIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1))
   }
 
   return (
@@ -28,7 +35,7 @@ export function ProductGallery({ images }) {
       <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Thumbnails */}
         <div className="flex md:flex-col gap-4 order-2 md:order-1 overflow-x-auto w-full md:w-24 flex-shrink-0 hide-scrollbar">
-          {images.map((img, idx) => (
+          {allImages.map((img, idx) => (
             <button
               key={img.id}
               onClick={() => setActiveIndex(idx)}

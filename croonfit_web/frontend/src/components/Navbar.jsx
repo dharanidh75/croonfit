@@ -10,7 +10,7 @@ export function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { cart, wishlist, isAuthenticated } = useStore()
+  const { cart, wishlist, isAuthenticated, openSearch } = useStore()
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0)
   const wishlistCount = wishlist.length
 
@@ -30,6 +30,7 @@ export function Navbar() {
 
 
   const navLinks = [
+    { to: '/products', label: 'Shop All' },
     { to: '/category/mens', label: 'Mens' },
     { to: '/category/womens', label: 'Womens' },
     { to: '/category/kids', label: 'Kids' },
@@ -91,6 +92,15 @@ export function Navbar() {
           {/* RIGHT — Actions */}
           <div className="flex items-center justify-end gap-6 flex-1">
 
+            {/* Search */}
+            <button
+              onClick={openSearch}
+              className={`hidden sm:block ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
             {/* Profile */}
             <Link
               to={isAuthenticated ? '/account' : '/login'}
@@ -145,7 +155,14 @@ export function Navbar() {
       {/* Mobile overlay menu */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 bg-white/80 backdrop-blur-2xl pt-24" role="dialog">
-          {/* Mobile search removed */}
+          <div className="flex justify-end px-6 mb-6">
+            <button
+              onClick={() => { setMobileOpen(false); openSearch() }}
+              className="flex items-center gap-2 text-sm uppercase tracking-widest font-medium"
+            >
+              <Search className="w-5 h-5" /> Search
+            </button>
+          </div>
 
           <nav className="flex flex-col px-6">
             {navLinks.map(({ to, label }) => (

@@ -32,9 +32,9 @@ class CategoryOut(BaseModel):
         from_attributes = True
 
 
-# ─── ProductImage ─────────────────────────────────────────────────────────────
+# ─── VariantImage ─────────────────────────────────────────────────────────────
 
-class ProductImageOut(BaseModel):
+class VariantImageOut(BaseModel):
     id: UUID
     url: str
     alt: Optional[str] = None
@@ -55,11 +55,17 @@ class ProductVariantOut(BaseModel):
     stock_qty: int
     sku: str
     price: Optional[float] = None
-    image_url: Optional[str] = None
+    images: List[VariantImageOut] = []
 
     class Config:
         from_attributes = True
 
+
+class VariantImageCreate(BaseModel):
+    url: str
+    alt: Optional[str] = None
+    is_primary: bool = False
+    sort_order: int = 0
 
 class ProductVariantCreate(BaseModel):
     size: str
@@ -68,7 +74,7 @@ class ProductVariantCreate(BaseModel):
     stock_qty: int = Field(0, ge=0)
     sku: str
     price: Optional[float] = None
-    image_url: Optional[str] = None
+    images: List[VariantImageCreate] = []
 
 
 # ─── Product ─────────────────────────────────────────────────────────────────
@@ -85,7 +91,7 @@ class ProductAdminDetail(BaseModel):
     is_featured: bool
     tags: Optional[List[str]] = None
     created_at: Optional[datetime] = None
-    images: List[ProductImageOut] = []
+    thumbnail_url: Optional[str] = None
     variants: List[ProductVariantOut] = []
     category: Optional[CategoryOut] = None
 
@@ -100,7 +106,7 @@ class ProductPublicDetail(BaseModel):
     price: float
     compare_price: Optional[float] = None
     tags: Optional[List[str]] = None
-    images: List[ProductImageOut] = []
+    thumbnail_url: Optional[str] = None
     variants: List[ProductVariantOut] = []
     category: Optional[CategoryOut] = None
 
@@ -116,7 +122,7 @@ class ProductPublicListItem(BaseModel):
     compare_price: Optional[float] = None
     is_featured: bool
     tags: Optional[List[str]] = None
-    primary_image: Optional[str] = None   # populated in service
+    thumbnail_url: Optional[str] = None
     secondary_image: Optional[str] = None  # for card hover crossfade
     category: Optional[CategoryOut] = None
     available_sizes: List[str] = []
@@ -125,11 +131,7 @@ class ProductPublicListItem(BaseModel):
         from_attributes = True
 
 
-class ProductImageCreate(BaseModel):
-    url: str
-    alt: Optional[str] = None
-    is_primary: bool = False
-    sort_order: int = 0
+
 
 class ProductCreate(BaseModel):
     name: str
@@ -142,7 +144,14 @@ class ProductCreate(BaseModel):
     is_featured: bool = False
     tags: Optional[List[str]] = None
     variants: List[ProductVariantCreate] = []
-    images: List[ProductImageCreate] = []
+    thumbnail_url: Optional[str] = None
+
+class VariantImageUpdate(BaseModel):
+    id: Optional[UUID] = None
+    url: str
+    alt: Optional[str] = None
+    is_primary: bool = False
+    sort_order: int = 0
 
 class ProductVariantUpdate(BaseModel):
     id: Optional[UUID] = None
@@ -151,18 +160,16 @@ class ProductVariantUpdate(BaseModel):
     color_hex: Optional[str] = None
     stock_qty: int = Field(0, ge=0)
     sku: str
+    price: Optional[float] = None
+    images: List[VariantImageUpdate] = []
 
-class ProductImageUpdate(BaseModel):
-    id: Optional[UUID] = None
-    url: str
-    alt: Optional[str] = None
-    is_primary: bool = False
-    sort_order: int = 0
+
 
 
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
+    slug: Optional[str] = None
     description: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
     compare_price: Optional[float] = Field(None, ge=0)
@@ -171,7 +178,7 @@ class ProductUpdate(BaseModel):
     is_featured: Optional[bool] = None
     tags: Optional[List[str]] = None
     variants: Optional[List[ProductVariantUpdate]] = None
-    images: Optional[List[ProductImageUpdate]] = None
+    thumbnail_url: Optional[str] = None
 
 
 class ProductListResponse(BaseModel):

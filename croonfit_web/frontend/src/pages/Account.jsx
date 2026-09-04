@@ -132,20 +132,6 @@ export function Account() {
                 <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
               </Link>
 
-              {/* Payment Options */}
-              <Link to="/account/payments" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#F5F5F5] rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-200">
-                    <CreditCard className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-heading font-bold text-lg uppercase tracking-wide mb-0.5">Payment Options</h3>
-                    <p className="text-sm text-[#888888]">Edit or add payment methods</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-[#888888] group-hover:text-black transition-colors duration-200" />
-              </Link>
-
               {/* Wishlist */}
               <Link to="/wishlist" className="group flex items-center justify-between p-6 border border-[#E5E5E5] rounded-2xl hover:border-black hover:shadow-md transition-all duration-200 bg-white">
                 <div className="flex items-center gap-4">

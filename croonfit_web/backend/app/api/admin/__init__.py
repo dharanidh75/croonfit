@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from app.database import get_db
 
-from app.models.product import Product, ProductVariant, ProductImage, Category
+from app.models.product import Product, ProductVariant, VariantImage, Category
 from app.models.order import Order, OrderStatusHistory, PaymentRecord, OrderStatus
 from app.schemas.user import AdminLogin, AdminToken
 from app.schemas.order import OrderOut, OrderStatusUpdate, PaymentRecordOut

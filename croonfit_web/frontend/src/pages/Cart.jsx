@@ -88,8 +88,8 @@ export function Cart() {
                         </Link>
                         <div className="flex flex-col py-2">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-[#888888] mb-1">Croonfit</p>
-                          <Link to={`/product/${item.product.slug}`} className="text-base font-medium hover:text-gray-600 transition-colors">
-                            {item.product.name}
+                          <Link to={`/product/${item.product?.slug}`} className="text-base font-medium hover:text-gray-600 transition-colors">
+                            {item.product?.name || 'Croonfit Item'}
                           </Link>
                           <p className="text-xs font-light text-[#555555] mt-2">Size: {item.variant.size}</p>
                           <p className="text-xs font-medium mt-2 md:hidden">₹{Number(item.variant?.price || item.product?.price || 0)}</p>
@@ -130,7 +130,7 @@ export function Cart() {
                       {/* Total Price */}
                       <div className="col-span-1 md:col-span-3 flex items-center justify-end text-black">
                         <span className="text-base font-medium">
-                          {`₹${(parseFloat(item.product?.price || 0) * Number(item.quantity || 1)).toFixed(2)}`}
+                          {`₹${(parseFloat(item.variant?.price || item.product?.price || 0) * Number(item.quantity || 1)).toFixed(2)}`}
                         </span>
                       </div>
                     </div>

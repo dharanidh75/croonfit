@@ -46,7 +46,7 @@ export function OrderSuccess() {
           </div>
         </div>
         
-        <Link to="/products" className="btn-primary w-full h-12 mb-4">
+        <Link to="/products" className="w-full h-12 flex items-center justify-center bg-black text-white font-heading font-bold uppercase tracking-wider text-sm hover:bg-[#333333] transition-colors duration-200 mb-4">
           CONTINUE SHOPPING
         </Link>
         

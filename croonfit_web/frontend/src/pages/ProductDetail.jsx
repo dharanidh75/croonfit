@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
@@ -24,10 +24,25 @@ export function ProductDetail() {
   const [shippingOpen, setShippingOpen] = useState(false)
   const [recommended, setRecommended] = useState([])
 
-  const { cart, wishlist, addToCart, updateCartQty, removeFromCart, openCart, toggleWishlist, isAuthenticated } = useStore()
+  const { cart, wishlist, addToCart, updateCartQty, removeFromCart, openCart, toggleWishlist, isAuthenticated, setBuyNowItem } = useStore()
+  const navigate = useNavigate()
 
   const selectedVariant = product?.variants?.find(v => v.size === selectedSize && v.color === selectedColor?.name)
-    || product?.variants?.find(v => v.size === selectedSize)
+
+  const handleColorChange = (color) => {
+    setSelectedColor(color)
+    if (product?.variants) {
+      const sizesForColor = product.variants.filter(v => v.color === color.name)
+      if (sizesForColor.length > 0) {
+        // If current size exists in new color, keep it. Else pick first available.
+        const sizeExists = sizesForColor.find(v => v.size === selectedSize)
+        if (!sizeExists) {
+          const firstAvail = sizesForColor.find(v => v.stock_qty > 0) || sizesForColor[0]
+          setSelectedSize(firstAvail.size)
+        }
+      }
+    }
+  }
 
   const cartItem = cart.find(item => item.product.id === product?.id && item.variant.id === selectedVariant?.id)
 
@@ -172,7 +187,9 @@ export function ProductDetail() {
 
             {/* Left: Gallery */}
             <div className="w-full lg:w-[60%] xl:w-[65%]">
-              <ProductGallery images={product.images} />
+              <ProductGallery 
+                images={selectedVariant?.images?.length > 0 ? selectedVariant.images : (product.thumbnail_url ? [{id: 'thumb', url: product.thumbnail_url}] : [])}
+              />
             </div>
 
             {/* Right: Info panel (Sticky) */}
@@ -210,7 +227,7 @@ export function ProductDetail() {
                     {colors.map(color => (
                       <button
                         key={color.name}
-                        onClick={() => setSelectedColor(color)}
+                        onClick={() => handleColorChange(color)}
                         className={`w-10 h-10 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${selectedColor?.name === color.name ? 'border-black' : 'border-transparent hover:border-gray-300'
                           }`}
                       >
@@ -235,7 +252,7 @@ export function ProductDetail() {
                     </button>
                   </div>
                   <SizeSelector
-                    variants={product.variants || []}
+                    variants={(product.variants || []).filter(v => v.color === selectedColor?.name)}
                     selectedSize={selectedSize}
                     onSelect={setSelectedSize}
                     sizeChart={product.category?.size_chart}

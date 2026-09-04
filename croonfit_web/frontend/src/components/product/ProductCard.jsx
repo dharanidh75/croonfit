@@ -48,7 +48,7 @@ export function ProductCard({ product, mode = 'default' }) {
         }}
       >
         <ImageWithFallback
-          src={product.primary_image || product.images?.find(i => i.is_primary)?.url || product.images?.[0]?.url}
+          src={product.thumbnail_url || product.primary_image}
           alt={product.name}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out"
           style={{ transform: hovered ? 'scale(1.04)' : 'scale(1)' }}

@@ -54,10 +54,10 @@ class Product(Base):
     tags = Column(JSON)
     created_at = Column(DateTime(timezone=True), server_default=text("now()"))
     updated_at = Column(DateTime(timezone=True), server_default=text("now()"), onupdate=text("now()"))
+    thumbnail_url = Column(String(500), nullable=True)
 
     category = relationship("Category", back_populates="products")
     variants = relationship("ProductVariant", back_populates="product", cascade="all, delete-orphan")
-    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan", order_by="ProductImage.sort_order")
     wishlisted_by = relationship("Wishlist", back_populates="product", cascade="all, delete-orphan")
 
 
@@ -72,21 +72,21 @@ class ProductVariant(Base):
     stock_qty = Column(Integer, server_default=text("0"), nullable=False)
     sku = Column(String(100), unique=True, nullable=False)
     price = Column(Numeric(10, 2), nullable=True)
-    image_url = Column(String(500), nullable=True)
 
     product = relationship("Product", back_populates="variants")
+    images = relationship("VariantImage", back_populates="variant", cascade="all, delete-orphan", order_by="VariantImage.sort_order")
     cart_items = relationship("CartItem", back_populates="variant", cascade="all, delete-orphan")
     order_items = relationship("OrderItem", back_populates="variant")
 
 
-class ProductImage(Base):
-    __tablename__ = "product_images"
+class VariantImage(Base):
+    __tablename__ = "variant_images"
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
-    product_id = Column(UUID(as_uuid=True), ForeignKey("products.id", ondelete="CASCADE"), index=True, nullable=False)
+    variant_id = Column(UUID(as_uuid=True), ForeignKey("product_variants.id", ondelete="CASCADE"), index=True, nullable=False)
     url = Column(String(500), nullable=False)
     alt = Column(String(255))
     is_primary = Column(Boolean, server_default=text("false"))
     sort_order = Column(Integer, server_default=text("0"))
 
-    product = relationship("Product", back_populates="images")
+    variant = relationship("ProductVariant", back_populates="images")

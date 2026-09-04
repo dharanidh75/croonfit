@@ -54,7 +54,6 @@ class InventoryService:
             .join(Category, Category.id == Product.category_id)
             .outerjoin(sold_subq, sold_subq.c.variant_id == ProductVariant.id)
             .outerjoin(incoming_subq, incoming_subq.c.variant_id == ProductVariant.id)
-            .options(selectinload(Product.images))
         )
         
         results = query.all()
@@ -74,9 +73,7 @@ class InventoryService:
             
             # Group by product
             if product.id not in product_map:
-                primary_image = None
-                if product.images:
-                    primary_image = product.images[0].url
+                primary_image = product.thumbnail_url
                 
                 product_map[product.id] = {
                     "id": product.id,

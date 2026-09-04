@@ -61,6 +61,18 @@ export function CheckoutForm({ address, setAddress, onSubmit }) {
         onSubmit(e)
       }, 0)
     } else {
+      // NEW address - silently save it to backend if logged in
+      if (user) {
+        api.post('/auth/me/addresses', {
+          name: 'Saved from Checkout',
+          full_name: address.full_name,
+          street: address.line1 + (address.line2 ? `, ${address.line2}` : ''),
+          city: address.city,
+          state: address.state,
+          zip: address.pin,
+          is_default: savedAddresses.length === 0
+        }).catch(err => console.error("Failed to save address", err))
+      }
       onSubmit(e)
     }
   }

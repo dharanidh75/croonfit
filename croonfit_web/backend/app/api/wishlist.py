@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List
 from app.database import get_db
 from app.models.shopping import Wishlist as WishlistItem
-from app.models.product import Product, ProductImage
+from app.models.product import Product, VariantImage
 from app.schemas.product import ProductPublicListItem
 from app.core.firebase_auth import get_current_user
 from app.services.product_service import ProductService

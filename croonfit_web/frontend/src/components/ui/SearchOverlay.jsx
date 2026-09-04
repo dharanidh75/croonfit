@@ -26,7 +26,7 @@ export function SearchOverlay() {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (query.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(query.trim())}`)
+      navigate(`/products?search=${encodeURIComponent(query.trim())}`)
       closeSearch()
       setQuery('')
     }
@@ -62,9 +62,9 @@ export function SearchOverlay() {
         </form>
         <div className="mt-8 flex flex-wrap gap-4 font-body text-sm text-muted">
           <span>POPULAR:</span>
-          <button onClick={() => { navigate('/shop?search=hoodie'); closeSearch() }} className="hover:text-text uppercase tracking-wider transition-colors duration-[150ms] linear">Hoodies</button>
-          <button onClick={() => { navigate('/shop?search=jogger'); closeSearch() }} className="hover:text-text uppercase tracking-wider transition-colors duration-[150ms] linear">Joggers</button>
-          <button onClick={() => { navigate('/shop?category=mens'); closeSearch() }} className="hover:text-text uppercase tracking-wider transition-colors duration-[150ms] linear">Men's New</button>
+          <button onClick={() => { navigate('/products?search=hoodie'); closeSearch() }} className="hover:text-text uppercase tracking-wider transition-colors duration-[150ms] linear">Hoodies</button>
+          <button onClick={() => { navigate('/products?search=jogger'); closeSearch() }} className="hover:text-text uppercase tracking-wider transition-colors duration-[150ms] linear">Joggers</button>
+          <button onClick={() => { navigate('/category/mens'); closeSearch() }} className="hover:text-text uppercase tracking-wider transition-colors duration-[150ms] linear">Men's New</button>
         </div>
       </div>
     </div>

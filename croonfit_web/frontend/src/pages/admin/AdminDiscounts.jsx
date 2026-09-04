@@ -14,6 +14,7 @@ export function AdminDiscounts() {
   
   const [showModal, setShowModal] = useState(false)
   const [modalMode, setModalMode] = useState('create') // 'create' | 'edit'
+  const [deletingId, setDeletingId] = useState(null)
   
   const [formData, setFormData] = useState({
     id: null,
@@ -75,12 +76,15 @@ export function AdminDiscounts() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete or deactivate this discount?')) return
+    setDeletingId(id)
     try {
       const res = await api.delete(`/admin/discounts/${id}`)
       toast.success(res.data.message || 'Discount processed')
       fetchDiscounts()
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to delete discount')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -223,8 +227,19 @@ export function AdminDiscounts() {
           <button onClick={() => handleOpenEdit(row)} className="p-1.5 text-[#888888] hover:text-[#111111] transition-colors rounded-md hover:bg-gray-100">
             <Pencil className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row.id)} className="p-1.5 text-[#888888] hover:text-red-600 transition-colors rounded-md hover:bg-red-50">
-            <Trash2 className="w-4 h-4" />
+          <button 
+            onClick={() => handleDelete(row.id)} 
+            disabled={deletingId === row.id}
+            className="p-1.5 text-[#888888] hover:text-red-600 transition-colors rounded-md hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {deletingId === row.id ? (
+              <svg className="animate-spin w-4 h-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
           </button>
         </div>
       )

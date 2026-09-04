@@ -113,8 +113,8 @@ def create_order(
             line_total = Decimal(str(variant.product.price)) * line.quantity
             subtotal += line_total
             image_url = None
-            if variant.product.images and len(variant.product.images) > 0:
-                image_url = variant.product.images[0].url
+            if variant.product.thumbnail_url:
+                image_url = variant.product.thumbnail_url
 
             order_items.append(OrderItem(
                 variant_id=variant.id,

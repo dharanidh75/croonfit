@@ -6,7 +6,7 @@ from app.schemas.product import (
     ProductCreate, ProductUpdate, 
     ProductAdminListItem, ProductPublicListItem
 )
-from app.models.product import Product, ProductVariant, ProductImage
+from app.models.product import Product, ProductVariant, VariantImage
 from app.models.order import OrderStatus
 
 class ProductService:
@@ -16,9 +16,7 @@ class ProductService:
 
     @staticmethod
     def _build_admin_list_item(p: Product) -> ProductAdminListItem:
-        primary_image = next((img.url for img in p.images if img.is_primary), None)
-        if not primary_image and p.images:
-            primary_image = p.images[0].url
+        primary_image = p.thumbnail_url
             
         stock = sum(v.stock_qty for v in p.variants) if p.variants else 0
         
@@ -37,15 +35,13 @@ class ProductService:
             stock=stock,
             is_active=p.is_active,
             category_name=p.category.name if p.category else None,
-            primary_image=primary_image,
+            thumbnail_url=primary_image,
         )
 
     @staticmethod
     def _build_public_list_item(p: Product) -> ProductPublicListItem:
-        primary = next((img.url for img in p.images if img.is_primary), None)
-        if not primary and p.images:
-            primary = p.images[0].url
-        secondary = next((img.url for img in p.images if not img.is_primary), None)
+        primary = p.thumbnail_url
+        secondary = None
         sizes = sorted({v.size for v in p.variants if v.stock_qty > 0}) if p.variants else []
         return ProductPublicListItem(
             id=p.id,
@@ -55,7 +51,7 @@ class ProductService:
             compare_price=p.compare_price,
             is_featured=p.is_featured,
             tags=p.tags,
-            primary_image=primary,
+            thumbnail_url=primary,
             secondary_image=secondary,
             category=p.category,
             available_sizes=sizes,
@@ -81,11 +77,15 @@ class ProductService:
             price=data.price, compare_price=data.compare_price,
             category_id=data.category_id, is_active=data.is_active,
             is_featured=data.is_featured, tags=data.tags,
+            thumbnail_url=data.thumbnail_url,
         )
-        for v in data.variants:
-            product.variants.append(ProductVariant(**v.model_dump()))
-        for i in data.images:
-            product.images.append(ProductImage(**i.model_dump()))
+        for v_data in data.variants:
+            v_dict = v_data.model_dump()
+            v_imgs = v_dict.pop('images', [])
+            v_model = ProductVariant(**v_dict)
+            for i in v_imgs:
+                v_model.images.append(VariantImage(**i))
+            product.variants.append(v_model)
             
         try:
             return ProductRepository.create_product(db, product)
@@ -99,9 +99,10 @@ class ProductService:
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
             
+
         update_data = data.model_dump(exclude_none=True)
-        images_data = update_data.pop('images', None)
         variants_data = update_data.pop('variants', None)
+
 
         if variants_data is not None:
             new_variant_ids = {str(v['id']) for v in variants_data if v.get('id')}
@@ -116,7 +117,13 @@ class ProductService:
                         detail=f"Cannot delete variants {blocked} because they are in active orders."
                     )
 
-        return ProductRepository.update_product(db, product, update_data, images_data, variants_data)
+        try:
+            return ProductRepository.update_product(db, product, update_data, variants_data)
+        except Exception as e:
+            db.rollback()
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(status_code=400, detail=str(e))
 
     @classmethod
     def delete_product(cls, db: Session, product_id: str):

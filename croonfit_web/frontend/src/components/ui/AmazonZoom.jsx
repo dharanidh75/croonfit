@@ -12,6 +12,8 @@ export function AmazonZoom({ src, alt, className = "" }) {
   const LENS_SIZE = 160 
   const ZOOM_FACTOR = 2.5 // How much larger the zoomed image is
 
+  const imageUrl = src?.startsWith('http') ? src : `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'}${src}`
+
   const handleMouseEnter = () => {
     setIsHovered(true)
     if (containerRef.current) {
@@ -93,7 +95,7 @@ export function AmazonZoom({ src, alt, className = "" }) {
             width: '100%', 
             minWidth: '500px', // Ensure it's large enough for a good view
             height: '100%', // Match height of the main image
-            backgroundImage: `url(${src})`,
+            backgroundImage: `url(${imageUrl})`,
             backgroundRepeat: 'no-repeat',
             backgroundSize: `${bgSize.width}px ${bgSize.height}px`,
             backgroundPosition: `${bgPos.x} ${bgPos.y}`
