@@ -65,6 +65,12 @@ export function Footer() {
               <Link to="/contact" className="hover:text-white transition-colors duration-150">Contact Us</Link>
             </li>
             <li>
+              <Link to="/shipping-policy" className="hover:text-white transition-colors duration-150">Shipping Policy</Link>
+            </li>
+            <li>
+              <Link to="/return-policy" className="hover:text-white transition-colors duration-150">Return & Refund Policy</Link>
+            </li>
+            <li>
               <a href="#" className="hover:text-white transition-colors duration-150">FAQ</a>
             </li>
           </ul>

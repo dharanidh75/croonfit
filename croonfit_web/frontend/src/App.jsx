@@ -20,6 +20,8 @@ import { Orders }         from './pages/Orders'
 import { Login }          from './pages/Login'
 import { Contact }        from './pages/Contact'
 import { NotFound }       from './pages/NotFound'
+import { ShippingPolicy } from './pages/ShippingPolicy'
+import { ReturnPolicy }   from './pages/ReturnPolicy'
 import { Navigate }       from 'react-router-dom'
 
 import { PageTransition } from './components/layout/PageTransition'
@@ -86,6 +88,8 @@ function AnimatedRoutes() {
         <Route path="/orders"                      element={<PageTransition><Orders /></PageTransition>} />
         <Route path="/login"                       element={<PageTransition><Login /></PageTransition>} />
         <Route path="/contact"                     element={<PageTransition><Contact /></PageTransition>} />
+        <Route path="/shipping-policy"             element={<PageTransition><ShippingPolicy /></PageTransition>} />
+        <Route path="/return-policy"               element={<PageTransition><ReturnPolicy /></PageTransition>} />
         
         {/* Products listing (all / search) */}
         <Route path="/products"                    element={<PageTransition><ProductListing /></PageTransition>} />
