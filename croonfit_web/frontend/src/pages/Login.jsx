@@ -32,12 +32,12 @@ function getAuthErrorMessage(code) {
 }
 
 // Syncs the Firebase user to our Supabase backend after any login
-async function syncUserToBackend(firebaseUser) {
+async function syncUserToBackend(firebaseUser, extraData = {}) {
   const token = await firebaseUser.getIdToken()
   const nameParts = (firebaseUser.displayName || '').split(' ')
   const res = await api.post('/auth/sync', {
-    first_name: nameParts[0] || null,
-    last_name: nameParts.slice(1).join(' ') || null,
+    first_name: extraData.first_name || nameParts[0] || null,
+    last_name: extraData.last_name || nameParts.slice(1).join(' ') || null,
     avatar_url: firebaseUser.photoURL || null,
   }, {
     headers: { Authorization: `Bearer ${token}` }
@@ -78,12 +78,13 @@ export function Login() {
         navigate('/')
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-        await syncUserToBackend(userCredential.user)
+        await syncUserToBackend(userCredential.user, { first_name: firstName, last_name: lastName })
         await sendEmailVerification(userCredential.user)
         setTab('verify-email')
       }
     } catch (err) {
-      toast.error(getAuthErrorMessage(err.code))
+      console.error("Auth error:", err)
+      toast.error(getAuthErrorMessage(err.code) || err.message || 'Something went wrong.')
     } finally {
       setLoading(false)
     }
