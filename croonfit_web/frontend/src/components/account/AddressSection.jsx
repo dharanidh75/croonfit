@@ -104,13 +104,18 @@ export function AddressSection({ onBack }) {
               <p className="text-sm text-[#888888]">Manage shipping addresses for orders</p>
             </div>
           </div>
-          {!isAdding && (
+          {!isAdding && addresses.length < 5 && (
             <button 
               onClick={handleAddNew}
               className="flex items-center gap-2 bg-white border border-[#E5E5E5] px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:border-black transition-colors"
             >
               <Plus className="w-4 h-4" /> Add New
             </button>
+          )}
+          {!isAdding && addresses.length >= 5 && (
+            <div className="text-xs font-bold uppercase tracking-wider text-[#888888]">
+              Address limit reached (5)
+            </div>
           )}
         </div>
 
@@ -128,7 +133,7 @@ export function AddressSection({ onBack }) {
 
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">Full Name</label>
-                <input required type="text" name="full_name" value={formData.full_name} onChange={handleChange} className="w-full px-4 py-3 bg-[#F9F9F9] border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black transition-all" />
+                <input required type="text" name="full_name" value={formData.full_name} onChange={handleChange} pattern="^[a-zA-Z\s]+$" title="Only letters and spaces are allowed" className="w-full px-4 py-3 bg-[#F9F9F9] border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black transition-all" />
               </div>
 
               <div className="md:col-span-2">
@@ -148,7 +153,7 @@ export function AddressSection({ onBack }) {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">ZIP Code</label>
-                <input required type="text" name="zip" value={formData.zip} onChange={handleChange} className="w-full px-4 py-3 bg-[#F9F9F9] border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black transition-all" />
+                <input required type="text" name="zip" value={formData.zip} onChange={handleChange} pattern="^[0-9]{5,6}$" title="Enter a valid 5 or 6 digit PIN/Zip code" className="w-full px-4 py-3 bg-[#F9F9F9] border border-[#E5E5E5] rounded-xl text-sm focus:outline-none focus:border-black transition-all" />
               </div>
             </div>
 

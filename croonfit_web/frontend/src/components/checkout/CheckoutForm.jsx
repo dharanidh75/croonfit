@@ -125,6 +125,7 @@ export function CheckoutForm({ address, setAddress, onSubmit }) {
             <input 
               required={!useExisting} type="text" name="full_name" placeholder="Full Name" 
               value={address.full_name || ''} onChange={handleChange} 
+              pattern="^[a-zA-Z\s]+$" title="Only letters and spaces are allowed"
               className={`${inputClass} md:col-span-2`}
             />
             
@@ -161,12 +162,14 @@ export function CheckoutForm({ address, setAddress, onSubmit }) {
             <input 
               required={!useExisting} type="text" name="pin" placeholder="PIN / Zip Code" 
               value={address.pin || ''} onChange={handleChange} 
+              pattern="^[0-9]{5,6}$" title="Enter a valid 5 or 6 digit PIN/Zip code"
               className={inputClass}
             />
             
             <input 
               required={!useExisting} type="tel" name="phone" placeholder="Phone Number" 
               value={address.phone || ''} onChange={handleChange} 
+              pattern="^(\+91[\-\s]?)?[0-9]{10}$" title="Enter a valid 10-digit phone number, optionally starting with +91"
               className={inputClass}
             />
           </div>

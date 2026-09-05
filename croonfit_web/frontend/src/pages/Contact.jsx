@@ -32,6 +32,7 @@ export function Contact() {
                     <input 
                       type="text" 
                       required
+                      pattern="^[a-zA-Z\s]+$" title="Only letters and spaces are allowed"
                       className="w-full h-14 border border-[#E5E5E5] rounded-xl px-4 text-sm font-light text-[#0A0A0A] placeholder-[#888888] focus:border-black focus:ring-1 focus:ring-black outline-none transition-all duration-300"
                       placeholder="John Doe"
                     />

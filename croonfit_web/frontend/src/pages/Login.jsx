@@ -169,6 +169,7 @@ export function Login() {
                     <input
                       type="text" required value={firstName}
                       onChange={e => setFirstName(e.target.value)}
+                      pattern="^[a-zA-Z\s]+$" title="Only letters and spaces are allowed"
                       className="w-full h-10 px-3 border border-[#CCCCCC] focus:border-[#0A0A0A] outline-none font-body text-sm transition-colors duration-150"
                     />
                   </div>
@@ -177,6 +178,7 @@ export function Login() {
                     <input
                       type="text" required value={lastName}
                       onChange={e => setLastName(e.target.value)}
+                      pattern="^[a-zA-Z\s]+$" title="Only letters and spaces are allowed"
                       className="w-full h-10 px-3 border border-[#CCCCCC] focus:border-[#0A0A0A] outline-none font-body text-sm transition-colors duration-150"
                     />
                   </div>
@@ -208,6 +210,8 @@ export function Login() {
                   <input
                     type={showPw ? 'text' : 'password'} required value={password}
                     onChange={e => setPassword(e.target.value)}
+                    pattern={tab === 'signup' ? "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$" : undefined}
+                    title={tab === 'signup' ? "Password must be at least 8 characters long and include a letter, a number, and a special character." : undefined}
                     placeholder="••••••••"
                     className="w-full h-10 px-3 pr-10 border border-[#CCCCCC] focus:border-[#0A0A0A] outline-none font-body text-sm placeholder:text-[#888888] transition-colors duration-150"
                   />

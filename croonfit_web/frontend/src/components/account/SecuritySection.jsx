@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, Shield, Info } from 'lucide-react'
+import { ArrowLeft, Shield, Info, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useStore } from '../../store'
 import api from '../../lib/api'
@@ -21,6 +21,7 @@ export function SecuritySection({ onBack }) {
   })
   
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPw, setShowPw] = useState(false)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -109,6 +110,7 @@ export function SecuritySection({ onBack }) {
                 name="full_name"
                 value={formData.full_name}
                 onChange={handleChange}
+                pattern="^[a-zA-Z\s]+$" title="Only letters and spaces are allowed"
                 className={inputClass}
                 required
               />
@@ -137,6 +139,7 @@ export function SecuritySection({ onBack }) {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                pattern="^(\+91[\-\s]?)?[0-9]{10}$" title="Enter a valid 10-digit phone number, optionally starting with +91"
                 className={inputClass}
               />
             </div>
@@ -149,38 +152,49 @@ export function SecuritySection({ onBack }) {
               
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">Current Password</label>
-                <input 
-                  type="password" 
-                  name="current_password"
-                  value={formData.current_password}
-                  onChange={handleChange}
-                  className={inputClass}
-                  placeholder="Leave blank to keep unchanged"
-                />
+                <div className="relative">
+                  <input 
+                    type={showPw ? 'text' : 'password'} 
+                    name="current_password"
+                    value={formData.current_password}
+                    onChange={handleChange}
+                    className={`${inputClass} pr-10`}
+                    placeholder="Leave blank to keep unchanged"
+                  />
+                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888888] hover:text-black transition-colors">
+                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">New Password</label>
-                <input 
-                  type="password" 
-                  name="new_password"
-                  value={formData.new_password}
-                  onChange={handleChange}
-                  className={inputClass}
-                  placeholder="Leave blank to keep unchanged"
-                />
+                <div className="relative">
+                  <input 
+                    type={showPw ? 'text' : 'password'} 
+                    name="new_password"
+                    value={formData.new_password}
+                    onChange={handleChange}
+                    pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+                    title="Password must be at least 8 characters long and include a letter, a number, and a special character."
+                    className={`${inputClass} pr-10`}
+                    placeholder="Leave blank to keep unchanged"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#0A0A0A] mb-1.5">Confirm New Password</label>
-                <input 
-                  type="password" 
-                  name="confirm_password"
-                  value={formData.confirm_password}
-                  onChange={handleChange}
-                  className={inputClass}
-                  placeholder="Re-enter new password"
-                />
+                <div className="relative">
+                  <input 
+                    type={showPw ? 'text' : 'password'} 
+                    name="confirm_password"
+                    value={formData.confirm_password}
+                    onChange={handleChange}
+                    className={`${inputClass} pr-10`}
+                    placeholder="Re-enter new password"
+                  />
+                </div>
               </div>
             </div>
           )}
