@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Mail } from 'lucide-react'
 import { useStore } from '../store'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
 import { auth, googleProvider } from '../lib/firebase'
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 
 // Friendly error messages for Firebase auth codes
 function getAuthErrorMessage(code) {
@@ -79,8 +79,8 @@ export function Login() {
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         await syncUserToBackend(userCredential.user)
-        toast.success('Account created! Please log in.')
-        setTab('login')
+        await sendEmailVerification(userCredential.user)
+        setTab('verify-email')
       }
     } catch (err) {
       toast.error(getAuthErrorMessage(err.code))
@@ -143,8 +143,41 @@ export function Login() {
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 py-12 md:py-16 bg-white">
           <div className="w-full max-w-[400px]">
 
-            {/* Tab toggle */}
-            <div className="flex gap-0 border-b border-[#CCCCCC] mb-8">
+            {tab === 'verify-email' ? (
+              <div className="text-center animate-fade-in-up">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Mail className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="font-heading font-black text-2xl uppercase tracking-wider text-[#0A0A0A] mb-4">Check Your Email</h2>
+                <p className="font-body text-[#555555] mb-6 leading-relaxed">
+                  An activation link has been sent to <strong>{email}</strong>. Please click the link to verify your account.
+                </p>
+                <div className="bg-[#F9F9F9] border border-[#E5E5E5] p-4 rounded-xl mb-8 text-xs text-[#888888]">
+                  If you didn't receive the email, please check your spam or junk folder.
+                </div>
+                
+                <button
+                  onClick={handleResendVerification}
+                  disabled={loading}
+                  className="w-full h-11 border border-black text-[#0A0A0A] font-heading font-bold text-sm uppercase tracking-wider hover:bg-black hover:text-white transition-colors duration-150 disabled:opacity-50 mb-4"
+                >
+                  {loading ? 'Sending...' : 'Resend Link'}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    auth.signOut()
+                    setTab('login')
+                  }}
+                  className="font-body text-sm font-bold text-[#888888] hover:text-[#0A0A0A] transition-colors"
+                >
+                  Back to Login
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Tab toggle */}
+                <div className="flex gap-0 border-b border-[#CCCCCC] mb-8">
               {['login', 'signup'].map(t => (
                 <button
                   key={t}
@@ -267,6 +300,8 @@ export function Login() {
                 </>
               )}
             </p>
+            </>
+            )}
           </div>
         </div>
       </div>
