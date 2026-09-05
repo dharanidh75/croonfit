@@ -81,7 +81,7 @@ export function Cart() {
                       <div className="col-span-1 md:col-span-6 flex gap-6">
                         <Link to={`/product/${item.product.slug}`} className="w-24 md:w-32 flex-shrink-0 bg-[#F5F5F5] rounded-xl overflow-hidden aspect-[3/4]">
                           <ImageWithFallback 
-                            src={item.product.thumbnail_url || item.product.primary_image || item.product.images?.find(i => i.is_primary)?.url || item.product.images?.[0]?.url} 
+                            src={item.product.thumbnail_url || item.variant?.images?.find(i => i.is_primary)?.url || item.variant?.images?.[0]?.url || item.product.primary_image || item.product.images?.[0]?.url} 
                             alt={item.product.name} 
                             className="w-full h-full object-cover mix-blend-multiply" 
                           />
@@ -128,8 +128,8 @@ export function Cart() {
                       </div>
 
                       {/* Total Price */}
-                      <div className="col-span-1 md:col-span-3 flex items-center justify-end text-black">
-                        <span className="text-base font-medium">
+                      <div className="hidden md:flex col-span-3 items-center justify-end">
+                        <span className="text-lg font-bold text-[#0A0A0A]">
                           {`₹${(parseFloat(item.variant?.price || item.product?.price || 0) * Number(item.quantity || 1)).toFixed(2)}`}
                         </span>
                       </div>
