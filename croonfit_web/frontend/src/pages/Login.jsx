@@ -90,6 +90,20 @@ export function Login() {
     }
   }
 
+  const handleResendVerification = async () => {
+    if (!auth.currentUser) return
+    setLoading(true)
+    try {
+      await sendEmailVerification(auth.currentUser)
+      toast.success("Verification link resent to " + email)
+    } catch (err) {
+      console.error("Resend error:", err)
+      toast.error(getAuthErrorMessage(err.code) || err.message || 'Something went wrong.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleGoogleSignIn = async () => {
     if (!auth) {
       toast.error("Firebase is not configured. Add keys to .env.development and restart.")
