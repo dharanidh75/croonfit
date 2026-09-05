@@ -146,28 +146,30 @@ export function Login() {
       <div className="flex flex-1 flex-col md:flex-row min-h-screen">
 
         {/* ── LEFT PANEL — brand image ────────────────────────────────────── */}
-        <div className="relative w-full h-[35vh] md:h-auto md:w-1/2 overflow-hidden bg-black flex-shrink-0 group">
-          {/* Background Image with slow zoom effect */}
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-[10s] group-hover:scale-110 opacity-60"></div>
+        <div className="relative w-full h-[35vh] md:h-auto md:w-1/2 flex flex-col justify-center items-center bg-[#F8F9FA] flex-shrink-0 border-r border-[#E5E5E5]">
+          {/* Subtle Grid Background */}
+          <div 
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }}
+          ></div>
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10"></div>
+          {/* Logo container with elegant animation */}
+          <div className="relative z-10 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center animate-fade-in-up">
+            <img
+              src="/logo.png"
+              alt="Croon Apparel Studio"
+              className="w-full h-full object-contain drop-shadow-2xl"
+            />
+          </div>
 
-          {/* Content */}
-          <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-14 text-white">
-            <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-              <h2 className="font-heading font-black text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider mb-4 leading-[1.1]">
-                Define<br/>Your<br/>Style.
-              </h2>
-              <p className="font-body text-sm text-gray-300 max-w-sm leading-relaxed mb-8">
-                Join Croon Apparel Studio to access exclusive collections, track your orders, and curate your aesthetic.
-              </p>
-              
-              <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                <span className="w-8 h-[1px] bg-gray-400"></span>
-                Croon Apparel Studio
-              </div>
-            </div>
+          {/* Minimalist typography below logo */}
+          <div className="absolute bottom-8 md:bottom-12 left-0 right-0 text-center animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            <h2 className="font-heading font-black text-sm uppercase tracking-[0.3em] text-[#0A0A0A] mb-2">
+              Apparel Studio
+            </h2>
+            <p className="font-body text-xs text-[#888888] tracking-wider uppercase">
+              Your Style Starts Here
+            </p>
           </div>
         </div>
 
