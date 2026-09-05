@@ -43,8 +43,8 @@ export function Navbar() {
 
   // The full-width glassmorphism effect
   const navClasses = scrolled
-    ? 'fixed top-0 left-0 w-full z-50 transition-all duration-500 bg-white/40 backdrop-blur-2xl border-b border-[#E5E5E5]/50 shadow-sm'
-    : 'fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b border-transparent bg-transparent'
+    ? 'absolute md:fixed top-0 left-0 w-full z-50 transition-all duration-500 bg-white/90 md:bg-white/40 backdrop-blur-2xl border-b border-[#E5E5E5]/50 shadow-sm'
+    : 'absolute md:fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b border-transparent bg-transparent'
 
   return (
     <>
@@ -90,12 +90,12 @@ export function Navbar() {
           </div>
 
           {/* RIGHT — Actions */}
-          <div className="flex items-center justify-end gap-6 flex-1">
+          <div className="flex items-center justify-end gap-3 sm:gap-6 flex-1">
 
             {/* Search */}
             <button
               onClick={openSearch}
-              className={`hidden sm:block ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+              className={`${textColor} opacity-80 hover:opacity-100 transition-opacity`}
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
@@ -104,7 +104,7 @@ export function Navbar() {
             {/* Profile */}
             <Link
               to={isAuthenticated ? '/account' : '/login'}
-              className={`hidden sm:block ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+              className={`${textColor} opacity-80 hover:opacity-100 transition-opacity`}
               aria-label="Profile"
             >
               <User className="w-5 h-5" />
@@ -113,7 +113,7 @@ export function Navbar() {
             {/* Wishlist */}
             <Link
               to="/wishlist"
-              className={`relative hidden sm:block ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
+              className={`relative ${textColor} opacity-80 hover:opacity-100 transition-opacity`}
               aria-label="Wishlist"
             >
               <Heart className="w-5 h-5" />

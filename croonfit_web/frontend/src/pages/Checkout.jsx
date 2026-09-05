@@ -179,7 +179,7 @@ export function Checkout() {
         </div>
 
         <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
-          <div className="lg:col-span-7 xl:col-span-8">
+          <div className="lg:col-span-7 xl:col-span-8 order-2 lg:order-1">
             <div className="flex gap-4 mb-10">
               <div
                 className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 1 ? 'border-black text-black' : 'border-transparent text-[#888888]'}`}
@@ -212,7 +212,7 @@ export function Checkout() {
             )}
           </div>
 
-          <div className="lg:col-span-5 xl:col-span-4">
+          <div className="lg:col-span-5 xl:col-span-4 order-1 lg:order-2">
             <OrderSummary
               cart={checkoutItems}
               outOfStockIssues={stockIssues}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, ShoppingBag, Building2 } from 'lucide-react'
@@ -8,11 +8,20 @@ import { AboutSection } from '../components/AboutSection'
 import backgroundVideo from '../video/0711.webm'
 import retailImg from '../images/retail.jpg'
 import wholesaleImg from '../images/shirt.jpg'
+import { ProductCard } from '../components/product/ProductCard'
+import api from '../lib/api'
 
 
 
 export function Home() {
   const videoRef = useRef(null)
+  const [newArrivals, setNewArrivals] = useState([])
+
+  useEffect(() => {
+    api.get('/products?sort=newest&per_page=2')
+      .then(res => setNewArrivals(res.data?.items || []))
+      .catch(console.error)
+  }, [])
 
   useEffect(() => {
     if (videoRef.current) {
@@ -99,24 +108,20 @@ export function Home() {
               </Link>
             </div>
 
-            {/* Right: Dual Images */}
+            {/* Right: Real Products */}
             <div className="flex-1 flex gap-4 md:gap-6 justify-center lg:justify-end items-center">
-              {/* First Image */}
-              <div className="w-48 h-64 md:w-64 md:h-[350px] rounded-[2rem] overflow-hidden shadow-sm shrink-0">
-                <img 
-                  src={wholesaleImg} 
-                  alt="New Arrival 1" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              {/* Second Image (slightly offset or same) */}
-              <div className="w-48 h-64 md:w-64 md:h-[350px] rounded-[2rem] overflow-hidden shadow-sm shrink-0">
-                <img 
-                  src={retailImg} 
-                  alt="New Arrival 2" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {newArrivals.length > 0 ? (
+                newArrivals.map((product) => (
+                  <div key={product.id} className="w-48 md:w-64 shrink-0">
+                    <ProductCard product={product} />
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="w-48 h-64 md:w-64 md:h-[350px] rounded-[2rem] overflow-hidden shadow-sm shrink-0 bg-gray-100 animate-pulse" />
+                  <div className="w-48 h-64 md:w-64 md:h-[350px] rounded-[2rem] overflow-hidden shadow-sm shrink-0 bg-gray-100 animate-pulse" />
+                </>
+              )}
             </div>
 
           </div>
