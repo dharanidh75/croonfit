@@ -125,12 +125,14 @@ export function ProductForm() {
         if (name) updated[index].color = name
       }
       
-      // Auto-generate SKU
-      if (field === 'size' || field === 'color') {
+      // Auto-generate SKU only if empty
+      if ((field === 'size' || field === 'color') && !updated[index].sku) {
         const slug = formData.slug || 'product'
         const size = field === 'size' ? value : updated[index].size
         const color = field === 'color' ? value : updated[index].color
-        updated[index].sku = `${slug}-${size}-${color}`.toLowerCase().replace(/\s+/g, '-')
+        if (size && color) {
+          updated[index].sku = `${slug}-${size}-${color}`.toLowerCase().replace(/\s+/g, '-')
+        }
       }
       return updated
     })

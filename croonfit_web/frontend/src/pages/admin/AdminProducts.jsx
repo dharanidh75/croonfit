@@ -64,7 +64,7 @@ export function AdminProducts() {
       fetchProducts() // Refresh table
     } catch (err) {
       console.error('Failed to delete product', err)
-      toast.error('Failed to delete product')
+      toast.error(err.response?.data?.detail || 'Failed to delete product')
       setProductToDelete(null)
     } finally {
       setIsDeleting(false)

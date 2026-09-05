@@ -5,7 +5,7 @@ import { adminApi } from '../../../lib/api'
 
 const GENDERS = ['MENS', 'WOMENS', 'KIDS', 'UNISEX']
 
-const EMPTY_FORM = { name: '', slug: '', gender: 'MENS', description: '', cover_image_url: '' }
+const EMPTY_FORM = { name: '', slug: '', gender: 'MENS', cover_image_url: '' }
 
 export function Categories() {
   const [categories, setCategories] = useState([])
@@ -41,7 +41,6 @@ export function Categories() {
       name: cat.name,
       slug: cat.slug,
       gender: cat.gender,
-      description: cat.description || '',
       cover_image_url: cat.cover_image_url || '',
     })
     setError('')
@@ -209,14 +208,6 @@ export function Categories() {
                 >
                   {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#111111] mb-2">Description</label>
-                <textarea
-                  name="description" value={form.description} onChange={handleChange}
-                  rows={3} placeholder="Optional description..."
-                  className="w-full p-3 border border-[#E5E5E5] rounded-lg text-sm focus:border-[#111111] outline-none resize-none"
-                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-[#111111] mb-2">Cover Image (Optional)</label>

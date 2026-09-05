@@ -214,9 +214,11 @@ export function ProductDetail() {
                 </div>
 
                 {/* Description */}
-                <p className="font-light text-base text-[#555555] leading-relaxed mb-10">
-                  {product.description || "Engineered for optimal comfort and minimal distraction. A versatile addition to your modern wardrobe."}
-                </p>
+                <div className="mb-10">
+                  <p className="text-gray-600 text-base leading-relaxed whitespace-pre-wrap">
+                    {product.description || "Engineered for optimal comfort and minimal distraction. A versatile addition to your modern wardrobe."}
+                  </p>
+                </div>
 
                 {/* Colors */}
                 <div className="mb-10">
