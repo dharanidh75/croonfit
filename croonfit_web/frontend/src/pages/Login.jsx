@@ -146,12 +146,29 @@ export function Login() {
       <div className="flex flex-1 flex-col md:flex-row min-h-screen">
 
         {/* ── LEFT PANEL — brand image ────────────────────────────────────── */}
-        <div className="relative w-full h-[40vh] md:h-auto md:w-1/2 overflow-hidden bg-[#E5E5E5] flex-shrink-0">
-          <img
-            src="/logo.png"
-            alt="Croon Apparel Studio"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
+        <div className="relative w-full h-[35vh] md:h-auto md:w-1/2 overflow-hidden bg-black flex-shrink-0 group">
+          {/* Background Image with slow zoom effect */}
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-[10s] group-hover:scale-110 opacity-60"></div>
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10"></div>
+
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-14 text-white">
+            <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+              <h2 className="font-heading font-black text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider mb-4 leading-[1.1]">
+                Define<br/>Your<br/>Style.
+              </h2>
+              <p className="font-body text-sm text-gray-300 max-w-sm leading-relaxed mb-8">
+                Join Croon Apparel Studio to access exclusive collections, track your orders, and curate your aesthetic.
+              </p>
+              
+              <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <span className="w-8 h-[1px] bg-gray-400"></span>
+                Croon Apparel Studio
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* ── RIGHT PANEL — form ─────────────────────────────────────────── */}
