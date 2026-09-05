@@ -52,7 +52,7 @@ export function Navbar() {
         <div className="mx-auto px-6 max-w-[1440px] h-20 flex items-center justify-between">
 
           {/* LEFT — Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 flex-1">
+          <nav className="hidden md:flex items-center gap-8 w-1/3">
             {navLinks.map(({ to, label }) => {
               const isActive = location.pathname.startsWith(to)
               return (
@@ -74,15 +74,15 @@ export function Navbar() {
           </nav>
 
           {/* CENTER — Logo */}
-          <div className="flex-shrink-0 flex-1 md:flex-none flex justify-start md:justify-center">
+          <div className="flex-shrink-0 flex justify-start md:absolute md:left-1/2 md:-translate-x-1/2 md:justify-center">
             <Link to="/" aria-label="Croon Home" className="flex flex-col items-center">
               <img
                 src="/logo-word.png?v=6"
                 alt="Croon"
-                className={`h-5 transition-all duration-300 ${isTransparent ? 'invert brightness-200' : 'invert-0'}`}
+                className={`h-4 sm:h-5 transition-all duration-300 ${isTransparent ? 'invert brightness-200' : 'invert-0'}`}
               />
               {!isTransparent && (
-                <span className={`text-[8px] font-bold tracking-[0.3em] uppercase mt-0.5 opacity-60 transition-colors duration-300 ${textColor}`}>
+                <span className={`text-[7px] sm:text-[8px] font-bold tracking-[0.3em] uppercase mt-0.5 opacity-60 transition-colors duration-300 ${textColor}`}>
                   APPAREL STUDIO
                 </span>
               )}
@@ -90,7 +90,7 @@ export function Navbar() {
           </div>
 
           {/* RIGHT — Actions */}
-          <div className="flex items-center justify-end gap-3 sm:gap-6 flex-1">
+          <div className="flex items-center justify-end gap-2.5 sm:gap-6 ml-auto">
 
             {/* Search */}
             <button

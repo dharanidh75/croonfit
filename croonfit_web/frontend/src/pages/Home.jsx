@@ -109,17 +109,17 @@ export function Home() {
             </div>
 
             {/* Right: Real Products */}
-            <div className="flex-1 flex gap-4 md:gap-6 justify-center lg:justify-end items-center">
+            <div className="flex-1 grid grid-cols-2 lg:flex gap-3 md:gap-6 lg:justify-end items-start lg:items-center w-full">
               {newArrivals.length > 0 ? (
                 newArrivals.map((product) => (
-                  <div key={product.id} className="w-48 md:w-64 shrink-0">
+                  <div key={product.id} className="w-full lg:w-64 shrink-0">
                     <ProductCard product={product} />
                   </div>
                 ))
               ) : (
                 <>
-                  <div className="w-48 h-64 md:w-64 md:h-[350px] rounded-[2rem] overflow-hidden shadow-sm shrink-0 bg-gray-100 animate-pulse" />
-                  <div className="w-48 h-64 md:w-64 md:h-[350px] rounded-[2rem] overflow-hidden shadow-sm shrink-0 bg-gray-100 animate-pulse" />
+                  <div className="w-full lg:w-64 aspect-[3/4] rounded-[2rem] overflow-hidden shadow-sm shrink-0 bg-gray-100 animate-pulse" />
+                  <div className="w-full lg:w-64 aspect-[3/4] rounded-[2rem] overflow-hidden shadow-sm shrink-0 bg-gray-100 animate-pulse" />
                 </>
               )}
             </div>
