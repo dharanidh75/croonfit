@@ -154,7 +154,7 @@ export function Login() {
           ></div>
           
           {/* Logo container with elegant animation */}
-          <div className="relative z-10 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center animate-fade-in-up">
+          <div className="relative z-10 w-64 h-64 md:w-96 md:h-96 lg:w-[400px] lg:h-[400px] flex items-center justify-center animate-fade-in-up">
             <img
               src="/logo.png"
               alt="Croon Apparel Studio"
