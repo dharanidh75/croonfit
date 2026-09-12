@@ -59,6 +59,26 @@ export function Login() {
 
   // Removed getRedirectResult useEffect as we will use signInWithPopup now
 
+  const syncCart = async (token) => {
+    const currentCart = useStore.getState().cart
+    if (currentCart && currentCart.length > 0) {
+      try {
+        const items = currentCart.map(item => ({
+          variant_id: item.variant.id,
+          quantity: item.quantity
+        }))
+        const res = await api.post('/cart/merge', { items }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        useStore.getState().clearCart()
+        // show any clamping messages
+        res.data.messages?.forEach(msg => toast(msg, { icon: '⚠️' }))
+      } catch (err) {
+        console.error("Cart sync failed:", err)
+      }
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!auth) {
@@ -74,11 +94,13 @@ export function Login() {
           { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || 'Guest', ...syncedUser },
           token
         )
+        await syncCart(token)
         toast.success('Welcome back!')
         navigate('/')
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-        await syncUserToBackend(userCredential.user, { first_name: firstName, last_name: lastName })
+        const { token } = await syncUserToBackend(userCredential.user, { first_name: firstName, last_name: lastName })
+        await syncCart(token)
         await sendEmailVerification(userCredential.user)
         setTab('verify-email')
       }
@@ -121,6 +143,7 @@ export function Login() {
             { email: syncedUser.email, name: `${syncedUser.first_name || ''} ${syncedUser.last_name || ''}`.trim() || firebaseUser.displayName || 'Guest', ...syncedUser },
             token
           )
+          await syncCart(token)
         } catch (syncErr) {
           console.warn('Backend sync failed, logging in from Firebase data:', syncErr)
           login(

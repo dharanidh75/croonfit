@@ -34,7 +34,7 @@ export function CheckoutForm({ address, setAddress, onSubmit }) {
     setAddress(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault()
     
     if (useExisting && selectedId) {
@@ -45,7 +45,7 @@ export function CheckoutForm({ address, setAddress, onSubmit }) {
       }
       
       // Auto-fill form state with the selected address + user profile details for email/phone
-      setAddress({
+      const populatedAddress = {
         full_name: selected.full_name,
         email: user?.email || '',
         line1: selected.street,
@@ -54,26 +54,44 @@ export function CheckoutForm({ address, setAddress, onSubmit }) {
         state: selected.state,
         pin: selected.zip,
         phone: user?.phone || ''
-      })
-      
-      // Delay slightly to let state update before calling parent onSubmit
-      setTimeout(() => {
-        onSubmit(e)
-      }, 0)
-    } else {
-      // NEW address - silently save it to backend if logged in
-      if (user) {
-        api.post('/auth/me/addresses', {
-          name: 'Saved from Checkout',
-          full_name: address.full_name,
-          street: address.line1 + (address.line2 ? `, ${address.line2}` : ''),
-          city: address.city,
-          state: address.state,
-          zip: address.pin,
-          is_default: savedAddresses.length === 0
-        }).catch(err => console.error("Failed to save address", err))
       }
-      onSubmit(e)
+      setAddress(populatedAddress)
+      onSubmit(e, populatedAddress)
+    } else {
+      let finalAddressToSubmit = address;
+      // NEW address - attempt to save it to backend if logged in
+      if (user) {
+        try {
+          await api.post('/auth/me/addresses', {
+            name: 'Saved from Checkout',
+            full_name: address.full_name,
+            street: address.line1 + (address.line2 ? `, ${address.line2}` : ''),
+            city: address.city,
+            state: address.state,
+            zip: address.pin,
+            is_default: savedAddresses.length === 0
+          })
+        } catch (err) {
+          if (err.response?.status === 409 && err.response?.data?.existing_address) {
+            // Address already exists. Reuse the existing address data silently.
+            const existing = err.response.data.existing_address;
+            finalAddressToSubmit = {
+              full_name: existing.full_name || existing.name,
+              email: user?.email || '',
+              line1: existing.street,
+              line2: '',
+              city: existing.city,
+              state: existing.state,
+              pin: existing.zip,
+              phone: user?.phone || ''
+            };
+            setAddress(finalAddressToSubmit);
+          } else {
+            console.error("Failed to save address", err)
+          }
+        }
+      }
+      onSubmit(e, finalAddressToSubmit)
     }
   }
 

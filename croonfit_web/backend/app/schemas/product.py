@@ -191,6 +191,7 @@ class ProductListResponse(BaseModel):
 class ProductAdminListItem(BaseModel):
     id: UUID
     name: str
+    slug: str
     sku: Optional[str] = None
     price: float
     stock: int

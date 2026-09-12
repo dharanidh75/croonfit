@@ -142,6 +142,11 @@ export function ProductDetail() {
   }
 
   const handleBuyNow = () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to continue to checkout')
+      navigate('/login')
+      return
+    }
     if (!selectedVariant) {
       toast.error('Please select a size')
       return
@@ -214,11 +219,9 @@ export function ProductDetail() {
                 </div>
 
                 {/* Description */}
-                <div className="mb-10">
-                  <p className="text-gray-600 text-base leading-relaxed whitespace-pre-wrap">
-                    {product.description || "Engineered for optimal comfort and minimal distraction. A versatile addition to your modern wardrobe."}
-                  </p>
-                </div>
+                <p className="font-body text-sm text-[#444444] leading-relaxed mb-6 whitespace-pre-wrap">
+                  {product.description || "Engineered for optimal comfort and minimal distraction. A versatile addition to your modern wardrobe."}
+                </p>
 
                 {/* Colors */}
                 <div className="mb-10">

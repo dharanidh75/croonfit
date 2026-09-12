@@ -82,7 +82,7 @@ export function AdminProducts() {
           </div>
           <div>
             <p className="font-bold text-[#111111]">{row.name}</p>
-            <p className="text-xs text-[#888888]">{row.sku || 'No SKU'}</p>
+            <p className="text-xs text-[#888888]">{row.slug || 'No Slug'}</p>
           </div>
         </div>
       )

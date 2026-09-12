@@ -12,7 +12,7 @@ import toast from 'react-hot-toast'
 
 export function Checkout() {
   const navigate = useNavigate()
-  const { cart, clearCart, setLastOrder, buyNowItem, clearBuyNowItem } = useStore()
+  const { cart, clearCart, setLastOrder, buyNowItem, clearBuyNowItem, updateCartQty, removeFromCart, setBuyNowItem } = useStore()
   const [step, setStep] = useState(1)
 
   const checkoutItems = buyNowItem ? [buyNowItem] : cart
@@ -40,6 +40,11 @@ export function Checkout() {
   }, [])
 
   useEffect(() => {
+    if (!useStore.getState().isAuthenticated) {
+      toast.error("Please login to proceed to checkout")
+      navigate('/login')
+      return
+    }
     if (checkoutItems.length === 0 && !isProcessing && !localLastOrder) {
       navigate('/cart')
     }
@@ -181,12 +186,13 @@ export function Checkout() {
         <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
           <div className="lg:col-span-7 xl:col-span-8 order-2 lg:order-1">
             <div className="flex gap-4 mb-10">
-              <div
-                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors ${step === 1 ? 'border-black text-black' : 'border-transparent text-[#888888]'}`}
+              <button
+                onClick={() => setStep(1)}
+                className={`flex items-center gap-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-widest transition-colors outline-none ${step === 1 ? 'border-black text-black' : 'border-transparent text-[#888888] hover:text-black cursor-pointer'}`}
               >
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-black text-white' : 'bg-[#E5E5E5] text-[#555555]'}`}>1</span>
                 Shipping
-              </div>
+              </button>
               <div className="flex items-center text-[#E5E5E5] pb-2">
                 <Check className="w-4 h-4" />
               </div>
@@ -202,7 +208,10 @@ export function Checkout() {
               <CheckoutForm
                 address={address}
                 setAddress={setAddress}
-                onSubmit={(e) => { e.preventDefault(); handleShippingSubmit(address); }}
+                onSubmit={(e, finalAddress) => { 
+                  if (e) e.preventDefault(); 
+                  handleShippingSubmit(finalAddress || address); 
+                }}
               />
             ) : (
               <PaymentForm
@@ -222,6 +231,8 @@ export function Checkout() {
               setAppliedDiscount={setAppliedDiscount}
               onApplyDiscount={handleApplyDiscount}
               isApplyingDiscount={isApplyingDiscount}
+              onUpdateQty={handleUpdateQty}
+              onRemoveItem={handleRemoveItem}
             />
           </div>
         </div>

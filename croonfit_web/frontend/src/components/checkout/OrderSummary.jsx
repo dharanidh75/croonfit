@@ -1,4 +1,5 @@
 import React from 'react'
+import { Minus, Plus, X } from 'lucide-react'
 import { ImageWithFallback } from '../ui/ImageWithFallback'
 export function OrderSummary({ 
   cart, 
@@ -8,7 +9,9 @@ export function OrderSummary({
   appliedDiscount = null,
   setAppliedDiscount = () => {},
   onApplyDiscount = () => {},
-  isApplyingDiscount = false
+  isApplyingDiscount = false,
+  onUpdateQty = () => {},
+  onRemoveItem = () => {}
 }) {
   const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
   const isFreeShipping = appliedDiscount?.type === 'FREE_SHIPPING'
@@ -48,8 +51,36 @@ export function OrderSummary({
                     ₹{item.product.price * item.quantity}
                   </span>
                 </div>
-                <div className="text-xs font-light text-[#555555] mt-1">
-                  Size: {item.variant.size}
+                <div className="flex justify-between items-center mt-2">
+                  <div className="text-xs font-light text-[#555555]">
+                    Size: {item.variant.size}
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => onRemoveItem(item.product.id, item.variant.id)}
+                      className="text-[#888888] hover:text-[#E53E3E] transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="flex items-center border border-[#E5E5E5] rounded-md overflow-hidden h-7">
+                      <button
+                        onClick={() => onUpdateQty(item.product.id, item.variant.id, item.quantity - 1, item)}
+                        className="w-7 h-full flex items-center justify-center text-[#888888] hover:bg-[#F5F5F5] transition-colors"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <div className="w-8 h-full flex items-center justify-center text-xs font-medium">
+                        {item.quantity}
+                      </div>
+                      <button
+                        onClick={() => onUpdateQty(item.product.id, item.variant.id, item.quantity + 1, item)}
+                        className="w-7 h-full flex items-center justify-center text-[#888888] hover:bg-[#F5F5F5] transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 
                 {issue && (

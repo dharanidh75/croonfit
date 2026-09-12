@@ -30,12 +30,13 @@ class ProductService:
         return ProductAdminListItem(
             id=p.id,
             name=p.name,
+            slug=p.slug,
             sku=sku,
             price=p.price,
             stock=stock,
             is_active=p.is_active,
             category_name=p.category.name if p.category else None,
-            thumbnail_url=primary_image,
+            primary_image=primary_image,
         )
 
     @staticmethod
