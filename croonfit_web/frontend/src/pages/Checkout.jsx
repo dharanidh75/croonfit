@@ -69,6 +69,28 @@ export function Checkout() {
     }
   }
 
+  const handleUpdateQty = (productId, variantId, newQty, item) => {
+    if (newQty < 1) return
+    if (newQty > item.variant.stock_qty) {
+      toast.error(`Only ${item.variant.stock_qty} available in stock`)
+      return
+    }
+    if (buyNowItem) {
+      setBuyNowItem({ ...buyNowItem, quantity: newQty })
+    } else {
+      updateCartQty(productId, variantId, newQty)
+    }
+  }
+
+  const handleRemoveItem = (productId, variantId) => {
+    if (buyNowItem) {
+      clearBuyNowItem()
+      navigate('/cart')
+    } else {
+      removeFromCart(productId, variantId)
+    }
+  }
+
   const handleShippingSubmit = (addr) => {
     setAddress(addr)
     setStep(2)
