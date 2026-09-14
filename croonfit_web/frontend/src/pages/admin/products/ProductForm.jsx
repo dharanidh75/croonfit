@@ -274,14 +274,6 @@ export function ProductForm() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-[#111111] mb-2">Master SKU (Stock Keeping Unit)</label>
-                <input
-                  name="sku" value={formData.sku} onChange={handleChange}
-                  type="text" placeholder="e.g. CRN-TEE-001"
-                  className="w-full h-10 px-3 bg-white border border-[#E5E5E5] rounded-lg text-sm font-mono focus:border-[#111111] outline-none uppercase"
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-semibold text-[#111111] mb-2">Description</label>
                 <textarea
                   name="description" value={formData.description} onChange={handleChange}
@@ -345,6 +337,14 @@ export function ProductForm() {
                         />
                         <span className="text-xs font-mono text-[#666666]">{v.color_hex}</span>
                       </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#666666] mb-1">SKU</label>
+                      <input
+                        value={v.sku} onChange={e => handleVariantChange(i, 'sku', e.target.value)}
+                        type="text" placeholder="Auto-generated"
+                        className="w-full h-9 px-2 border border-[#E5E5E5] rounded-lg text-sm outline-none placeholder:text-[#CCCCCC]"
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-[#666666] mb-1">Price (₹)</label>

@@ -15,9 +15,10 @@ export function OrderSummary({
 }) {
   const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
   const isFreeShipping = appliedDiscount?.type === 'FREE_SHIPPING'
-  const shipping = (subtotal >= 999 || isFreeShipping) ? 0 : 99
   const discountAmount = appliedDiscount?.discount_amount || 0
-  const total = Math.max(0, subtotal + shipping - discountAmount)
+  const postDiscountSubtotal = Math.max(0, subtotal - discountAmount)
+  const shipping = (postDiscountSubtotal >= 999 || isFreeShipping) ? 0 : 99
+  const total = postDiscountSubtotal + shipping
 
   return (
     <div className="bg-[#F9F9F9] rounded-2xl p-8 lg:sticky lg:top-28">
