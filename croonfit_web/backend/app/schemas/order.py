@@ -100,6 +100,7 @@ class PaymentIntentOut(BaseModel):
     currency: str
     order_id: UUID
     status: str
+    key_id: Optional[str] = None
 
 
 class PaymentConfirm(BaseModel):

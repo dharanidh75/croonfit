@@ -78,6 +78,7 @@ def create_payment_intent(
         currency="INR",
         order_id=order.id,
         status="requires_payment_method",
+        key_id=RAZORPAY_KEY_ID,
     )
 
 

@@ -118,7 +118,7 @@ export function Checkout() {
 
       // 3. Open Razorpay Checkout
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY',
+        key: intentRes.data.key_id || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY',
         amount: intentRes.data.amount * 100,
         currency: intentRes.data.currency,
         name: 'Croon Fit',
